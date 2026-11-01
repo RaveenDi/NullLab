@@ -59,3 +59,27 @@ def run_experiment(case_dir, patch_src, seeds=(42, 43, 44), n_boot=1000, timeout
         return {"status": "ok", "backend": backend, "result": json.loads((tmp / "result.json").read_text())}
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def run_factorial(case_dir, patches, seeds=(42, 43, 44), timeout=300):
+    """2x2 factorial in the restricted-subprocess sandbox. patches = {"fix_A": src, "fix_B": src, "fix_both": src}.
+    Returns raw per-seed y/p vectors for orig + the 3 fixes; statistics are computed by the caller."""
+    case_dir = Path(case_dir)
+    tmp = Path(tempfile.mkdtemp(prefix="nulllab_fx_"))
+    try:
+        for name in ("train.py", "data.csv"):
+            shutil.copy(case_dir / name, tmp / name)
+        for name in ("run.py", "run_factorial.py"):
+            shutil.copy(ROOT / "sandbox" / name, tmp / name)
+        for k in ("fix_A", "fix_B", "fix_both"):
+            (tmp / f"{k}.py").write_text(patches[k], encoding="utf-8")
+        cmd = [sys.executable, "-I", "run_factorial.py", "--seeds", ",".join(map(str, seeds)), "--out", "result.json"]
+        try:
+            r = subprocess.run(cmd, cwd=str(tmp), env=_scrubbed_env(), capture_output=True, text=True, timeout=timeout)
+        except subprocess.TimeoutExpired:
+            return {"status": "timeout", "backend": "subprocess", "timeout_s": timeout}
+        if r.returncode != 0 or not (tmp / "result.json").exists():
+            return {"status": "error", "backend": "subprocess", "stderr": r.stderr[-2000:]}
+        return {"status": "ok", "backend": "subprocess", "result": json.loads((tmp / "result.json").read_text())}
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)

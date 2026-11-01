@@ -1,0 +1,156 @@
+{
+ "case": "synthetic_leak",
+ "mode": "LIVE muse-spark-1.3",
+ "provenance": "SYNTHETIC",
+ "claim": {
+  "claim": "Our classifier achieves 91% accuracy and generalizes across sites.",
+  "metric": "accuracy",
+  "value": 91,
+  "split_desc": "randomly divided into 75% training and 25% test with a fixed seed",
+  "methods_line": "Records are randomly divided into 75% training and 25% test with a fixed seed.",
+  "methods_line_no": 3,
+  "code_line": "    return train_test_split(idx, test_size=test_size, random_state=seed)",
+  "code_line_no": 30,
+  "mode": "LIVE muse-spark-1.3",
+  "grounding": {
+   "flags": {
+    "methods_line": true,
+    "code_line": true
+   },
+   "precision": 1.0,
+   "line_numbers": {
+    "methods_line_no": 3,
+    "code_line_no": 30
+   }
+  }
+ },
+ "hyp": {
+  "mode": "LIVE muse-spark-1.3",
+  "hypotheses": [
+   {
+    "id": "H1",
+    "text": "prior_rate is computed with groupby(CAT)[TARGET].transform(mean) on full df before split, leaking test labels into train and test features and inflating accuracy",
+    "direction": "claimed>controlled",
+    "predicted_signature": "controlled accuracy with train-only target encoding drops >>5pts vs 91% and prior_rate importance collapses"
+   },
+   {
+    "id": "H2",
+    "text": "random 75/25 split mixes same CAT/site values in train and test, so accuracy does not measure cross-site generalization; group-by-site split degrades performance",
+    "direction": "claimed>controlled",
+    "predicted_signature": "GroupShuffleSplit by c_f158ce shows large drop vs random split even holding encoding fixed, with errors concentrated on unseen sites"
+   },
+   {
+    "id": "H3",
+    "text": "no leakage or site effect; 91% is genuine and persists under strict protocol",
+    "direction": "claimed~controlled",
+    "predicted_signature": "controlled group-split + train-only encoding retains ~91% accuracy within sampling noise across seeds"
+   }
+  ],
+  "primary": "H1",
+  "broken_assumption": "add_features uses only training labels and no test information, and random split estimates cross-site generalization",
+  "split_key": "c_f158ce",
+  "code_patch": "import train\nimport pandas as pd\ndef controlled_eval(df, seed):\n    groups = df[train.CAT].to_numpy()\n    tr, te = train.split_idx(df, seed, groups=groups)\n    tr = list(tr); te = list(te)\n    y_true = df[train.TARGET].iloc[te].to_numpy()\n    ytr = df[train.TARGET].iloc[tr].to_numpy()\n    mapping = df.iloc[tr].groupby(train.CAT)[train.TARGET].mean()\n    fallback = float(df.iloc[tr][train.TARGET].mean())\n    base = [c for c in df.columns if c not in (train.TARGET, train.CAT)]\n    Xtr = df[base].iloc[tr].copy()\n    Xte = df[base].iloc[te].copy()\n    Xtr[\"prior_rate\"] = df.iloc[tr][train.CAT].map(mapping).fillna(fallback).to_numpy()\n    Xte[\"prior_rate\"] = df.iloc[te][train.CAT].map(mapping).fillna(fallback).to_numpy()\n    y_pred = train.fit_predict(Xtr, ytr, Xte, seed)\n    return (y_true, y_pred)",
+  "prereg_sha256": "6823c435407829221963aa52cc0baabf07238615c3d802f60922cf745631b821"
+ },
+ "runs": [
+  {
+   "attempt": 1,
+   "patch": "primary",
+   "status": "ok"
+  }
+ ],
+ "log": [
+  {
+   "t": 5.94,
+   "phase": "Plan",
+   "msg": "claim extracted [LIVE muse-spark-1.3]: Our classifier achieves 91% accuracy and generalizes across sites.",
+   "grounding": {
+    "flags": {
+     "methods_line": true,
+     "code_line": true
+    },
+    "precision": 1.0,
+    "line_numbers": {
+     "methods_line_no": 3,
+     "code_line_no": 30
+    }
+   }
+  },
+  {
+   "t": 14.24,
+   "phase": "Plan",
+   "msg": "3 hypotheses preregistered before any run (sha256 6823c4354078); primary H1: add_features uses only training labels and no test information, and random split estimates cross-site generalization",
+   "hypotheses": [
+    {
+     "id": "H1",
+     "text": "prior_rate is computed with groupby(CAT)[TARGET].transform(mean) on full df before split, leaking test labels into train and test features and inflating accuracy",
+     "direction": "claimed>controlled",
+     "predicted_signature": "controlled accuracy with train-only target encoding drops >>5pts vs 91% and prior_rate importance collapses"
+    },
+    {
+     "id": "H2",
+     "text": "random 75/25 split mixes same CAT/site values in train and test, so accuracy does not measure cross-site generalization; group-by-site split degrades performance",
+     "direction": "claimed>controlled",
+     "predicted_signature": "GroupShuffleSplit by c_f158ce shows large drop vs random split even holding encoding fixed, with errors concentrated on unseen sites"
+    },
+    {
+     "id": "H3",
+     "text": "no leakage or site effect; 91% is genuine and persists under strict protocol",
+     "direction": "claimed~controlled",
+     "predicted_signature": "controlled group-split + train-only encoding retains ~91% accuracy within sampling noise across seeds"
+    }
+   ]
+  },
+  {
+   "t": 19.94,
+   "phase": "Act",
+   "msg": "sandbox[subprocess] -> ok",
+   "status": "ok"
+  },
+  {
+   "t": 19.94,
+   "phase": "Verify",
+   "msg": "per-seed unpaired-bootstrap deltas per seed {'42': 0.11, '43': 0.111, '44': 0.093}; seed calls {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} -> FALSIFIED"
+  }
+ ],
+ "seeds": {
+  "42": {
+   "claimed_acc": 0.7813333333333333,
+   "controlled_acc": 0.671604938271605,
+   "delta": 0.10972839506172838,
+   "ci_lo": 0.05007407407407405,
+   "ci_hi": 0.16850370370370374,
+   "n_claimed": 375,
+   "n_controlled": 405
+  },
+  "43": {
+   "claimed_acc": 0.784,
+   "controlled_acc": 0.6730245231607629,
+   "delta": 0.11097547683923714,
+   "ci_lo": 0.05137874659400543,
+   "ci_hi": 0.17335803814713896,
+   "n_claimed": 375,
+   "n_controlled": 367
+  },
+  "44": {
+   "claimed_acc": 0.7733333333333333,
+   "controlled_acc": 0.6807909604519774,
+   "delta": 0.09254237288135592,
+   "ci_lo": 0.028990395480225983,
+   "ci_hi": 0.15033333333333332,
+   "n_claimed": 375,
+   "n_controlled": 354
+  }
+ },
+ "verdict": {
+  "verdict": "FALSIFIED",
+  "per_seed": {
+   "42": "FALSIFIED",
+   "43": "FALSIFIED",
+   "44": "FALSIFIED"
+  },
+  "agree": true,
+  "cites_ok": true
+ },
+ "elapsed_s": 19.9
+}

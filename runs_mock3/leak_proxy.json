@@ -1,0 +1,156 @@
+{
+ "case": "leak_proxy",
+ "mode": "MOCK (stub, not a model result)",
+ "provenance": "SYNTHETIC",
+ "claim": {
+  "claim": "Our classifier achieves 94% accuracy with the risk score as the strongest predictor.",
+  "metric": "accuracy",
+  "value": 0.94,
+  "split_desc": "Records were randomly divided into 75% training and 25% test with a fixed random seed.",
+  "methods_line": "Records were randomly divided into 75% training and 25% test with a fixed random seed.",
+  "methods_line_no": 3,
+  "code_line": "tr, te = split_idx(df, seed, groups)",
+  "code_line_no": 31,
+  "mode": "MOCK (stub, not a model result)",
+  "grounding": {
+   "flags": {
+    "methods_line": true,
+    "code_line": true
+   },
+   "precision": 1.0,
+   "line_numbers": {
+    "methods_line_no": 3,
+    "code_line_no": 31
+   }
+  }
+ },
+ "hyp": {
+  "mode": "MOCK (regex heuristics, not a model result)",
+  "hypotheses": [
+   {
+    "id": "H1",
+    "text": "a proxy column carrying the label is used as a model input",
+    "direction": "claimed>controlled",
+    "predicted_signature": "claimed accuracy exceeds accuracy when the proxy column is removed from the inputs"
+   },
+   {
+    "id": "H2",
+    "text": "result is specific to the one random partition (seed sensitivity)",
+    "direction": "claimed~controlled",
+    "predicted_signature": "per-seed deltas change sign"
+   },
+   {
+    "id": "H3",
+    "text": "accuracy is carried by a distribution shift between train and test rows",
+    "direction": "claimed>controlled",
+    "predicted_signature": "not run (primary-only policy)"
+   }
+  ],
+  "primary": "H1",
+  "broken_assumption": "a proxy column carrying the label is used as a model input",
+  "split_key": "none (feature removal, not a row group)",
+  "code_patch": "import numpy as np\nimport train\nfrom sklearn.model_selection import KFold\n\n\ndef controlled_eval(df, seed):\n    # same protocol minus the proxy column, which must not be a model input\n    f = [c for c in train.feats(df) if c != train.PROXY]\n    X = df[f].to_numpy()\n    y = df[train.TARGET].to_numpy()\n    ys, ps = [], []\n    for tr, te in KFold(5, shuffle=True, random_state=seed + 1000).split(df):\n        ys.append(y[te])\n        ps.append(train.fit_predict(X[tr], y[tr], X[te], seed))\n    return np.concatenate(ys), np.concatenate(ps)\n",
+  "prereg_sha256": "2135d934b3503ca427c94074b0a60c612900cd2a8d354c035714aa0f45e31726"
+ },
+ "runs": [
+  {
+   "attempt": 1,
+   "patch": "primary",
+   "status": "ok"
+  }
+ ],
+ "log": [
+  {
+   "t": 0.0,
+   "phase": "Plan",
+   "msg": "claim extracted [MOCK (stub, not a model result)]: Our classifier achieves 94% accuracy with the risk score as the strongest predictor.",
+   "grounding": {
+    "flags": {
+     "methods_line": true,
+     "code_line": true
+    },
+    "precision": 1.0,
+    "line_numbers": {
+     "methods_line_no": 3,
+     "code_line_no": 31
+    }
+   }
+  },
+  {
+   "t": 0.0,
+   "phase": "Plan",
+   "msg": "3 hypotheses preregistered before any run (sha256 2135d934b350); primary H1: a proxy column carrying the label is used as a model input",
+   "hypotheses": [
+    {
+     "id": "H1",
+     "text": "a proxy column carrying the label is used as a model input",
+     "direction": "claimed>controlled",
+     "predicted_signature": "claimed accuracy exceeds accuracy when the proxy column is removed from the inputs"
+    },
+    {
+     "id": "H2",
+     "text": "result is specific to the one random partition (seed sensitivity)",
+     "direction": "claimed~controlled",
+     "predicted_signature": "per-seed deltas change sign"
+    },
+    {
+     "id": "H3",
+     "text": "accuracy is carried by a distribution shift between train and test rows",
+     "direction": "claimed>controlled",
+     "predicted_signature": "not run (primary-only policy)"
+    }
+   ]
+  },
+  {
+   "t": 12.95,
+   "phase": "Act",
+   "msg": "sandbox[subprocess] -> ok",
+   "status": "ok"
+  },
+  {
+   "t": 12.95,
+   "phase": "Verify",
+   "msg": "paired-bootstrap deltas per seed {'42': 0.172, '43': 0.14, '44': 0.135}; seed calls {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} -> FALSIFIED"
+  }
+ ],
+ "seeds": {
+  "42": {
+   "claimed_acc": 0.9033333333333333,
+   "controlled_acc": 0.7316666666666667,
+   "delta": 0.17166666666666663,
+   "ci_lo": 0.12997916666666667,
+   "ci_hi": 0.21085416666666662,
+   "n_claimed": 300,
+   "n_controlled": 1200
+  },
+  "43": {
+   "claimed_acc": 0.8733333333333333,
+   "controlled_acc": 0.7333333333333333,
+   "delta": 0.14,
+   "ci_lo": 0.09497916666666664,
+   "ci_hi": 0.18587499999999993,
+   "n_claimed": 300,
+   "n_controlled": 1200
+  },
+  "44": {
+   "claimed_acc": 0.87,
+   "controlled_acc": 0.735,
+   "delta": 0.135,
+   "ci_lo": 0.08997916666666664,
+   "ci_hi": 0.18166666666666664,
+   "n_claimed": 300,
+   "n_controlled": 1200
+  }
+ },
+ "verdict": {
+  "verdict": "FALSIFIED",
+  "per_seed": {
+   "42": "FALSIFIED",
+   "43": "FALSIFIED",
+   "44": "FALSIFIED"
+  },
+  "agree": true,
+  "cites_ok": true
+ },
+ "elapsed_s": 12.9
+}

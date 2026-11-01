@@ -1,0 +1,64 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>
+<title>NullLab verdict: clean_group_correct</title><style>:root{--bg:#0e1116;--panel:#161b22;--line:#30363d;--txt:#e6e9ef;--dim:#9aa4b2;
+--blue:#58a6ff;--red:#f85149;--green:#3fb950;--amber:#d29922;--mock:#f0883e}
+[data-theme=light]{--bg:#ffffff;--panel:#f3f4f6;--line:#d7dce2;--txt:#16191e;--dim:#5b6572;
+--blue:#0969da;--red:#cf222e;--green:#1a7f37;--amber:#9a6700;--mock:#bc4c00}
+*{box-sizing:border-box}body{font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+background:var(--bg);color:var(--txt);margin:0;padding:20px}
+.wrap{max-width:1020px;margin:auto}
+.topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+h1{font-size:22px;margin:8px 0}h2{font-size:17px;margin:26px 0 8px}.sub{color:var(--dim)}
+.wm{display:inline-block;padding:3px 10px;border:2px solid;border-radius:4px;font-weight:700;letter-spacing:.08em;font-size:13px}
+.REAL{color:var(--green)}.SYNTH{color:var(--mock)}
+.mock{display:inline-block;background:var(--mock);color:#000;font-weight:700;border-radius:4px;
+padding:2px 8px;font-size:12px;margin-left:6px}
+.bars{display:flex;gap:48px;align-items:flex-end;min-height:250px;margin:26px 0 10px;
+border-bottom:2px solid var(--line);position:relative;padding:30px 10px 0}
+.bar{width:min(200px,34vw);border-radius:6px 6px 0 0;position:relative;transition:height 1.6s cubic-bezier(.2,.7,.2,1)}
+.bar b{position:absolute;top:-26px;width:100%;text-align:center;font-size:20px}
+.bar small{position:absolute;bottom:-46px;width:100%;text-align:center;color:var(--dim);font-size:12px}
+#claim{background:var(--blue)}#ctrl{background:var(--red)}
+.ci{text-align:center;color:var(--dim);font-size:12px;margin-top:52px}
+.stamp{position:absolute;right:6px;top:6px;transform:rotate(-8deg) scale(0);font-size:clamp(24px,6vw,40px);
+font-weight:900;padding:4px 14px;border:5px solid;border-radius:8px;opacity:0}
+.stamp.show{animation:pop .5s ease-out 1.5s both}
+@keyframes pop{from{transform:rotate(-8deg) scale(2.2);opacity:0}to{transform:rotate(-8deg) scale(1);opacity:.92}}
+.FALSIFIED{color:var(--red)}.SURVIVED{color:var(--green)}.INCONCLUSIVE{color:var(--amber)}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+@media(max-width:700px){.grid4{grid-template-columns:1fr 1fr}.bars{gap:20px}}
+.step{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px;font-size:13px}
+.step h4{margin:0 0 6px;font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim)}
+.htree{display:grid;gap:8px}.hyp{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.hyp.primary{border-color:var(--blue);border-width:2px}
+.hyp .tag{font-size:11px;font-weight:700;color:var(--dim)}
+.dir{font-weight:700}.sig{color:var(--dim);font-size:13px}
+.log{border-left:3px solid var(--line);margin:8px 0 0 4px;padding-left:12px;display:grid;gap:6px}
+.log .ev b{color:var(--blue)}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:8px}
+td,th{padding:5px 10px;border-bottom:1px solid var(--line);text-align:left}
+select,button,input{font:inherit;color:var(--txt);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+button{cursor:pointer}button.go{background:var(--blue);color:#fff;border-color:transparent;font-weight:700}
+.cite{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:10px 12px;font-size:13px;margin:8px 0}
+.cite code{font-family:ui-monospace,Consolas,monospace}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.score td:nth-child(n+2),.score th:nth-child(n+2){text-align:center}
+footer{color:var(--dim);font-size:12px;margin:30px 0 10px}</style>
+<div class=wrap>
+<div class=topbar><h1>NullLab</h1><button onclick="document.documentElement.dataset.theme=
+document.documentElement.dataset.theme==='light'?'':'light';try{localStorage.nlt=document.documentElement.dataset.theme}catch(e){}">
+dark / light</button></div>
+<p class=sub>Every AI can give you an answer; this one tries to prove it wrong.</p>
+<span class="wm SYNTH">SYNTHETIC</span><span class=mock>MOCK (stub, not a model result)</span>
+<h2>Claim</h2><p>Our classifier achieves 84% accuracy on held-out wards.</p>
+<div class=bars>
+ <div class=bar id=claim style="height:201px"><b>77.2%</b><small>claimed protocol</small></div>
+ <div class=bar id=ctrl style="height:196px"><b>75.5%</b><small>controlled re-evaluation</small></div>
+ <div class="stamp SURVIVED show">SURVIVED</div></div>
+<p class=ci>Paired delta per seed +0.023, -0.002, +0.030 · 95% CIs [-0.028, +0.078], [-0.066, +0.061], [-0.043, +0.085]</p>
+<h2>Why</h2><p>none found by static inspection; fall back to an independent re-evaluation</p>
+<h2>Hypothesis tree (preregistered)</h2><div class=htree><div class='hyp primary'><span class=tag>H1 ★ primary</span><br>none found by static inspection; fall back to an independent re-evaluation<br><span class=dir>claimed~controlled</span> <span class=sig>predicted signature: accuracy under independent 5-fold CV matches claimed accuracy</span></div><div class='hyp'><span class=tag>H2</span><br>result is specific to the one random partition (seed sensitivity)<br><span class=dir>claimed~controlled</span> <span class=sig>predicted signature: per-seed deltas change sign</span></div><div class='hyp'><span class=tag>H3</span><br>accuracy is carried by a distribution shift between train and test rows<br><span class=dir>claimed&gt;controlled</span> <span class=sig>predicted signature: not run (primary-only policy)</span></div><p class=sub>Preregistered before any run · sha256 e6de9282f1d4a544 · split key: none</p></div>
+<h2>Plan → Act → Verify → Recover</h2><div class=grid4><div class=step><h4>Plan</h4>claim extracted [MOCK (stub, not a model result)]: Our classifier achieves 84% accuracy on held-out wards.<br>3 hypotheses preregistered before any run (sha256 e6de9282f1d4); primary H1: none found by static inspection; fall back to an independent re-evaluation</div><div class=step><h4>Act</h4>sandbox[subprocess] -&gt; ok</div><div class=step><h4>Verify</h4>paired-bootstrap deltas per seed {&#x27;42&#x27;: 0.023, &#x27;43&#x27;: -0.002, &#x27;44&#x27;: 0.03}; seed calls {&#x27;42&#x27;: &#x27;SURVIVED&#x27;, &#x27;43&#x27;: &#x27;SURVIVED&#x27;, &#x27;44&#x27;: &#x27;SURVIVED&#x27;} -&gt; SURVIVED</div><div class=step><h4>Recover</h4><span class=sub>not needed</span></div></div>
+<h2>Evidence</h2><table><tr><th>seed<th>claimed acc<th>controlled acc<th>delta<th>95% CI of delta<th>call</tr><tr><td>42<td>0.780<td>0.757<td>+0.023<td>[-0.028, +0.078]<td>SURVIVED<tr><td>43<td>0.755<td>0.757<td>-0.002<td>[-0.066, +0.061]<td>SURVIVED<tr><td>44<td>0.780<td>0.750<td>+0.030<td>[-0.043, +0.085]<td>SURVIVED</table><p class=sub>Verdict rule: FALSIFIED only if the delta CI excludes 0 and delta ≥ 0.03 on all 3 seeds (42, 43, 44); SURVIVED if all three CIs include 0; otherwise INCONCLUSIVE.</p>
+<h2>Citations (verbatim)</h2><div class=cite><b>Methods line</b> (line 3): “Whole wards are held out for testing (a group split by ward) with a fixed random seed; the ward identifier is never a model input.”</div><div class=cite><b>Code line</b> (line 33): <code>tr, te = split_idx(df, seed, np.asarray(df[SITE]) if groups is None else np.asarray(groups))</code></div><p class=sub>Grounding precision 1.0 (normalised-whitespace match at the reported line number; one live retry on mismatch).</p>
+<p><a href="index.html">← all cases</a></p>
+<footer>NullLab · clean_group_correct · MOCK (stub, not a model result) · sandbox: restricted subprocess (not Docker)</footer>
+</div>

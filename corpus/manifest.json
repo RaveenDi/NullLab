@@ -10,5 +10,29 @@
  "synthetic_leak": {
   "provenance": "SYNTHETIC",
   "note": "generated data, planted text-dependent leak"
+ },
+ "leak_prescale": {
+  "provenance": "SYNTHETIC",
+  "note": "generated data, planted pre-split scaling+selection leak"
+ },
+ "leak_temporal": {
+  "provenance": "SYNTHETIC",
+  "note": "generated data, planted temporal-distribution-shift leak"
+ },
+ "leak_proxy": {
+  "provenance": "SYNTHETIC",
+  "note": "generated data, planted proxy-feature leak"
+ },
+ "leak_group": {
+  "provenance": "SYNTHETIC",
+  "note": "generated data, planted group non-independence leak"
+ },
+ "clean_wine_correct": {
+  "provenance": "REAL-PINNED",
+  "note": "real UCI wine data (sklearn bundled); correct pipeline"
+ },
+ "clean_group_correct": {
+  "provenance": "SYNTHETIC",
+  "note": "generated data; correct group-aware pipeline"
  }
 }

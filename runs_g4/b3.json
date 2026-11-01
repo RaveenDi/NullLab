@@ -1,0 +1,171 @@
+{
+ "g4_freight_delay": {
+  "ans": {
+   "leak": true,
+   "A": "carrier_late_rate computed with groupby-target mean on full data before train/test split, leaking test labels",
+   "B": "test missing values filled with 0 instead of training median described for live use, train-serve skew",
+   "predicted_drop_pp": {
+    "fix_A": 5,
+    "fix_B": 2,
+    "fix_both": 7
+   },
+   "culprit_ranking": [
+    "A",
+    "B"
+   ],
+   "confidence": 0.82,
+   "reason": "Full-data target encoding is the main inflation while test-only zero imputation adds small optimistic skew.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": true, \"A\": \"carrier_late_rate computed with groupby-target mean on full data before train/test split, leaking test labels\", \"B\": \"test missing values filled with 0 instead of training median described for live use, train-serve skew\", \"predicted_drop_pp\": {\"fix_A\": 5, \"fix_B\": 2, \"fix_both\": 7}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.82, \"reason\": \"Full-data target encoding is the main inflation while test-only zero imputation adds small optimistic skew.\"}",
+  "prereg_sha256": "4a841497380ea3739f4b014bd06798fb3c4a7c394d3015f1e87d3f89e6aed358"
+ },
+ "g4_pump_inspection": {
+  "ans": {
+   "leak": true,
+   "A": "prev_load uses groupby shift(-1), i.e. next inspection's future load, not previous inspection's load",
+   "B": "SelectKBest ANOVA F-test fitted on full dataset before train-test split, leaking test labels into feature selection",
+   "predicted_drop_pp": {
+    "fix_A": 12,
+    "fix_B": 3,
+    "fix_both": 14
+   },
+   "culprit_ranking": [
+    "A",
+    "B",
+    "AxB"
+   ],
+   "confidence": 0.9,
+   "reason": "shift(-1) leaks future information into predictors while pre-split selection on all labels inflates accuracy slightly.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": true, \"A\": \"prev_load uses groupby shift(-1), i.e. next inspection's future load, not previous inspection's load\", \"B\": \"SelectKBest ANOVA F-test fitted on full dataset before train-test split, leaking test labels into feature selection\", \"predicted_drop_pp\": {\"fix_A\": 12, \"fix_B\": 3, \"fix_both\": 14}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"confidence\": 0.9, \"reason\": \"shift(-1) leaks future information into predictors while pre-split selection on all labels inflates accuracy slightly.\"}",
+  "prereg_sha256": "b5a2efb757dfb783eb96b397d76493545a4fa5364150b1a13bf7e67442c44f30"
+ },
+ "g4_crop_irrigation": {
+  "ans": {
+   "leak": true,
+   "A": "StandardScaler and PCA fit on full dataset before split",
+   "B": "GridSearchCV hyperparameter tuning on full dataset including test",
+   "predicted_drop_pp": {
+    "fix_A": 1.5,
+    "fix_B": 2.0,
+    "fix_both": 3.5
+   },
+   "culprit_ranking": [
+    "B",
+    "A"
+   ],
+   "confidence": 0.75,
+   "reason": "Both preprocessing and tuning leak test data into training, modestly inflating held-out accuracy.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": true, \"A\": \"StandardScaler and PCA fit on full dataset before split\", \"B\": \"GridSearchCV hyperparameter tuning on full dataset including test\", \"predicted_drop_pp\": {\"fix_A\": 1.5, \"fix_B\": 2.0, \"fix_both\": 3.5}, \"culprit_ranking\": [\"B\", \"A\"], \"confidence\": 0.75, \"reason\": \"Both preprocessing and tuning leak test data into training, modestly inflating held-out accuracy.\"}",
+  "prereg_sha256": "401b01f19f825f366814989febffc9728b6c0e5d74077010e46c313be2ac918f"
+ },
+ "g4_assay_replicates": {
+  "ans": {
+   "leak": true,
+   "A": "Target-dependent imputation: fillna with groupby(TARGET) mean computed on full data before split",
+   "B": "Well-level random split puts replicate wells of same compound in both train and test instead of compound-grouped split for new-compound use",
+   "predicted_drop_pp": {
+    "fix_A": 4,
+    "fix_B": 18,
+    "fix_both": 22
+   },
+   "culprit_ranking": [
+    "B",
+    "A"
+   ],
+   "confidence": 0.85,
+   "reason": "Same-compound replicates across splits allow memorization while target-mean imputation encodes the label.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": true, \"A\": \"Target-dependent imputation: fillna with groupby(TARGET) mean computed on full data before split\", \"B\": \"Well-level random split puts replicate wells of same compound in both train and test instead of compound-grouped split for new-compound use\", \"predicted_drop_pp\": {\"fix_A\": 4, \"fix_B\": 18, \"fix_both\": 22}, \"culprit_ranking\": [\"B\", \"A\"], \"confidence\": 0.85, \"reason\": \"Same-compound replicates across splits allow memorization while target-mean imputation encodes the label.\"}",
+  "prereg_sha256": "3998145400e36d9d173371bf3115a6b80bb5c1ad6a796c562843e9fa85b508e5"
+ },
+ "clean_control": {
+  "ans": {
+   "leak": true,
+   "A": "random row split leaks duplicate/near-duplicate 8x8 images across train-test instead of group-aware split by source image",
+   "B": "single fixed-seed 25% holdout reported without averaging over seeds/splits, allowing seed-selection variance",
+   "predicted_drop_pp": {
+    "fix_A": 6,
+    "fix_B": 1.5,
+    "fix_both": 7
+   },
+   "culprit_ranking": [
+    "A",
+    "B"
+   ],
+   "confidence": 0.72,
+   "reason": "Code provides GroupShuffleSplit but claimed_eval uses random train_test_split so duplicates inflate accuracy while scaler is correctly fit on train only.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": true, \"A\": \"random row split leaks duplicate/near-duplicate 8x8 images across train-test instead of group-aware split by source image\", \"B\": \"single fixed-seed 25% holdout reported without averaging over seeds/splits, allowing seed-selection variance\", \"predicted_drop_pp\": {\"fix_A\": 6, \"fix_B\": 1.5, \"fix_both\": 7}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.72, \"reason\": \"Code provides GroupShuffleSplit but claimed_eval uses random train_test_split so duplicates inflate accuracy while scaler is correctly fit on train only.\"}",
+  "prereg_sha256": "e620f2a284e9e768b8bbef7a65e307f376a7dc1298e538b45a9f6dacaa9e36f6"
+ },
+ "clean_group_correct": {
+  "ans": {
+   "leak": false,
+   "A": "single fixed-seed GroupShuffleSplit with 20 wards (one 75/25 split) - 84% is one lucky draw, not mean over repeated group splits",
+   "B": "accuracy-only reporting with no baseline/CI - small test wards and possible imbalance make 84% look better than intended use",
+   "predicted_drop_pp": {
+    "fix_A": 4,
+    "fix_B": 0,
+    "fix_both": 4
+   },
+   "culprit_ranking": [
+    "A",
+    "B"
+   ],
+   "confidence": 0.7,
+   "reason": "Code correctly holds out whole wards and excludes ward id from inputs so no train-test leakage, only single-split variance remains.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": false, \"A\": \"single fixed-seed GroupShuffleSplit with 20 wards (one 75/25 split) - 84% is one lucky draw, not mean over repeated group splits\", \"B\": \"accuracy-only reporting with no baseline/CI - small test wards and possible imbalance make 84% look better than intended use\", \"predicted_drop_pp\": {\"fix_A\": 4, \"fix_B\": 0, \"fix_both\": 4}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.7, \"reason\": \"Code correctly holds out whole wards and excludes ward id from inputs so no train-test leakage, only single-split variance remains.\"}",
+  "prereg_sha256": "a3c78a1fad0d101a57d522b21dbd8b11c1452aa8b8d6eb1a3bbe439860973ef0"
+ },
+ "clean_wine_correct": {
+  "ans": {
+   "leak": true,
+   "A": "random train_test_split ignoring sample groups allows same-group/duplicate origins in both train and test",
+   "B": "single fixed-seed 25% holdout reported without cross-validation averaging allows seed-cherry-picked optimistic accuracy",
+   "predicted_drop_pp": {
+    "fix_A": 13,
+    "fix_B": 4,
+    "fix_both": 16
+   },
+   "culprit_ranking": [
+    "A",
+    "B"
+   ],
+   "confidence": 0.72,
+   "reason": "GroupShuffleSplit code exists but claimed eval uses train_test_split with groups=None so group leakage inflates 78% while single-seed reporting adds small optimism.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": true, \"A\": \"random train_test_split ignoring sample groups allows same-group/duplicate origins in both train and test\", \"B\": \"single fixed-seed 25% holdout reported without cross-validation averaging allows seed-cherry-picked optimistic accuracy\", \"predicted_drop_pp\": {\"fix_A\": 13, \"fix_B\": 4, \"fix_both\": 16}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.72, \"reason\": \"GroupShuffleSplit code exists but claimed eval uses train_test_split with groups=None so group leakage inflates 78% while single-seed reporting adds small optimism.\"}",
+  "prereg_sha256": "50f4c8b778645c65caf6a13183639794a7939f2a4819f7f867e20b305fd2ac8b"
+ },
+ "g4_visit_history_clean": {
+  "ans": {
+   "leak": false,
+   "A": "Test evaluates on all visits of held-out patients, not only first-referral visits as in intended triage use",
+   "B": "Single fixed-seed random group split with no averaging or prospective split, allowing seed luck/variance to inflate",
+   "predicted_drop_pp": {
+    "fix_A": 4,
+    "fix_B": 2,
+    "fix_both": 6
+   },
+   "culprit_ranking": [
+    "A",
+    "B"
+   ],
+   "confidence": 0.65,
+   "reason": "Code shows no test-label reuse but test distribution includes follow-ups and a single lucky split.",
+   "status": "LIVE muse-spark-1.3 (single prompt, no execution)"
+  },
+  "raw": "{\"leak\": false, \"A\": \"Test evaluates on all visits of held-out patients, not only first-referral visits as in intended triage use\", \"B\": \"Single fixed-seed random group split with no averaging or prospective split, allowing seed luck/variance to inflate\", \"predicted_drop_pp\": {\"fix_A\": 4, \"fix_B\": 2, \"fix_both\": 6}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.65, \"reason\": \"Code shows no test-label reuse but test distribution includes follow-ups and a single lucky split.\"}",
+  "prereg_sha256": "2af3a3d465b95b69e6387e8d03b4498d254ed92aee6b8e03cfb9665df3e9dbfc"
+ }
+}

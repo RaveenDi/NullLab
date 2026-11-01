@@ -23,13 +23,31 @@ def _block_network():
     socket.create_connection = _no
     socket.getaddrinfo = _no
 
+    # File allow-list (G0b): after this point the experiment may only open files inside its own temp working dir
+    # or the Python installation (stdlib / site-packages). Paths are resolved with realpath first, so absolute paths,
+    # '..' tricks, 8.3 short names and symlinks to evaluator files are all refused. Process spawning, hard links,
+    # renames and new ctypes library/symbol lookups are refused too (they would bypass the open hook).
+    def _real(p):
+        return os.path.normcase(os.path.realpath(p))
+    roots = {_real(r) for r in (os.getcwd(), sys.prefix, sys.base_prefix, sys.exec_prefix) if r}
+    blocked = ("subprocess.Popen", "os.system", "os.startfile", "os.spawn", "os.exec", "os.posix_spawn",
+               "_winapi.CreateProcess", "os.link", "os.symlink", "os.rename", "os.replace", "ctypes.dlopen",
+               "ctypes.dlsym", "ctypes.dlsym/handle", "winreg.OpenKey", "shutil.copyfile")
+
+    def _allowed(path):
+        rp = _real(path)
+        return any(rp == r or rp.startswith(r.rstrip("\\/") + os.sep) for r in roots)
+
     def _audit(event, args):  # defence in depth: the experiment may not open evaluator-only files
         if event == "open" and args and isinstance(args[0], (str, bytes, os.PathLike)):
-            p = os.fsdecode(args[0]).replace("\\", "/").lower()
-            if "ground_truth" in p or "/nulllab/eval/" in p:
-                raise PermissionError("evaluator-only path is off limits")
+            p = os.fsdecode(args[0])
+            low = p.replace("\\", "/").lower()
+            if "ground_truth" in low or "/nulllab/eval/" in low or not _allowed(p):
+                raise PermissionError("path outside the sandbox allow-list is off limits")
         if event in ("socket.connect", "socket.bind"):
             raise OSError("network disabled in NullLab sandbox")
+        if event in blocked:
+            raise PermissionError(f"{event} is disabled in NullLab sandbox")
     sys.addaudithook(_audit)
 
 

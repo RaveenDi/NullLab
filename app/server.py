@@ -1,8 +1,11 @@
-"""FastAPI: serves the static verdict pages and can (re)run a case in MOCK mode.  uvicorn app.server:app --port 8099"""
+"""FastAPI: serves the single-page demo (/) with JSON APIs, per-case verdict pages,
+and can (re)run a case in MOCK mode.  uvicorn app.server:app --port 8099
+Live mode stays CLI-only (spend-gated): POST /api/run/{case}?mode=live is refused; use pipeline.py --live."""
+import json
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse
 
 import pipeline
 from report import render
@@ -25,6 +28,33 @@ def verdict(case: str):
     if not p.exists():
         run_case(case)
     return FileResponse(p)
+
+
+@app.get("/api/cases")
+def api_cases():
+    return sorted(pipeline.cases())
+
+
+@app.get("/api/case/{case}")
+def api_case(case: str):
+    if case not in pipeline.cases():
+        raise HTTPException(404)
+    p = ROOT / "runs_live" / f"{case}.json"   # live evidence first, mock run as fallback
+    if not p.exists():
+        p = ROOT / "runs" / f"{case}.json"
+    if not p.exists():
+        raise HTTPException(404, f"no run for {case}; POST /api/run/{case} first")
+    return JSONResponse(json.loads(p.read_text()))
+
+
+@app.get("/api/ablation")
+def api_ablation():
+    p = ROOT / "runs_live" / "ablation.json"
+    if not p.exists():
+        p = ROOT / "runs" / "ablation.json"
+    if not p.exists():
+        raise HTTPException(404, "no ablation; run python -m eval.score")
+    return JSONResponse(json.loads(p.read_text()))
 
 
 @app.post("/api/run/{case}")

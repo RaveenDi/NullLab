@@ -1,0 +1,56 @@
+== g4_freight_delay: LOOP (patches written LIVE by muse-spark ok 10.2s 
+ seed 42: acc orig=0.643 fix_A=0.583 fix_B=0.803 fix_both=0.710 n=731/731
+   drops fix_A=+6.0[+1.0,+10.8] fix_B=-16.0[-20.5,-11.8] fix_both=-6.7[-11.6,-1.9]  I=+3.3[-3.1,+9.8]
+ seed 43: acc orig=0.663 fix_A=0.576 fix_B=0.837 fix_both=0.707 n=731/731
+   drops fix_A=+8.8[+3.7,+13.7] fix_B=-17.4[-21.8,-12.9] fix_both=-4.4[-9.0,+0.4]  I=+4.2[-2.5,+11.1]
+ seed 44: acc orig=0.661 fix_A=0.596 fix_B=0.830 fix_both=0.715 n=731/731
+   drops fix_A=+6.4[+1.5,+10.9] fix_B=-17.0[-21.3,-12.6] fix_both=-5.5[-9.8,-0.5]  I=+5.1[-1.5,+11.5]
+== g4_pump_inspection: LOOP (patches written LIVE by muse-spark ok 11.6s 
+ seed 42: acc orig=0.887 fix_A=0.747 fix_B=0.887 fix_both=0.747 n=750/750
+   drops fix_A=+14.0[+10.1,+18.0] fix_B=+0.0[-3.2,+3.2] fix_both=+14.0[+10.1,+17.7]  I=+0.0[-5.2,+5.6]
+ seed 43: acc orig=0.889 fix_A=0.704 fix_B=0.889 fix_both=0.704 n=750/750
+   drops fix_A=+18.5[+14.7,+22.4] fix_B=+0.0[-3.1,+3.1] fix_both=+18.5[+14.4,+22.4]  I=+0.0[-5.6,+5.3]
+ seed 44: acc orig=0.889 fix_A=0.736 fix_B=0.889 fix_both=0.736 n=750/750
+   drops fix_A=+15.3[+11.5,+19.3] fix_B=+0.0[-3.1,+2.9] fix_both=+15.3[+11.2,+18.9]  I=+0.0[-5.5,+5.6]
+== g4_crop_irrigation: LOOP (patches written LIVE by muse-spark ok 59.5s 
+ seed 42: acc orig=0.676 fix_A=0.684 fix_B=0.676 fix_both=0.694 n=800/800
+   drops fix_A=-0.7[-5.4,+3.7] fix_B=+0.0[-4.5,+4.3] fix_both=-1.7[-6.2,+3.1]  I=-1.0[-7.1,+5.1]
+ seed 43: acc orig=0.680 fix_A=0.676 fix_B=0.674 fix_both=0.676 n=800/800
+   drops fix_A=+0.4[-4.1,+4.9] fix_B=+0.6[-3.9,+5.1] fix_both=+0.4[-4.0,+5.1]  I=-0.6[-6.6,+5.8]
+ seed 44: acc orig=0.699 fix_A=0.704 fix_B=0.699 fix_both=0.705 n=800/800
+   drops fix_A=-0.5[-5.1,+4.1] fix_B=+0.0[-4.0,+4.7] fix_both=-0.6[-5.1,+3.7]  I=-0.1[-6.4,+6.0]
+== g4_assay_replicates: LOOP (patches written LIVE by muse-spark ok 16.9s 
+ seed 42: acc orig=0.916 fix_A=0.857 fix_B=0.815 fix_both=0.608 n=525/525
+   drops fix_A=+5.9[+2.1,+9.7] fix_B=+10.1[+5.9,+14.3] fix_both=+30.9[+25.7,+35.6]  I=+14.9[+8.4,+21.5]
+ seed 43: acc orig=0.924 fix_A=0.829 fix_B=0.813 fix_both=0.646 n=525/525
+   drops fix_A=+9.5[+5.7,+13.5] fix_B=+11.0[+7.0,+15.0] fix_both=+27.8[+23.0,+32.6]  I=+7.2[+1.1,+13.5]
+ seed 44: acc orig=0.926 fix_A=0.880 fix_B=0.830 fix_both=0.590 n=525/525
+   drops fix_A=+4.6[+1.0,+8.2] fix_B=+9.5[+5.7,+13.3] fix_both=+33.5[+28.4,+38.3]  I=+19.4[+12.8,+25.3]
+== clean_control: LOOP (patches written LIVE by muse-spark ok 4.3s 
+ seed 42: acc orig=0.971 fix_A=0.971 fix_B=0.958 fix_both=0.958 n=450/450
+   drops fix_A=+0.0[-2.0,+2.2] fix_B=+1.3[-0.9,+3.8] fix_both=+1.3[-1.1,+3.8]  I=+0.0[-3.6,+3.3]
+ seed 43: acc orig=0.973 fix_A=0.973 fix_B=0.967 fix_both=0.967 n=450/450
+   drops fix_A=+0.0[-2.0,+2.2] fix_B=+0.7[-1.6,+2.9] fix_both=+0.7[-1.6,+2.9]  I=+0.0[-3.3,+3.3]
+ seed 44: acc orig=0.980 fix_A=0.980 fix_B=0.971 fix_both=0.971 n=450/450
+   drops fix_A=+0.0[-1.8,+1.8] fix_B=+0.9[-1.1,+2.9] fix_both=+0.9[-1.1,+2.9]  I=+0.0[-2.9,+2.7]
+== clean_group_correct: LOOP (patches written LIVE by muse-spark ok 18.0s 
+ seed 42: acc orig=0.780 fix_A=0.743 fix_B=0.695 fix_both=0.634 n=200/800
+   drops fix_A=+3.7[-2.6,+10.2] fix_B=+8.5[+0.5,+16.5] fix_both=+14.6[+8.2,+20.7]  I=+2.4[-7.5,+11.0]
+ seed 43: acc orig=0.755 fix_A=0.744 fix_B=0.725 fix_both=0.641 n=200/800
+   drops fix_A=+1.1[-5.6,+7.8] fix_B=+3.0[-6.0,+12.0] fix_both=+11.4[+4.7,+18.4]  I=+7.3[-2.8,+17.0]
+ seed 44: acc orig=0.780 fix_A=0.743 fix_B=0.695 fix_both=0.627 n=200/800
+   drops fix_A=+3.7[-2.3,+10.2] fix_B=+8.5[+0.5,+17.5] fix_both=+15.3[+9.0,+21.1]  I=+3.0[-7.2,+12.6]
+== clean_wine_correct: LOOP (patches written LIVE by muse-spark ok 3.5s 
+ seed 42: acc orig=0.867 fix_A=0.844 fix_B=0.867 fix_both=0.822 n=45/45
+   drops fix_A=+2.2[-11.1,+15.6] fix_B=+0.0[-13.3,+13.3] fix_both=+4.4[-11.1,+20.0]  I=+2.2[-17.8,+22.2]
+ seed 43: acc orig=0.911 fix_A=0.844 fix_B=0.822 fix_both=0.800 n=45/45
+   drops fix_A=+6.7[-6.7,+20.0] fix_B=+8.9[-4.4,+22.2] fix_both=+11.1[-2.2,+24.4]  I=-4.4[-24.4,+15.6]
+ seed 44: acc orig=0.800 fix_A=0.822 fix_B=0.844 fix_both=0.778 n=45/45
+   drops fix_A=-2.2[-17.8,+13.4] fix_B=-4.4[-20.0,+11.1] fix_both=+2.2[-15.6,+20.0]  I=+8.9[-13.3,+31.1]
+== g4_visit_history_clean: LOOP (patches written LIVE by muse-spark ok 10.5s 
+ seed 42: acc orig=0.597 fix_A=0.565 fix_B=0.571 fix_both=0.571 n=573/63
+   drops fix_A=+3.1[-2.3,+8.7] fix_B=+2.5[-10.2,+15.4] fix_both=+2.5[-9.6,+15.4]  I=-3.1[-22.0,+16.4]
+ seed 43: acc orig=0.582 fix_A=0.579 fix_B=0.540 fix_both=0.571 n=582/63
+   drops fix_A=+0.3[-5.8,+5.8] fix_B=+4.3[-7.8,+16.3] fix_both=+1.1[-11.7,+14.3]  I=-3.5[-21.4,+15.1]
+ seed 44: acc orig=0.647 fix_A=0.607 fix_B=0.667 fix_both=0.619 n=567/63
+   drops fix_A=+4.1[-1.2,+9.9] fix_B=-1.9[-14.3,+10.8] fix_both=+2.8[-9.9,+15.9]  I=+0.7[-16.6,+18.7]

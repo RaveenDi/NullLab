@@ -19,3 +19,9 @@ Thumbs.db
 docs/BUILDER-BRIEF.md
 docs/BRIEF-*.md
 docs/MUSE-BRIEF-*.md
+
+# G1 baseline-tool venvs (deepchecks / giskard)
+.venv-g1/
+.venv-g1b/
+.venv*/
+runs_g1*/

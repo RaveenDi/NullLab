@@ -1,0 +1,23 @@
+{
+ "case": "comp_visit_history",
+ "provenance": "SYNTHETIC",
+ "leaky": true,
+ "flaw_A": {
+  "kind": "target-derived feature computed on all rows before the split",
+  "code_substr": "df[HIST] = df.groupby(PATIENT)[TARGET].transform(\"mean\")"
+ },
+ "flaw_B": {
+  "kind": "non-independence: random visit split, same patient on both sides; claim is about new patients",
+  "code_substr": "return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)"
+ },
+ "ref_patches": {
+  "fix_A": "import numpy as np\nimport train\nfrom sklearn.model_selection import KFold\n\n\ndef _oof_rate(trd, ted, seed):\n    T, P, H = train.TARGET, train.PATIENT, train.HIST\n    prior = trd[T].mean()\n    trd[H] = prior\n    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):\n        m = trd.iloc[a].groupby(P)[T].mean()\n        trd.loc[trd.index[b], H] = trd.iloc[b][P].map(m).fillna(prior).to_numpy()\n    ted[H] = ted[P].map(trd.groupby(P)[T].mean()).fillna(prior)\n    return trd, ted\n\n\ndef controlled_eval(df, seed):\n    # fix A only: patient rate from training labels only (out-of-fold); random visit split kept\n    tr, te = train.split_idx(df, seed)\n    trd, ted = _oof_rate(df.iloc[tr].reset_index(drop=True).copy(), df.iloc[te].reset_index(drop=True).copy(), seed)\n    f = train.feats(trd)\n    return ted[train.TARGET].to_numpy(), train.fit_predict(trd[f].to_numpy(), trd[train.TARGET].to_numpy(), ted[f].to_numpy(), seed)\n",
+  "fix_B": "import numpy as np\nimport train\nfrom sklearn.model_selection import GroupShuffleSplit\n\n\ndef controlled_eval(df, seed):\n    # fix B only: whole patients held out; patient rate still computed on all visits before the split\n    data = train.add_history(df)\n    tr, te = next(GroupShuffleSplit(1, test_size=0.25, random_state=seed).split(data, groups=data[train.PATIENT]))\n    f = train.feats(data)\n    X, y = data[f].to_numpy(), data[train.TARGET].to_numpy()\n    return y[te], train.fit_predict(X[tr], y[tr], X[te], seed)\n",
+  "fix_both": "import numpy as np\nimport train\nfrom sklearn.model_selection import KFold, GroupShuffleSplit\n\n\ndef _oof_rate(trd, ted, seed):\n    T, P, H = train.TARGET, train.PATIENT, train.HIST\n    prior = trd[T].mean()\n    trd[H] = prior\n    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):\n        m = trd.iloc[a].groupby(P)[T].mean()\n        trd.loc[trd.index[b], H] = trd.iloc[b][P].map(m).fillna(prior).to_numpy()\n    ted[H] = ted[P].map(trd.groupby(P)[T].mean()).fillna(prior)\n    return trd, ted\n\n\ndef controlled_eval(df, seed):\n    # fix both: whole patients held out AND patient rate from training labels only (unseen patients get the prior)\n    tr, te = next(GroupShuffleSplit(1, test_size=0.25, random_state=seed).split(df, groups=df[train.PATIENT]))\n    trd, ted = _oof_rate(df.iloc[tr].reset_index(drop=True).copy(), df.iloc[te].reset_index(drop=True).copy(), seed)\n    f = train.feats(trd)\n    return ted[train.TARGET].to_numpy(), train.fit_predict(trd[f].to_numpy(), trd[train.TARGET].to_numpy(), ted[f].to_numpy(), seed)\n"
+ },
+ "agent_view_sha256": {
+  "train.py": "5c3eb127a306daf0572a2bef3508a1ef9932300237f3059cc20d4336d1a67057",
+  "data.csv": "d61291300f32e732f3628b78ce9b7a34122b522c0ca4d4938332fcd03be8f41b",
+  "excerpt.md": "872afc226652602cf2dc760440ed6ab477688da07ca005b1085dd255ba36832b"
+ }
+}

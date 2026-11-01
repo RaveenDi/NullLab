@@ -1,0 +1,204 @@
+﻿Collecting giskard
+  Obtaining dependency information for giskard from https://files.pythonhosted.org/packages/9c/16/28a1609370c99e908e7d77481c66d22c6533dee98bd1b9a6b28d418d8c33/giskard-3.0.1-py3-none-any.whl.metadata
+  Downloading giskard-3.0.1-py3-none-any.whl.metadata (14 kB)
+Collecting giskard-checks<2,>=1.0.5 (from giskard)
+  Obtaining dependency information for giskard-checks<2,>=1.0.5 from https://files.pythonhosted.org/packages/90/38/44f5292e5c3e2930fadd8619e5f7c3ccb51ce502b9475a1d159e65e5c81d/giskard_checks-1.0.6-py3-none-any.whl.metadata
+  Downloading giskard_checks-1.0.6-py3-none-any.whl.metadata (24 kB)
+Collecting giskard-agents<2,>=1.0.4 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for giskard-agents<2,>=1.0.4 from https://files.pythonhosted.org/packages/58/86/472e7a1aa85d9925d2d314d416c2be33f178a77e4ef09633342269d10d16/giskard_agents-1.0.6-py3-none-any.whl.metadata
+  Downloading giskard_agents-1.0.6-py3-none-any.whl.metadata (16 kB)
+Collecting giskard-core<2,>=1.0.2 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for giskard-core<2,>=1.0.2 from https://files.pythonhosted.org/packages/46/ab/5a15fa51fe72aac45c806ceb804be9d055fb721f85ba32c2964271320a2e/giskard_core-1.0.3-py3-none-any.whl.metadata
+  Downloading giskard_core-1.0.3-py3-none-any.whl.metadata (3.9 kB)
+Collecting jinja2<4,>=3.1.6 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for jinja2<4,>=3.1.6 from https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl.metadata
+  Using cached jinja2-3.1.6-py3-none-any.whl.metadata (2.9 kB)
+Collecting jsonpath-ng<2,>=1.7.0 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for jsonpath-ng<2,>=1.7.0 from https://files.pythonhosted.org/packages/4b/a1/ec64128a063e501bd84b73cfbd2f204f9756c20d9be7eceeea8d997bd6f2/jsonpath_ng-1.15.0-py3-none-any.whl.metadata
+  Downloading jsonpath_ng-1.15.0-py3-none-any.whl.metadata (17 kB)
+Collecting jsonschema<5,>=4.23.0 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for jsonschema<5,>=4.23.0 from https://files.pythonhosted.org/packages/69/90/f63fb5873511e014207a475e2bb4e8b2e570d655b00ac19a9a0ca0a385ee/jsonschema-4.26.0-py3-none-any.whl.metadata
+  Downloading jsonschema-4.26.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting numpy<3,>=2.4.1 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for numpy<3,>=2.4.1 from https://files.pythonhosted.org/packages/12/33/fefe62073dc8acfd0f2b9ed7c003af2f50aa61555e113e6db02b8f79f145/numpy-2.5.4-cp312-cp312-win_amd64.whl.metadata
+  Using cached numpy-2.5.4-cp312-cp312-win_amd64.whl.metadata (6.6 kB)
+Collecting pydantic-settings<3,>=2.7 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for pydantic-settings<3,>=2.7 from https://files.pythonhosted.org/packages/39/88/4131c51ff87b7cd7f82a1194d0c0a2b7ca68c72d9da04c3b7e69ab91a79f/pydantic_settings-2.16.2-py3-none-any.whl.metadata
+  Downloading pydantic_settings-2.16.2-py3-none-any.whl.metadata (4.0 kB)
+Collecting pydantic<3,>=2.12 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for pydantic<3,>=2.12 from https://files.pythonhosted.org/packages/97/01/c71a71258b58659c72504e5fd65b451f6e36e34dc931d0b237ded213c814/pydantic-2.14.2-py3-none-any.whl.metadata
+  Using cached pydantic-2.14.2-py3-none-any.whl.metadata (137 kB)
+Collecting regex>=2026.1.15 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for regex>=2026.1.15 from https://files.pythonhosted.org/packages/93/19/489bc8db91196381c935752df01ba3f607140daece33b78d88573f028e64/regex-2026.9.29-cp312-cp312-win_amd64.whl.metadata
+  Downloading regex-2026.9.29-cp312-cp312-win_amd64.whl.metadata (41 kB)
+     -------------------------------------- 41.6/41.6 kB 667.8 kB/s eta 0:00:00
+Collecting rich<16,>=14.2.0 (from giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for rich<16,>=14.2.0 from https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl.metadata
+  Using cached rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+Collecting giskard-llm<2,>=1.0.3 (from giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for giskard-llm<2,>=1.0.3 from https://files.pythonhosted.org/packages/92/48/01d5038b68fbe70f3c979629c9cfddf3887f4f5059a1671e02cfac7b387b/giskard_llm-1.0.3-py3-none-any.whl.metadata
+  Downloading giskard_llm-1.0.3-py3-none-any.whl.metadata (6.6 kB)
+Collecting griffe<3,>=1.7.0 (from giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for griffe<3,>=1.7.0 from https://files.pythonhosted.org/packages/29/93/67a1814b4b13e9a5cc02510dbfa1d3937603140192a701c96d861b272611/griffe-2.4.1-py3-none-any.whl.metadata
+  Downloading griffe-2.4.1-py3-none-any.whl.metadata (11 kB)
+Collecting httpx<1,>=0.28.1 (from giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for httpx<1,>=0.28.1 from https://files.pythonhosted.org/packages/2a/39/e50c7c3a983047577ee07d2a9e53faf5a69493943ec3f6a384bdc792deb2/httpx-0.28.1-py3-none-any.whl.metadata
+  Using cached httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+Collecting logfire-api<5,>=3.22.0 (from giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for logfire-api<5,>=3.22.0 from https://files.pythonhosted.org/packages/c8/96/97552d0d742866719b3a6e8fd7e68dd2877804f4c3b10c44a19a1f99b0d6/logfire_api-4.41.0-py3-none-any.whl.metadata
+  Downloading logfire_api-4.41.0-py3-none-any.whl.metadata (973 bytes)
+Collecting tenacity<10,>=9.1.0 (from giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for tenacity<10,>=9.1.0 from https://files.pythonhosted.org/packages/d6/26/1ff2b0721ac66a3ec5b1402b333110b352ab0a8724052ac279a7b82d40c4/tenacity-9.2.1-py3-none-any.whl.metadata
+  Downloading tenacity-9.2.1-py3-none-any.whl.metadata (1.4 kB)
+Collecting posthog<8,>=7.10.3 (from giskard-core<2,>=1.0.2->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for posthog<8,>=7.10.3 from https://files.pythonhosted.org/packages/ce/b0/2439291ea8d5a881d6effe893d3ef609c2207225af7075a5c87c803275fb/posthog-7.81.1-py3-none-any.whl.metadata
+  Downloading posthog-7.81.1-py3-none-any.whl.metadata (7.0 kB)
+Collecting MarkupSafe>=2.0 (from jinja2<4,>=3.1.6->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for MarkupSafe>=2.0 from https://files.pythonhosted.org/packages/3f/bf/62495e180b7000aaf30000fff849e933f74264638057176cf46852500adc/markupsafe-3.0.4-cp312-cp312-win_amd64.whl.metadata
+  Using cached markupsafe-3.0.4-cp312-cp312-win_amd64.whl.metadata (2.8 kB)
+Collecting attrs>=22.2.0 (from jsonschema<5,>=4.23.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for attrs>=22.2.0 from https://files.pythonhosted.org/packages/64/b4/17d4b0b2a2dc85a6df63d1157e028ed19f90d4cd97c36717afef2bc2f395/attrs-26.1.0-py3-none-any.whl.metadata
+  Downloading attrs-26.1.0-py3-none-any.whl.metadata (8.8 kB)
+Collecting jsonschema-specifications>=2023.03.6 (from jsonschema<5,>=4.23.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for jsonschema-specifications>=2023.03.6 from https://files.pythonhosted.org/packages/41/45/1a4ed80516f02155c51f51e8cedb3c1902296743db0bbc66608a0db2814f/jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata
+  Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl.metadata (2.9 kB)
+Collecting referencing>=0.28.4 (from jsonschema<5,>=4.23.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for referencing>=0.28.4 from https://files.pythonhosted.org/packages/2c/58/ca301544e1fa93ed4f80d724bf5b194f6e4b945841c5bfd555878eea9fcb/referencing-0.37.0-py3-none-any.whl.metadata
+  Downloading referencing-0.37.0-py3-none-any.whl.metadata (2.8 kB)
+Collecting rpds-py>=0.25.0 (from jsonschema<5,>=4.23.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for rpds-py>=0.25.0 from https://files.pythonhosted.org/packages/1c/84/1700cc748d0eaa747486e4e82882d2575224e6e9a3148df583058850c629/rpds_py-2026.9.1-cp312-cp312-win_amd64.whl.metadata
+  Downloading rpds_py-2026.9.1-cp312-cp312-win_amd64.whl.metadata (4.2 kB)
+Collecting annotated-types>=0.6.0 (from pydantic<3,>=2.12->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for annotated-types>=0.6.0 from https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl.metadata
+  Using cached annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+Collecting pydantic-core==2.50.2 (from pydantic<3,>=2.12->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for pydantic-core==2.50.2 from https://files.pythonhosted.org/packages/b4/fb/679144362d7e5162519d9f6631ec982521417de3196351c6c56485f5b29f/pydantic_core-2.50.2-cp312-cp312-win_amd64.whl.metadata
+  Using cached pydantic_core-2.50.2-cp312-cp312-win_amd64.whl.metadata (6.7 kB)
+Collecting typing-extensions>=4.16.0 (from pydantic<3,>=2.12->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for typing-extensions>=4.16.0 from https://files.pythonhosted.org/packages/49/d3/b8441a820a491ddfc024b0b0cf0393375b75ea13866d9c66727e54c2fc80/typing_extensions-4.16.0-py3-none-any.whl.metadata
+  Using cached typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+Collecting typing-inspection>=0.4.4 (from pydantic<3,>=2.12->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for typing-inspection>=0.4.4 from https://files.pythonhosted.org/packages/67/81/4add07e5172b7ac40d8ed5ff580409a7801a4fe26d529bdd915401dabfbe/typing_inspection-0.4.4-py3-none-any.whl.metadata
+  Using cached typing_inspection-0.4.4-py3-none-any.whl.metadata (2.6 kB)
+Collecting python-dotenv>=1.2.2 (from pydantic-settings<3,>=2.7->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for python-dotenv>=1.2.2 from https://files.pythonhosted.org/packages/60/d1/38f3a3405989a89ac18390803e70c6ad7c7760da4f9b83cbeca0c44a0c72/python_dotenv-1.2.4-py3-none-any.whl.metadata
+  Using cached python_dotenv-1.2.4-py3-none-any.whl.metadata (29 kB)
+Collecting markdown-it-py>=2.2.0 (from rich<16,>=14.2.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for markdown-it-py>=2.2.0 from https://files.pythonhosted.org/packages/b3/81/4da04ced5a082363ecfa159c010d200ecbd959ae410c10c0264a38cac0f5/markdown_it_py-4.2.0-py3-none-any.whl.metadata
+  Using cached markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+Collecting pygments<3.0.0,>=2.13.0 (from rich<16,>=14.2.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for pygments<3.0.0,>=2.13.0 from https://files.pythonhosted.org/packages/71/46/17f022dd3e953bf20a04a028a21ec746d942f8d2af30fa0f124fa0e6a684/pygments-2.21.0-py3-none-any.whl.metadata
+  Using cached pygments-2.21.0-py3-none-any.whl.metadata (2.5 kB)
+Collecting griffecli==2.4.1 (from griffe<3,>=1.7.0->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for griffecli==2.4.1 from https://files.pythonhosted.org/packages/3f/dc/5cdbbbfd1a9e8c0e9b6b8b6e6d839e67f82cb138b77cf74856e5b80527de/griffecli-2.4.1-py3-none-any.whl.metadata
+  Downloading griffecli-2.4.1-py3-none-any.whl.metadata (1.7 kB)
+Collecting griffelib==2.4.1 (from griffe<3,>=1.7.0->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for griffelib==2.4.1 from https://files.pythonhosted.org/packages/de/02/1156d5f5307f573b901b14373848b84e69ca6cab09169b8cc97d16a181f9/griffelib-2.4.1-py3-none-any.whl.metadata
+  Downloading griffelib-2.4.1-py3-none-any.whl.metadata (1.9 kB)
+Collecting colorama>=0.4 (from griffecli==2.4.1->griffe<3,>=1.7.0->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for colorama>=0.4 from https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl.metadata
+  Using cached colorama-0.4.6-py2.py3-none-any.whl.metadata (17 kB)
+Collecting anyio (from httpx<1,>=0.28.1->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for anyio from https://files.pythonhosted.org/packages/12/b8/4bd346e22b28902df4d651910f5242c28d84e4a5c2435ca5c3f797ed7e2e/anyio-4.15.1-py3-none-any.whl.metadata
+  Using cached anyio-4.15.1-py3-none-any.whl.metadata (4.7 kB)
+Collecting certifi (from httpx<1,>=0.28.1->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for certifi from https://files.pythonhosted.org/packages/32/d1/a3652fe2c19134d0d15922177821d863cbd7e842d53a21bbe7e8e3a1b5ac/certifi-2026.10.23-py3-none-any.whl.metadata
+  Using cached certifi-2026.10.23-py3-none-any.whl.metadata (2.5 kB)
+Collecting httpcore==1.* (from httpx<1,>=0.28.1->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for httpcore==1.* from https://files.pythonhosted.org/packages/7e/f5/f66802a942d491edb555dd61e3a9961140fd64c90bce1eafd741609d334d/httpcore-1.0.9-py3-none-any.whl.metadata
+  Using cached httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+Collecting idna (from httpx<1,>=0.28.1->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for idna from https://files.pythonhosted.org/packages/58/a2/bb081bab032533a855d44de1d56f8e8426114ff1ba5d1f07a438a0a654f8/idna-3.20-py3-none-any.whl.metadata
+  Using cached idna-3.20-py3-none-any.whl.metadata (7.2 kB)
+Collecting h11>=0.16 (from httpcore==1.*->httpx<1,>=0.28.1->giskard-agents<2,>=1.0.4->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for h11>=0.16 from https://files.pythonhosted.org/packages/04/4b/29cac41a4d98d144bf5f6d33995617b185d14b22401f75ca86f384e87ff1/h11-0.16.0-py3-none-any.whl.metadata
+  Using cached h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich<16,>=14.2.0->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for mdurl~=0.1 from https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl.metadata
+  Using cached mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+Collecting requests<3.0,>=2.7 (from posthog<8,>=7.10.3->giskard-core<2,>=1.0.2->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for requests<3.0,>=2.7 from https://files.pythonhosted.org/packages/a0/f4/c67b0b3f1b9245e8d266f0f112c500d50e5b4e83cb6f3b71b6528104182a/requests-2.34.2-py3-none-any.whl.metadata
+  Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+Collecting backoff>=1.10.0 (from posthog<8,>=7.10.3->giskard-core<2,>=1.0.2->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for backoff>=1.10.0 from https://files.pythonhosted.org/packages/df/73/b6e24bd22e6720ca8ee9a85a0c4a2971af8497d8f3193fa05390cbd46e09/backoff-2.2.1-py3-none-any.whl.metadata
+  Downloading backoff-2.2.1-py3-none-any.whl.metadata (14 kB)
+Collecting distro>=1.5.0 (from posthog<8,>=7.10.3->giskard-core<2,>=1.0.2->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for distro>=1.5.0 from https://files.pythonhosted.org/packages/12/b3/231ffd4ab1fc9d679809f356cebee130ac7daa00d6d6f3206dd4fd137e9e/distro-1.9.0-py3-none-any.whl.metadata
+  Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+Collecting charset_normalizer<4,>=2 (from requests<3.0,>=2.7->posthog<8,>=7.10.3->giskard-core<2,>=1.0.2->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for charset_normalizer<4,>=2 from https://files.pythonhosted.org/packages/eb/e6/e6e083884cbcfd49c64865af05027fe7011be7b2d9179524f099a1b611f3/charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl.metadata
+  Using cached charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl.metadata (47 kB)
+Collecting urllib3<3,>=1.26 (from requests<3.0,>=2.7->posthog<8,>=7.10.3->giskard-core<2,>=1.0.2->giskard-checks<2,>=1.0.5->giskard)
+  Obtaining dependency information for urllib3<3,>=1.26 from https://files.pythonhosted.org/packages/92/9d/c4e665119135114480843e7ab388fa94d8480650450e6f8e26b70d323a4c/urllib3-2.8.0-py3-none-any.whl.metadata
+  Downloading urllib3-2.8.0-py3-none-any.whl.metadata (7.4 kB)
+Downloading giskard-3.0.1-py3-none-any.whl (10 kB)
+Downloading giskard_checks-1.0.6-py3-none-any.whl (116 kB)
+   -------------------------------------- 116.2/116.2 kB 519.6 kB/s eta 0:00:00
+Downloading giskard_agents-1.0.6-py3-none-any.whl (46 kB)
+   ---------------------------------------- 46.5/46.5 kB 329.8 kB/s eta 0:00:00
+Downloading giskard_core-1.0.3-py3-none-any.whl (16 kB)
+Using cached jinja2-3.1.6-py3-none-any.whl (134 kB)
+Downloading jsonpath_ng-1.15.0-py3-none-any.whl (84 kB)
+   ---------------------------------------- 84.8/84.8 kB 2.3 MB/s eta 0:00:00
+Downloading jsonschema-4.26.0-py3-none-any.whl (90 kB)
+   ---------------------------------------- 90.6/90.6 kB ? eta 0:00:00
+Using cached numpy-2.5.4-cp312-cp312-win_amd64.whl (12.6 MB)
+Using cached pydantic-2.14.2-py3-none-any.whl (490 kB)
+Using cached pydantic_core-2.50.2-cp312-cp312-win_amd64.whl (2.3 MB)
+Downloading pydantic_settings-2.16.2-py3-none-any.whl (81 kB)
+   ---------------------------------------- 82.0/82.0 kB 2.3 MB/s eta 0:00:00
+Downloading regex-2026.9.29-cp312-cp312-win_amd64.whl (280 kB)
+   ---------------------------------------- 280.3/280.3 kB 2.5 MB/s eta 0:00:00
+Using cached rich-15.0.0-py3-none-any.whl (310 kB)
+Using cached annotated_types-0.8.0-py3-none-any.whl (13 kB)
+Downloading attrs-26.1.0-py3-none-any.whl (67 kB)
+   ---------------------------------------- 67.5/67.5 kB 3.6 MB/s eta 0:00:00
+Downloading giskard_llm-1.0.3-py3-none-any.whl (45 kB)
+   ---------------------------------------- 45.8/45.8 kB 756.0 kB/s eta 0:00:00
+Downloading griffe-2.4.1-py3-none-any.whl (5.1 kB)
+Downloading griffecli-2.4.1-py3-none-any.whl (11 kB)
+Downloading griffelib-2.4.1-py3-none-any.whl (172 kB)
+   ---------------------------------------- 173.0/173.0 kB 2.1 MB/s eta 0:00:00
+Using cached httpx-0.28.1-py3-none-any.whl (73 kB)
+Using cached httpcore-1.0.9-py3-none-any.whl (78 kB)
+Downloading jsonschema_specifications-2025.9.1-py3-none-any.whl (18 kB)
+Downloading logfire_api-4.41.0-py3-none-any.whl (143 kB)
+   ---------------------------------------- 143.0/143.0 kB 2.1 MB/s eta 0:00:00
+Using cached markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+Using cached markupsafe-3.0.4-cp312-cp312-win_amd64.whl (14 kB)
+Downloading posthog-7.81.1-py3-none-any.whl (1.0 MB)
+   ---------------------------------------- 1.0/1.0 MB 2.0 MB/s eta 0:00:00
+Using cached pygments-2.21.0-py3-none-any.whl (1.3 MB)
+Using cached python_dotenv-1.2.4-py3-none-any.whl (23 kB)
+Downloading referencing-0.37.0-py3-none-any.whl (26 kB)
+Downloading rpds_py-2026.9.1-cp312-cp312-win_amd64.whl (222 kB)
+   ---------------------------------------- 222.9/222.9 kB 2.7 MB/s eta 0:00:00
+Downloading tenacity-9.2.1-py3-none-any.whl (32 kB)
+Using cached typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+Using cached typing_inspection-0.4.4-py3-none-any.whl (14 kB)
+Downloading backoff-2.2.1-py3-none-any.whl (15 kB)
+Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+Using cached mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+   ---------------------------------------- 73.1/73.1 kB 3.9 MB/s eta 0:00:00
+Using cached certifi-2026.10.23-py3-none-any.whl (135 kB)
+Using cached idna-3.20-py3-none-any.whl (69 kB)
+Using cached anyio-4.15.1-py3-none-any.whl (132 kB)
+Using cached charset_normalizer-3.5.2-cp312-cp312-win_amd64.whl (207 kB)
+Using cached colorama-0.4.6-py2.py3-none-any.whl (25 kB)
+Using cached h11-0.16.0-py3-none-any.whl (37 kB)
+Downloading urllib3-2.8.0-py3-none-any.whl (135 kB)
+   ---------------------------------------- 135.7/135.7 kB 1.2 MB/s eta 0:00:00
+Installing collected packages: urllib3, typing-extensions, tenacity, rpds-py, regex, python-dotenv, pygments, numpy, mdurl, MarkupSafe, logfire-api, jsonpath-ng, idna, h11, griffelib, distro, colorama, charset_normalizer, certifi, backoff, attrs, annotated-types, typing-inspection, requests, referencing, pydantic-core, markdown-it-py, jinja2, httpcore, griffecli, anyio, rich, pydantic, posthog, jsonschema-specifications, httpx, griffe, pydantic-settings, jsonschema, giskard-core, giskard-llm, giskard-agents, giskard-checks, giskard
+Successfully installed MarkupSafe-3.0.4 annotated-types-0.8.0 anyio-4.15.1 attrs-26.1.0 backoff-2.2.1 certifi-2026.10.23 charset_normalizer-3.5.2 colorama-0.4.6 distro-1.9.0 giskard-3.0.1 giskard-agents-1.0.6 giskard-checks-1.0.6 giskard-core-1.0.3 giskard-llm-1.0.3 griffe-2.4.1 griffecli-2.4.1 griffelib-2.4.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.20 jinja2-3.1.6 jsonpath-ng-1.15.0 jsonschema-4.26.0 jsonschema-specifications-2025.9.1 logfire-api-4.41.0 markdown-it-py-4.2.0 mdurl-0.1.2 numpy-2.5.4 posthog-7.81.1 pydantic-2.14.2 pydantic-core-2.50.2 pydantic-settings-2.16.2 pygments-2.21.0 python-dotenv-1.2.4 referencing-0.37.0 regex-2026.9.29 requests-2.34.2 rich-15.0.0 rpds-py-2026.9.1 tenacity-9.2.1 typing-extensions-4.16.0 typing-inspection-0.4.4 urllib3-2.8.0
+.venv-g1b\Scripts\python : 
+At line:1 char:682
++ ...  .venv-g1b; .venv-g1b\Scripts\python -m pip install giskard > g1_inst ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[notice] A new release of pip is available: 23.2.1 -> 26.2.2
+[notice] To update, run: C:\Users\raved\OneDrive\Desktop\MetaHackathon\nulllab\.venv-g1b\Scripts\python.exe -m pip 
+install --upgrade pip
+giskard exit 0

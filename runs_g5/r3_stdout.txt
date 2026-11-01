@@ -1,0 +1,25 @@
+PREREG b3_single_prompt g4_freight_delay g5-r3 cf7f48486a44cbbb
+PREREG b3_single_prompt g4_pump_inspection g5-r3 19468aaf147ff07d
+PREREG b3_single_prompt g4_crop_irrigation g5-r3 ba37897f28a76267
+PREREG b3_single_prompt g4_assay_replicates g5-r3 44a2306985f0b2b0
+PREREG b3_single_prompt clean_control g5-r3 75920593bccac6b0
+PREREG b3_single_prompt clean_group_correct g5-r3 d88bd2e0caa57479
+PREREG b3_single_prompt clean_wine_correct g5-r3 8ad579934633d886
+PREREG b3_single_prompt g4_visit_history_clean g5-r3 333b127ef88adf6b
+PREREG loop_planner g4_freight_delay g5-r3 3c3737c1946c4b04
+PREREG loop_planner g4_pump_inspection g5-r3 5665a9e3fac9846c
+PREREG loop_planner g4_crop_irrigation g5-r3 ba5f5251a6df6aff
+PREREG loop_planner g4_assay_replicates g5-r3 40bf8402508666b2
+PREREG loop_planner clean_control g5-r3 f82f1d23d2782baf
+PREREG loop_planner clean_group_correct g5-r3 853ece0239d716f7
+PREREG loop_planner clean_wine_correct g5-r3 5b2753c4cff9f5d3
+PREREG loop_planner g4_visit_history_clean g5-r3 0bd9227989a44cf9
+g5-r3 g4_freight_delay         ok retries=0 sign=('-', ['-', '0', '-']) 11s
+g5-r3 g4_pump_inspection       ok retries=0 sign=('+', ['+', '+', '+']) 12s
+g5-r3 g4_crop_irrigation       ok retries=0 sign=('0', ['0', '0', '0']) 58s
+g5-r3 g4_assay_replicates      ok retries=0 sign=('+', ['+', '+', '+']) 17s
+g5-r3 clean_control            ok retries=0 sign=('0', ['0', '0', '0']) 5s
+g5-r3 clean_group_correct      ok retries=0 sign=('0', ['0', '0', '0']) 18s
+g5-r3 clean_wine_correct       ok retries=0 sign=('0', ['0', '0', '0']) 3s
+PREREG loop_planner_retry g4_visit_history_clean g5-r3 d2500e302f934a66
+g5-r3 g4_visit_history_clean   ok retries=1 sign=('0', ['0', '0', '0']) 18s

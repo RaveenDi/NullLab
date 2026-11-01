@@ -1,5 +1,7 @@
 """Plan -> Act -> Verify -> Recover orchestration for one case. Only touches the agent view + sandbox.
-Usage: python pipeline.py [case ...] [--live]   (default: all cases, MOCK mode)"""
+Usage: python pipeline.py [case ...] [--live]   (default: all cases, MOCK mode)
+Outputs: MOCK -> runs/<case>.json ; LIVE -> runs_live/<case>.json (kept apart so a mock run or a test can never
+overwrite live evidence; tests redirect both to a temp dir)."""
 import json
 import sys
 import time
@@ -10,14 +12,15 @@ from sandbox import executor, verdict
 
 ROOT = Path(__file__).resolve().parent
 CORPUS = ROOT / "corpus"
-RUNS = ROOT / "runs"
+RUNS = ROOT / "runs"            # MOCK outputs
+RUNS_LIVE = ROOT / "runs_live"  # LIVE outputs only
 
 
 def cases():
     return sorted(p.name for p in CORPUS.iterdir() if p.is_dir())
 
 
-def run_case(case, mode="mock", n_boot=1000, timeout=120):
+def run_case(case, mode="mock", n_boot=1000, timeout=120, out_dir=None):
     case_dir = CORPUS / case
     manifest = json.loads((CORPUS / "manifest.json").read_text())[case]
     log, t0 = [], time.time()
@@ -52,10 +55,13 @@ def run_case(case, mode="mock", n_boot=1000, timeout=120):
         out["verdict"] = verdict.verdict(res["seeds"])
         out["verdict"]["cites_ok"] = claim["grounding"]["precision"] == 1.0
         d = {s: round(r["delta"], 3) for s, r in res["seeds"].items()}
-        ev("Verify", f"paired-bootstrap deltas per seed {d}; seed calls {out['verdict']['per_seed']} -> {out['verdict']['verdict']}")
+        ev("Verify", f"per-seed unpaired-bootstrap deltas per seed {d}; seed calls {out['verdict']['per_seed']} -> {out['verdict']['verdict']}")
     out["elapsed_s"] = round(time.time() - t0, 1)
-    RUNS.mkdir(exist_ok=True)
-    (RUNS / f"{case}.json").write_text(json.dumps(out, indent=1))
+    out_dir = Path(out_dir) if out_dir else (RUNS_LIVE if mode == "live" else RUNS)
+    if mode != "live" and out_dir.resolve() == (ROOT / "runs_live").resolve():
+        raise RuntimeError("refusing to write a MOCK run into runs_live/")
+    out_dir.mkdir(exist_ok=True)
+    (out_dir / f"{case}.json").write_text(json.dumps(out, indent=1))
     return out
 
 

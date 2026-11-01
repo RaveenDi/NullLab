@@ -8,14 +8,20 @@
   "value": 0.96,
   "split_desc": "The augmented pool was randomly divided into 75% training and 25% test records using a fixed random seed.",
   "methods_line": "The augmented pool was randomly divided into 75% training and 25% test records using a fixed random seed.",
+  "methods_line_no": 4,
   "code_line": "data = augment(df, seed)",
+  "code_line_no": 40,
   "mode": "MOCK (stub, not a model result)",
   "grounding": {
    "flags": {
     "methods_line": true,
     "code_line": true
    },
-   "precision": 1.0
+   "precision": 1.0,
+   "line_numbers": {
+    "methods_line_no": 4,
+    "code_line_no": 40
+   }
   }
  },
  "hyp": {
@@ -63,7 +69,11 @@
      "methods_line": true,
      "code_line": true
     },
-    "precision": 1.0
+    "precision": 1.0,
+    "line_numbers": {
+     "methods_line_no": 4,
+     "code_line_no": 40
+    }
    }
   },
   {
@@ -92,13 +102,13 @@
    ]
   },
   {
-   "t": 11.68,
+   "t": 16.43,
    "phase": "Act",
    "msg": "sandbox[subprocess] -> ok",
    "status": "ok"
   },
   {
-   "t": 11.68,
+   "t": 16.43,
    "phase": "Verify",
    "msg": "paired-bootstrap deltas per seed {'42': 0.197, '43': 0.208, '44': 0.208}; seed calls {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} -> FALSIFIED"
   }
@@ -142,5 +152,5 @@
   "agree": true,
   "cites_ok": true
  },
- "elapsed_s": 11.7
+ "elapsed_s": 16.4
 }

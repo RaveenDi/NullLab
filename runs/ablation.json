@@ -11,14 +11,44 @@
     "flagged": false,
     "flags": []
    },
+   "leak_prescale": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_temporal": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_proxy": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_group": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "clean_wine_correct": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "clean_group_correct": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
    "synthetic_leak": {
     "baseline": "B0 Deepchecks-style checklist",
     "flagged": false,
     "flags": []
    }
   },
-  "recall": "0/2",
-  "false_alarms": "0/1"
+  "recall": "0/6",
+  "false_alarms": "0/3"
  },
  "B1": {
   "per_case": {
@@ -34,6 +64,52 @@
     "applicable": false,
     "reason": "no group column found"
    },
+   "leak_prescale": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_temporal": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_proxy": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_group": {
+    "baseline": "B1 fixed GroupKFold",
+    "applicable": true,
+    "group_col": "c_8d423f",
+    "flagged": true,
+    "per_seed": [
+     "FALSIFIED",
+     "FALSIFIED",
+     "FALSIFIED"
+    ]
+   },
+   "clean_wine_correct": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "clean_group_correct": {
+    "baseline": "B1 fixed GroupKFold",
+    "applicable": true,
+    "group_col": "c_9a104c",
+    "flagged": false,
+    "per_seed": [
+     "SURVIVED",
+     "SURVIVED",
+     "SURVIVED"
+    ]
+   },
    "synthetic_leak": {
     "baseline": "B1 fixed GroupKFold",
     "applicable": true,
@@ -46,25 +122,107 @@
     ]
    }
   },
-  "recall": "0/2",
-  "false_alarms": "0/1"
+  "recall": "1/6",
+  "false_alarms": "0/3"
  },
  "B3": {
-  "status": "NOT RUN (UNVERIFIED)"
+  "mode": "LIVE muse-spark-1.3 (one call per case, no execution)",
+  "per_case": {
+   "hero_tabular": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": true,
+    "confidence": 0.95,
+    "reason": "Augmentation is applied before the random split, so jittered near-duplicates of the same original record appear in both train and test."
+   },
+   "clean_control": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": false,
+    "confidence": 0.9,
+    "reason": "Pipeline fits scaler and classifier on training split only with random holdout and 96% matches expected digits logistic baseline."
+   },
+   "leak_prescale": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": true,
+    "confidence": 0.95,
+    "reason": "Standardization and SelectKBest feature selection were fit on all rows before the train-test split, leaking test label information into training."
+   },
+   "leak_temporal": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": true,
+    "confidence": 0.9,
+    "reason": "Random 75/25 split ignores chronological order and includes time as a feature while claiming next-year generalization, enabling temporal interpolation that will not hold prospectively."
+   },
+   "leak_proxy": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": true,
+    "confidence": 0.9,
+    "reason": "The feature set includes proxy column c_33548a which leaks the target label and drives the reported 94% accuracy."
+   },
+   "leak_group": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": true,
+    "confidence": 0.9,
+    "reason": "Random record split reuses the same centres in train and test while including centre ID as a feature, so accuracy does not estimate generalization to new centres."
+   },
+   "clean_wine_correct": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": false,
+    "confidence": 0.9,
+    "reason": "Scaler and classifier are fit on train only, target column is excluded from features, and random holdout matches claimed use with no group structure indicated."
+   },
+   "clean_group_correct": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": false,
+    "confidence": 0.9,
+    "reason": "The code correctly implements a GroupShuffleSplit by ward and excludes the ward identifier from model features."
+   },
+   "synthetic_leak": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "LIVE muse-spark-1.3",
+    "flagged": true,
+    "confidence": 0.95,
+    "reason": "The prior_rate feature is computed as the per-site target mean over the full dataset before the random split, leaking test labels into both train and test features."
+   }
+  },
+  "recall": "6/6",
+  "false_alarms": "0/3",
+  "loop_vs_single": "NullLab loop vs single-prompt: compare recall/false-alarms rows; the loop wins only if its recall >= B3 with strictly fewer false alarms and >=1 non-checklist win (B0+B1+B3 all miss, loop falsifies with 3-seed CI)."
+ },
+ "real_suites": {
+  "deepchecks": "not installed (reimplementation used; install with `pip install deepchecks` to run the real suite)",
+  "giskard": "installed (version unknown)"
  },
  "NullLab": {
-  "mode": "MOCK (stub, not a model result)",
+  "mode": "LIVE muse-spark-1.3",
   "verdicts": {
    "hero_tabular": "FALSIFIED",
    "clean_control": "SURVIVED",
+   "leak_prescale": "INCONCLUSIVE",
+   "leak_temporal": "FALSIFIED",
+   "leak_proxy": "FALSIFIED",
+   "leak_group": "FALSIFIED",
+   "clean_wine_correct": "SURVIVED",
+   "clean_group_correct": "SURVIVED",
    "synthetic_leak": "FALSIFIED"
   },
-  "recall": "2/2",
-  "false_alarms": "0/1"
+  "recall": "5/6",
+  "false_alarms": "0/3"
  },
  "grounding_precision": 1.0,
  "non_checklist_win": {
-  "hero_tabular": true,
-  "synthetic_leak": true
+  "hero_tabular": false,
+  "leak_prescale": false,
+  "leak_temporal": false,
+  "leak_proxy": false,
+  "leak_group": false,
+  "synthetic_leak": false
  }
 }

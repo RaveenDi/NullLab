@@ -1,0 +1,9 @@
+﻿clean_control SURVIVED {'42': 'SURVIVED', '43': 'SURVIVED', '44': 'SURVIVED'} 3.1
+clean_group_correct SURVIVED {'42': 'SURVIVED', '43': 'SURVIVED', '44': 'SURVIVED'} 9.4
+clean_wine_correct SURVIVED {'42': 'SURVIVED', '43': 'SURVIVED', '44': 'SURVIVED'} 3.6
+hero_tabular FALSIFIED {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} 16.0
+leak_group FALSIFIED {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} 8.1
+leak_prescale FALSIFIED {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} 3.8
+leak_proxy FALSIFIED {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} 12.9
+leak_temporal FALSIFIED {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} 6.6
+synthetic_leak FALSIFIED {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} 6.7

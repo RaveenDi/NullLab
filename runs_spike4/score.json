@@ -1,0 +1,37 @@
+{
+ "components_mean_pp": {
+  "A": 5.7,
+  "B": -0.8,
+  "AxB": 18.0
+ },
+ "truth_top": "AxB",
+ "b3_top": "AxB",
+ "b3_misrank": false,
+ "b3_fix_both_pp": 32.0,
+ "b3_outside_loop_ci": {
+  "42": true,
+  "43": true,
+  "44": true
+ },
+ "b3_point_miss_all_seeds": true,
+ "loop_pred_pp": {
+  "fix_A": 6.0,
+  "fix_B": 3.0,
+  "fix_both": 20.0
+ },
+ "loop_top": "AxB",
+ "I_ci_excludes_0": {
+  "42": true,
+  "43": true,
+  "44": true
+ },
+ "I_ci_excludes_0_same_n": {
+  "42": true,
+  "43": true,
+  "44": true
+ },
+ "fix_both_drop_mean_pp": 22.9,
+ "acceptance": true,
+ "kill_B3_ranks_and_inside": false,
+ "kill_I_includes_0_or_drop_lt_5pp": false
+}

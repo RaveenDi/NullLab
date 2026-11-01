@@ -1,0 +1,3227 @@
+{
+ "repeat": "g5-r2",
+ "b3": {
+  "g4_freight_delay": {
+   "ans": {
+    "leak": true,
+    "A": "carrier_late_rate computed by groupby-target mean on full dataframe before train/test split, leaking test labels into train and test features",
+    "B": "train missing values filled with training median but test missing values filled with 0 instead of training median, inconsistent with claimed live imputation",
+    "predicted_drop_pp": {
+     "fix_A": 7,
+     "fix_B": 1.5,
+     "fix_both": 8
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "confidence": 0.85,
+    "reason": "Whole-data target encoding gives the model test-label information via carrier means while test-only zero imputation adds a small extra optimistic shift."
+   },
+   "raw": "{\"leak\": true, \"A\": \"carrier_late_rate computed by groupby-target mean on full dataframe before train/test split, leaking test labels into train and test features\", \"B\": \"train missing values filled with training median but test missing values filled with 0 instead of training median, inconsistent with claimed live imputation\", \"predicted_drop_pp\": {\"fix_A\": 7, \"fix_B\": 1.5, \"fix_both\": 8}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"confidence\": 0.85, \"reason\": \"Whole-data target encoding gives the model test-label information via carrier means while test-only zero imputation adds a small extra optimistic shift.\"}",
+   "prereg_sha256": "18e6a21c613e0eb851aca9d472e8825ba9b2559b594e75b43f32bbd5677f7c73"
+  },
+  "g4_pump_inspection": {
+   "ans": {
+    "leak": true,
+    "A": "prev_load uses groupby shift(-1) so it is next inspection's load, not previous inspection's load - future lookahead",
+    "B": "random inspection split with feature selection before split leaks same-pump temporal correlation and test information; should split by pump/time with selection fit on train only",
+    "predicted_drop_pp": {
+     "fix_A": 9,
+     "fix_B": 4,
+     "fix_both": 13
+    },
+    "culprit_ranking": [
+     "A",
+     "B"
+    ],
+    "confidence": 0.82,
+    "reason": "future load is contemporaneous with the next-inspection target and drives most inflation while random split adds smaller optimism."
+   },
+   "raw": "{\"leak\": true, \"A\": \"prev_load uses groupby shift(-1) so it is next inspection's load, not previous inspection's load - future lookahead\", \"B\": \"random inspection split with feature selection before split leaks same-pump temporal correlation and test information; should split by pump/time with selection fit on train only\", \"predicted_drop_pp\": {\"fix_A\": 9, \"fix_B\": 4, \"fix_both\": 13}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.82, \"reason\": \"future load is contemporaneous with the next-inspection target and drives most inflation while random split adds smaller optimism.\"}",
+   "prereg_sha256": "68ae682ef539bcbff0c2d2bf834aca76d7896d169795f1d805b474cd928b96cb"
+  },
+  "g4_crop_irrigation": {
+   "ans": {
+    "leak": true,
+    "A": "StandardScaler and PCA fit on full dataset before train-test split",
+    "B": "GridSearchCV hyperparameter selection fit on full dataset including test labels before split",
+    "predicted_drop_pp": {
+     "fix_A": 1.5,
+     "fix_B": 3.0,
+     "fix_both": 4.0
+    },
+    "culprit_ranking": [
+     "B",
+     "A"
+    ],
+    "confidence": 0.85,
+    "reason": "Both leak test data into training but label-using tuning inflates more than unsupervised scaler/PCA."
+   },
+   "raw": "{\"leak\": true, \"A\": \"StandardScaler and PCA fit on full dataset before train-test split\", \"B\": \"GridSearchCV hyperparameter selection fit on full dataset including test labels before split\", \"predicted_drop_pp\": {\"fix_A\": 1.5, \"fix_B\": 3.0, \"fix_both\": 4.0}, \"culprit_ranking\": [\"B\", \"A\"], \"confidence\": 0.85, \"reason\": \"Both leak test data into training but label-using tuning inflates more than unsupervised scaler/PCA.\"}",
+   "prereg_sha256": "4ea7bcc0a42d5ccd70d892757c339ad5cfad877028030f9fae5ef927af23319b"
+  },
+  "g4_assay_replicates": {
+   "ans": {
+    "leak": true,
+    "A": "well-level random split puts replicate wells of same compound in both train and test instead of group-by-compound split required for newly synthesised compounds",
+    "B": "missing values imputed with target-conditional means computed on full data before split, encoding label into features and leaking test statistics",
+    "predicted_drop_pp": {
+     "fix_A": 17,
+     "fix_B": 6,
+     "fix_both": 22
+    },
+    "culprit_ranking": [
+     "A",
+     "B"
+    ],
+    "confidence": 0.85,
+    "reason": "Replicate-compound overlap lets the model recognize compounds rather than generalize, while label-based imputation adds smaller extra boost on missing entries."
+   },
+   "raw": "{\"leak\": true, \"A\": \"well-level random split puts replicate wells of same compound in both train and test instead of group-by-compound split required for newly synthesised compounds\", \"B\": \"missing values imputed with target-conditional means computed on full data before split, encoding label into features and leaking test statistics\", \"predicted_drop_pp\": {\"fix_A\": 17, \"fix_B\": 6, \"fix_both\": 22}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.85, \"reason\": \"Replicate-compound overlap lets the model recognize compounds rather than generalize, while label-based imputation adds smaller extra boost on missing entries.\"}",
+   "prereg_sha256": "620b023c397c88955f4ce2d254f17692d19d5c2295d2ae3bd18230921ce79bdd"
+  },
+  "clean_control": {
+   "ans": {
+    "leak": true,
+    "A": "random train_test_split with groups=None lets same-source/near-duplicate images appear in both train and test (group leakage)",
+    "B": "single fixed-seed 25% holdout reported without CV/averaging allows lucky-split selection inflation",
+    "predicted_drop_pp": {
+     "fix_A": 6,
+     "fix_B": 2,
+     "fix_both": 7
+    },
+    "culprit_ranking": [
+     "A",
+     "B"
+    ],
+    "confidence": 0.65,
+    "reason": "Code supports GroupShuffleSplit but claimed_eval uses groups=None so duplicates leak, with small extra optimism from single-seed reporting."
+   },
+   "raw": "{\"leak\": true, \"A\": \"random train_test_split with groups=None lets same-source/near-duplicate images appear in both train and test (group leakage)\", \"B\": \"single fixed-seed 25% holdout reported without CV/averaging allows lucky-split selection inflation\", \"predicted_drop_pp\": {\"fix_A\": 6, \"fix_B\": 2, \"fix_both\": 7}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.65, \"reason\": \"Code supports GroupShuffleSplit but claimed_eval uses groups=None so duplicates leak, with small extra optimism from single-seed reporting.\"}",
+   "prereg_sha256": "194d9c7a6b8406264654f0276fa7e4207cfd20827b0806f0b724d816315baf85"
+  },
+  "clean_group_correct": {
+   "ans": {
+    "leak": false,
+    "A": "",
+    "B": "",
+    "predicted_drop_pp": {
+     "fix_A": 0,
+     "fix_B": 0,
+     "fix_both": 0
+    },
+    "culprit_ranking": [],
+    "confidence": 0.9,
+    "reason": "The code implements a proper GroupShuffleSplit by ward and excludes the ward identifier from model inputs."
+   },
+   "raw": "{\"leak\": false, \"A\": \"\", \"B\": \"\", \"predicted_drop_pp\": {\"fix_A\": 0, \"fix_B\": 0, \"fix_both\": 0}, \"culprit_ranking\": [], \"confidence\": 0.9, \"reason\": \"The code implements a proper GroupShuffleSplit by ward and excludes the ward identifier from model inputs.\"}",
+   "prereg_sha256": "1796c65c045fecfe7fea75c21deedc139621ba03455e339702c74aed5483232f"
+  },
+  "clean_wine_correct": {
+   "ans": {
+    "leak": true,
+    "A": "High-value cutoff for color-intensity target estimated on full data including test set before split",
+    "B": "Single fixed-seed 75/25 holdout reported without stratification/CV, allowing lucky-seed inflation",
+    "predicted_drop_pp": {
+     "fix_A": 2,
+     "fix_B": 5,
+     "fix_both": 6
+    },
+    "culprit_ranking": [
+     "B"
+    ],
+    "confidence": 0.62,
+    "reason": "Target is binarized color-intensity with source removed so no feature leak, leaving only threshold-peeking and single-split variance as inflators."
+   },
+   "raw": "{\"leak\": true, \"A\": \"High-value cutoff for color-intensity target estimated on full data including test set before split\", \"B\": \"Single fixed-seed 75/25 holdout reported without stratification/CV, allowing lucky-seed inflation\", \"predicted_drop_pp\": {\"fix_A\": 2, \"fix_B\": 5, \"fix_both\": 6}, \"culprit_ranking\": [\"B\"], \"confidence\": 0.62, \"reason\": \"Target is binarized color-intensity with source removed so no feature leak, leaving only threshold-peeking and single-split variance as inflators.\"}",
+   "prereg_sha256": "6821e538eb500316ab916ba9becb6218b52b69ed1da3f99f11e4c93bef813f6f"
+  },
+  "g4_visit_history_clean": {
+   "ans": {
+    "leak": false,
+    "A": "test uses all visits per held-out patient not first-referral visit only",
+    "B": "single fixed-seed group holdout with seed selection variance",
+    "predicted_drop_pp": {
+     "fix_A": 2,
+     "fix_B": 8,
+     "fix_both": 10
+    },
+    "culprit_ranking": [
+     "B",
+     "A"
+    ],
+    "confidence": 0.65,
+    "reason": "No test-label leakage occurs but all-visit scoring and a single lucky seed overstate first-visit performance."
+   },
+   "raw": "{\"leak\": false, \"A\": \"test uses all visits per held-out patient not first-referral visit only\", \"B\": \"single fixed-seed group holdout with seed selection variance\", \"predicted_drop_pp\": {\"fix_A\": 2, \"fix_B\": 8, \"fix_both\": 10}, \"culprit_ranking\": [\"B\", \"A\"], \"confidence\": 0.65, \"reason\": \"No test-label leakage occurs but all-visit scoring and a single lucky seed overstate first-visit performance.\"}",
+   "prereg_sha256": "b85cd811b8f461ea068d274ac56380caf0593d2127d2bc64041808d41c917769"
+  }
+ },
+ "plan": {
+  "g4_freight_delay": {
+   "plan": {
+    "A": "carrier historical rate computed on full data before split leaks test labels",
+    "A_code_line": "    df[RATE] = df.groupby(CARRIER)[TARGET].transform(\"mean\")",
+    "B": "test missing values imputed with 0 instead of training median",
+    "B_code_line": "    return Xtr.fillna(med), Xte.fillna(0)  # held-out rows: a missing dwell reading counts as no dwell",
+    "edits": {
+     "A": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    train = df.iloc[tr]\n    test = df.iloc[te]\n    rate_map = train.groupby(CARRIER)[TARGET].mean()\n    global_mean = train[TARGET].mean()\n    train2 = train.copy()\n    test2 = test.copy()\n    train2[RATE] = train2[CARRIER].map(rate_map)\n    test2[RATE] = test2[CARRIER].map(rate_map).fillna(global_mean)\n    f = feats(train2)\n    Xtr, Xte = impute(train2[f], test2[f])\n    y = df[TARGET].to_numpy()\n    return y[te], fit_predict(Xtr.to_numpy(), y[tr], Xte.to_numpy(), seed)"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "impute": "def impute(Xtr, Xte):\n    med = Xtr.median()\n    return Xtr.fillna(med), Xte.fillna(med)"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 7.0,
+     "fix_B": 1.5,
+     "fix_both": 8.0
+    },
+    "culprit_ranking": [
+     "A",
+     "AxB",
+     "B"
+    ],
+    "reason": "Carrier-rate leakage fits target mean on test rows before split, directly inflating accuracy for existing carriers; test-only 0-imputation violates stated training-median rule and shifts held-out distribution but has smaller effect.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "0198695a126df1a62aaa4c5fddc5014bd0c8c37a37a3dc637cbcec2298f4c8c9"
+   },
+   "raw": "{\"A\": \"carrier historical rate computed on full data before split leaks test labels\", \"A_code_line\": \"    df[RATE] = df.groupby(CARRIER)[TARGET].transform(\\\"mean\\\")\", \"B\": \"test missing values imputed with 0 instead of training median\", \"B_code_line\": \"    return Xtr.fillna(med), Xte.fillna(0)  # held-out rows: a missing dwell reading counts as no dwell\", \"edits\": {\"A\": {\"kind\": \"fit_scope\", \"steps\": {\"claimed_eval\": \"def claimed_eval(df, seed):\\n    tr, te = split_idx(df, seed)\\n    train = df.iloc[tr]\\n    test = df.iloc[te]\\n    rate_map = train.groupby(CARRIER)[TARGET].mean()\\n    global_mean = train[TARGET].mean()\\n    train2 = train.copy()\\n    test2 = test.copy()\\n    train2[RATE] = train2[CARRIER].map(rate_map)\\n    test2[RATE] = test2[CARRIER].map(rate_map).fillna(global_mean)\\n    f = feats(train2)\\n    Xtr, Xte = impute(train2[f], test2[f])\\n    y = df[TARGET].to_numpy()\\n    return y[te], fit_predict(Xtr.to_numpy(), y[tr], Xte.to_numpy(), seed)\"}}, \"B\": {\"kind\": \"fit_scope\", \"steps\": {\"impute\": \"def impute(Xtr, Xte):\\n    med = Xtr.median()\\n    return Xtr.fillna(med), Xte.fillna(med)\"}}, \"both_overrides\": {}}, \"predicted_drop_pp\": {\"fix_A\": 7.0, \"fix_B\": 1.5, \"fix_both\": 8.0}, \"culprit_ranking\": [\"A\", \"AxB\", \"B\"], \"reason\": \"Carrier-rate leakage fits target mean on test rows before split, directly inflating accuracy for existing carriers; test-only 0-imputation violates stated training-median rule and shifts held-out distribution but has smaller effect.\"}",
+   "prereg_sha256": "9c34424b7ee081be43cada47feb120fc2c724271c2fc769502276a08bed57133"
+  },
+  "g4_pump_inspection": {
+   "plan": {
+    "A": "add_lag",
+    "A_code_line": "    df[\"prev_load\"] = df.groupby(PUMP)[LOAD].shift(-1)",
+    "B": "claimed_eval",
+    "B_code_line": "    cols = select(data, feats(data))",
+    "edits": {
+     "A": {
+      "kind": "feature",
+      "steps": {
+       "add_lag": "def add_lag(df):\n    # previous inspection's load for the same pump\n    df = df.sort_values([PUMP, ORDER]).copy()\n    df[\"prev_load\"] = df.groupby(PUMP)[LOAD].shift(1)\n    return df.dropna(subset=[\"prev_load\"]).reset_index(drop=True)"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    data = add_lag(df)\n    tr, te = split_idx(data, seed)\n    cols_all = feats(data)\n    cols = select(data.iloc[tr], cols_all)\n    X, y = data[cols].to_numpy(), data[TARGET].to_numpy()\n    return y[te], fit_predict(X[tr], y[tr], X[te], seed)"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 14.0,
+     "fix_B": 3.0,
+     "fix_both": 16.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "A uses shift(-1)=next load not previous load, giving future leakage for next-fault prediction; B fits SelectKBest on all data before split, leaking test labels into feature choice. Fixing lag removes future info (large drop), fixing selection removes small optimism.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "9727d4041c15e6f3fcfcf67017ced9045d865296d9d2540c405b4bb62833d6d4"
+   },
+   "raw": "{\"A\": \"add_lag\", \"A_code_line\": \"    df[\\\"prev_load\\\"] = df.groupby(PUMP)[LOAD].shift(-1)\", \"B\": \"claimed_eval\", \"B_code_line\": \"    cols = select(data, feats(data))\", \"edits\": {\"A\": {\"kind\": \"feature\", \"steps\": {\"add_lag\": \"def add_lag(df):\\n    # previous inspection's load for the same pump\\n    df = df.sort_values([PUMP, ORDER]).copy()\\n    df[\\\"prev_load\\\"] = df.groupby(PUMP)[LOAD].shift(1)\\n    return df.dropna(subset=[\\\"prev_load\\\"]).reset_index(drop=True)\"}}, \"B\": {\"kind\": \"fit_scope\", \"steps\": {\"claimed_eval\": \"def claimed_eval(df, seed):\\n    import numpy as np\\n    data = add_lag(df)\\n    tr, te = split_idx(data, seed)\\n    cols_all = feats(data)\\n    cols = select(data.iloc[tr], cols_all)\\n    X, y = data[cols].to_numpy(), data[TARGET].to_numpy()\\n    return y[te], fit_predict(X[tr], y[tr], X[te], seed)\"}}, \"both_overrides\": {}}, \"predicted_drop_pp\": {\"fix_A\": 14.0, \"fix_B\": 3.0, \"fix_both\": 16.0}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"A uses shift(-1)=next load not previous load, giving future leakage for next-fault prediction; B fits SelectKBest on all data before split, leaking test labels into feature choice. Fixing lag removes future info (large drop), fixing selection removes small optimism.\"}",
+   "prereg_sha256": "19903402c9a3bb4650b2f023730376fc07faf59c8c051d56b2401a8f96f6cc72"
+  },
+  "g4_crop_irrigation": {
+   "plan": {
+    "A": "scaling and PCA fitted on full data before split",
+    "A_code_line": "    Z = StandardScaler().fit_transform(df[feats(df)])",
+    "B": "grid-search hyperparameters tuned on full data before split",
+    "B_code_line": "    return grid.fit(X, y).best_params_",
+    "edits": {
+     "A": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.decomposition import PCA\n    from sklearn.ensemble import RandomForestClassifier\n    tr, te = split_idx(df, seed)\n    y = df[TARGET].to_numpy()\n    feats_list = feats(df)\n    Xfull = df[feats_list].to_numpy()\n    scaler = StandardScaler()\n    Z_tr = scaler.fit_transform(Xfull[tr])\n    Z_all = scaler.transform(Xfull)\n    pca = PCA(n_components=8, random_state=0)\n    X_tr = pca.fit_transform(Z_tr)\n    X_all = pca.transform(Z_all)\n    params = tune(X_all, y)\n    X_te = pca.transform(scaler.transform(Xfull[te]))\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return y[te], m.fit(X_tr, y[tr]).predict(X_te)"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.ensemble import RandomForestClassifier\n    X, y = prepare(df)\n    tr, te = split_idx(df, seed)\n    params = tune(X[tr], y[tr])\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return y[te], m.fit(X[tr], y[tr]).predict(X[te])"
+      }
+     },
+     "both_overrides": {
+      "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.decomposition import PCA\n    from sklearn.ensemble import RandomForestClassifier\n    tr, te = split_idx(df, seed)\n    y = df[TARGET].to_numpy()\n    feats_list = feats(df)\n    Xfull = df[feats_list].to_numpy()\n    scaler = StandardScaler()\n    Z_tr = scaler.fit_transform(Xfull[tr])\n    Z_te = scaler.transform(Xfull[te])\n    pca = PCA(n_components=8, random_state=0)\n    X_tr = pca.fit_transform(Z_tr)\n    X_te = pca.transform(Z_te)\n    params = tune(X_tr, y[tr])\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return y[te], m.fit(X_tr, y[tr]).predict(X_te)"
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 2.0,
+     "fix_B": 1.5,
+     "fix_both": 3.5
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "prepare fits scaler+PCA on test data and tune selects hyperparameters on test data; both inflate held-out accuracy vs same-farm deployment where transforms and params must come from train only",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "0e6882a60429f2848258bfede8b482c1e9939ad51d1f25ba9aa6f8ed2f22a2b8"
+   },
+   "raw": "{\"A\": \"scaling and PCA fitted on full data before split\", \"A_code_line\": \"    Z = StandardScaler().fit_transform(df[feats(df)])\", \"B\": \"grid-search hyperparameters tuned on full data before split\", \"B_code_line\": \"    return grid.fit(X, y).best_params_\", \"edits\": {\"A\": {\"kind\": \"fit_scope\", \"steps\": {\"claimed_eval\": \"def claimed_eval(df, seed):\\n    import numpy as np\\n    import pandas as pd\\n    from sklearn.preprocessing import StandardScaler\\n    from sklearn.decomposition import PCA\\n    from sklearn.ensemble import RandomForestClassifier\\n    tr, te = split_idx(df, seed)\\n    y = df[TARGET].to_numpy()\\n    feats_list = feats(df)\\n    Xfull = df[feats_list].to_numpy()\\n    scaler = StandardScaler()\\n    Z_tr = scaler.fit_transform(Xfull[tr])\\n    Z_all = scaler.transform(Xfull)\\n    pca = PCA(n_components=8, random_state=0)\\n    X_tr = pca.fit_transform(Z_tr)\\n    X_all = pca.transform(Z_all)\\n    params = tune(X_all, y)\\n    X_te = pca.transform(scaler.transform(Xfull[te]))\\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\\n    return y[te], m.fit(X_tr, y[tr]).predict(X_te)\"}}, \"B\": {\"kind\": \"fit_scope\", \"steps\": {\"claimed_eval\": \"def claimed_eval(df, seed):\\n    import numpy as np\\n    import pandas as pd\\n    from sklearn.ensemble import RandomForestClassifier\\n    X, y = prepare(df)\\n    tr, te = split_idx(df, seed)\\n    params = tune(X[tr], y[tr])\\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\\n    return y[te], m.fit(X[tr], y[tr]).predict(X[te])\"}}, \"both_overrides\": {\"claimed_eval\": \"def claimed_eval(df, seed):\\n    import numpy as np\\n    import pandas as pd\\n    from sklearn.preprocessing import StandardScaler\\n    from sklearn.decomposition import PCA\\n    from sklearn.ensemble import RandomForestClassifier\\n    tr, te = split_idx(df, seed)\\n    y = df[TARGET].to_numpy()\\n    feats_list = feats(df)\\n    Xfull = df[feats_list].to_numpy()\\n    scaler = StandardScaler()\\n    Z_tr = scaler.fit_transform(Xfull[tr])\\n    Z_te = scaler.transform(Xfull[te])\\n    pca = PCA(n_components=8, random_state=0)\\n    X_tr = pca.fit_transform(Z_tr)\\n    X_te = pca.transform(Z_te)\\n    params = tune(X_tr, y[tr])\\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\\n    return y[te], m.fit(X_tr, y[tr]).predict(X_te)\"}}, \"predicted_drop_pp\": {\"fix_A\": 2.0, \"fix_B\": 1.5, \"fix_both\": 3.5}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"prepare fits scaler+PCA on test data and tune selects hyperparameters on test data; both inflate held-out accuracy vs same-farm deployment where transforms and params must come from train only\"}",
+   "prereg_sha256": "bf6dbf930efc10f508ffdcb909db658148bbb84615ed264f6f1b219403fd3a2d"
+  },
+  "g4_assay_replicates": {
+   "plan": {
+    "A": "random well split leaks same compound into train and test instead of holding out whole compounds",
+    "A_code_line": "    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)",
+    "B": "target-grouped mean imputation leaks label and test rows into features",
+    "B_code_line": "    df[cols] = df.groupby(TARGET)[cols].transform(lambda s: s.fillna(s.mean()))",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "split_idx": "def split_idx(df, seed, test_size=0.25):\n    import numpy as np\n    from sklearn.model_selection import GroupShuffleSplit\n    groups = df[COMPOUND].to_numpy()\n    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n    tr, te = next(gss.split(np.arange(len(df)), groups=groups))\n    return tr, te"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "impute": "def impute(df):\n    import pandas as pd\n    df = df.copy()\n    cols = [c for c in df.columns if c not in (TARGET, COMPOUND)]\n    df[cols] = df[cols].fillna(df[cols].mean())\n    return df",
+       "claimed_eval": "def claimed_eval(df, seed):\n    import pandas as pd\n    tr, te = split_idx(df, seed)\n    f = feats(df)\n    train_df = df.iloc[tr].copy()\n    test_df = df.iloc[te].copy()\n    means = train_df[f].mean()\n    train_df[f] = train_df[f].fillna(means)\n    test_df[f] = test_df[f].fillna(means)\n    Xtr = train_df[f].to_numpy()\n    ytr = train_df[TARGET].to_numpy()\n    Xte = test_df[f].to_numpy()\n    yte = test_df[TARGET].to_numpy()\n    return yte, fit_predict(Xtr, ytr, Xte, seed)"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 18.0,
+     "fix_B": 6.0,
+     "fix_both": 22.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Intended use is new compounds so must hold out whole compounds; random-well split lets same compound appear both sides inflating most. Target-grouped test-inclusive imputation adds label leakage inflating less.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "ebf4242b2af32ae61ec6d8486cd19be0dcfc8bd1a5cd497aeaac4cc689b3cfd2"
+   },
+   "raw": "{\"A\": \"random well split leaks same compound into train and test instead of holding out whole compounds\", \"A_code_line\": \"    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\", \"B\": \"target-grouped mean imputation leaks label and test rows into features\", \"B_code_line\": \"    df[cols] = df.groupby(TARGET)[cols].transform(lambda s: s.fillna(s.mean()))\", \"edits\": {\"A\": {\"kind\": \"split\", \"steps\": {\"split_idx\": \"def split_idx(df, seed, test_size=0.25):\\n    import numpy as np\\n    from sklearn.model_selection import GroupShuffleSplit\\n    groups = df[COMPOUND].to_numpy()\\n    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\\n    tr, te = next(gss.split(np.arange(len(df)), groups=groups))\\n    return tr, te\"}}, \"B\": {\"kind\": \"fit_scope\", \"steps\": {\"impute\": \"def impute(df):\\n    import pandas as pd\\n    df = df.copy()\\n    cols = [c for c in df.columns if c not in (TARGET, COMPOUND)]\\n    df[cols] = df[cols].fillna(df[cols].mean())\\n    return df\", \"claimed_eval\": \"def claimed_eval(df, seed):\\n    import pandas as pd\\n    tr, te = split_idx(df, seed)\\n    f = feats(df)\\n    train_df = df.iloc[tr].copy()\\n    test_df = df.iloc[te].copy()\\n    means = train_df[f].mean()\\n    train_df[f] = train_df[f].fillna(means)\\n    test_df[f] = test_df[f].fillna(means)\\n    Xtr = train_df[f].to_numpy()\\n    ytr = train_df[TARGET].to_numpy()\\n    Xte = test_df[f].to_numpy()\\n    yte = test_df[TARGET].to_numpy()\\n    return yte, fit_predict(Xtr, ytr, Xte, seed)\"}}, \"both_overrides\": {}}, \"predicted_drop_pp\": {\"fix_A\": 18.0, \"fix_B\": 6.0, \"fix_both\": 22.0}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"Intended use is new compounds so must hold out whole compounds; random-well split lets same compound appear both sides inflating most. Target-grouped test-inclusive imputation adds label leakage inflating less.\"}",
+   "prereg_sha256": "ad217a302843122d220d76574e7a2316a5aaf9937a735def72b06a711cda02ca"
+  },
+  "clean_control": {
+   "plan": {
+    "A": "Random 25% image split without grouping duplicate images inflates accuracy vs new-image use",
+    "A_code_line": "    tr, te = split_idx(df, seed, groups)",
+    "B": "Including all 64 pixel columns includes a highly predictive central pixel; removing one pixel checks feature-leakage/dependence",
+    "B_code_line": "    return [c for c in df.columns if c != TARGET]",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed, groups=None):\n    import numpy as np\n    f = feats(df)\n    X = df[f].to_numpy()\n    grp = ['_'.join(map(str, r)) for r in X]\n    tr, te = split_idx(df, seed, grp)\n    return df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed)"
+      }
+     },
+     "B": {
+      "kind": "feature",
+      "steps": {
+       "feats": "def feats(df):\n    return [c for c in df.columns if c != TARGET and c != 'c_4a669f']"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 1.2,
+     "fix_B": 0.4,
+     "fix_both": 1.6
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Only visible inflation is train-test leakage via duplicate/near-duplicate 8x8 images under random split; scaler is already train-only so no fit_scope leak. Grouping exact-duplicate images carries most inflation, single-pixel removal is minor control.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "df72dd90388b0887b69fdb7fb02578d5e4fa7cc132bae2f871aac112635b1246"
+   },
+   "raw": "{\"A\": \"Random 25% image split without grouping duplicate images inflates accuracy vs new-image use\", \"A_code_line\": \"    tr, te = split_idx(df, seed, groups)\", \"B\": \"Including all 64 pixel columns includes a highly predictive central pixel; removing one pixel checks feature-leakage/dependence\", \"B_code_line\": \"    return [c for c in df.columns if c != TARGET]\", \"edits\": {\"A\": {\"kind\": \"split\", \"steps\": {\"claimed_eval\": \"def claimed_eval(df, seed, groups=None):\\n    import numpy as np\\n    f = feats(df)\\n    X = df[f].to_numpy()\\n    grp = ['_'.join(map(str, r)) for r in X]\\n    tr, te = split_idx(df, seed, grp)\\n    return df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed)\"}}, \"B\": {\"kind\": \"feature\", \"steps\": {\"feats\": \"def feats(df):\\n    return [c for c in df.columns if c != TARGET and c != 'c_4a669f']\"}}, \"both_overrides\": {}}, \"predicted_drop_pp\": {\"fix_A\": 1.2, \"fix_B\": 0.4, \"fix_both\": 1.6}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"Only visible inflation is train-test leakage via duplicate/near-duplicate 8x8 images under random split; scaler is already train-only so no fit_scope leak. Grouping exact-duplicate images carries most inflation, single-pixel removal is minor control.\"}",
+   "prereg_sha256": "e96ef241f245afba8bbe0c81456b300609486de3258f9473524b5d25ea48e37e"
+  },
+  "clean_group_correct": {
+   "plan": {
+    "A": "One measurement is a post-outcome proxy that would not be available at prediction time; removing it should collapse accuracy.",
+    "A_code_line": "    return [c for c in df.columns if c not in (TARGET, SITE)]",
+    "B": "Single fixed-seed GroupShuffleSplit cherry-picks easy held-out wards; group K-fold averaging removes seed/test-set selection bias.",
+    "B_code_line": "        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "feature",
+      "steps": {
+       "feats": "def feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE, \"c_c95911\")]"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed, groups=None):\n    import numpy as np\n    from sklearn.model_selection import GroupKFold\n    g = np.asarray(df[SITE]) if groups is None else np.asarray(groups)\n    f = feats(df)\n    X = df[f].to_numpy()\n    y = df[TARGET].to_numpy()\n    gkf = GroupKFold(n_splits=5)\n    preds = np.empty_like(y)\n    for tr, te in gkf.split(X, y, groups=g):\n        preds[te] = fit_predict(X[tr], y[tr], X[te], seed)\n    return y, preds"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 18.0,
+     "fix_B": 6.0,
+     "fix_both": 23.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Feature leakage carries most inflation; single-seed ward selection adds smaller optimism; combination removes both.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "affd848df4a0ab27189662ca2ff4f77ffc2907e26548d9d2f6a5d5a2bb57de9d"
+   },
+   "raw": "{\"A\": \"One measurement is a post-outcome proxy that would not be available at prediction time; removing it should collapse accuracy.\", \"A_code_line\": \"    return [c for c in df.columns if c not in (TARGET, SITE)]\", \"B\": \"Single fixed-seed GroupShuffleSplit cherry-picks easy held-out wards; group K-fold averaging removes seed/test-set selection bias.\", \"B_code_line\": \"        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\", \"edits\": {\"A\": {\"kind\": \"feature\", \"steps\": {\"feats\": \"def feats(df):\\n    return [c for c in df.columns if c not in (TARGET, SITE, \\\"c_c95911\\\")]\" }}, \"B\": {\"kind\": \"split\", \"steps\": {\"claimed_eval\": \"def claimed_eval(df, seed, groups=None):\\n    import numpy as np\\n    from sklearn.model_selection import GroupKFold\\n    g = np.asarray(df[SITE]) if groups is None else np.asarray(groups)\\n    f = feats(df)\\n    X = df[f].to_numpy()\\n    y = df[TARGET].to_numpy()\\n    gkf = GroupKFold(n_splits=5)\\n    preds = np.empty_like(y)\\n    for tr, te in gkf.split(X, y, groups=g):\\n        preds[te] = fit_predict(X[tr], y[tr], X[te], seed)\\n    return y, preds\" }}, \"both_overrides\": {}}, \"predicted_drop_pp\": {\"fix_A\": 18.0, \"fix_B\": 6.0, \"fix_both\": 23.0}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"Feature leakage carries most inflation; single-seed ward selection adds smaller optimism; combination removes both.\"}",
+   "prereg_sha256": "a0dda6ae0bafb6cac11623de2ffe92a9b853522f06c415785697c3547625d5b7"
+  },
+  "clean_wine_correct": {
+   "plan": {
+    "A": "leaky source measurement kept as feature",
+    "A_code_line": "    return [c for c in df.columns if c != TARGET]",
+    "B": "random holdout leaks batches/groups; intended use is new-batch holdout",
+    "B_code_line": "    return train_test_split(idx, test_size=test_size, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "feature",
+      "steps": {
+       "feats": "def feats(df):\n    import pandas as pd\n    return [c for c in df.columns if c not in (TARGET, \"c_55565a\")]"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "split_idx": "def split_idx(df, seed, groups=None, test_size=0.25):\n    import numpy as np\n    n = len(df)\n    k = int(n * (1 - test_size))\n    tr = np.arange(k)\n    te = np.arange(k, n)\n    return tr, te"
+      }
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 15.0,
+     "fix_B": 10.0,
+     "fix_both": 25.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Source chemistry column for high-value flag remains in 12 features, inflating random-split accuracy; random split also mixes batches. Removing source drops most; sequential holdout drops independently.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "712871c832d5a2896c856110330f0a54169716815b8548c91be7a6de7d9c40a9"
+   },
+   "raw": "{\"A\": \"leaky source measurement kept as feature\", \"A_code_line\": \"    return [c for c in df.columns if c != TARGET]\", \"B\": \"random holdout leaks batches/groups; intended use is new-batch holdout\", \"B_code_line\": \"    return train_test_split(idx, test_size=test_size, random_state=seed)\", \"edits\": {\"A\": {\"kind\": \"feature\", \"steps\": {\"feats\": \"def feats(df):\\n    import pandas as pd\\n    return [c for c in df.columns if c not in (TARGET, \\\"c_55565a\\\")]\" }}, \"B\": {\"kind\": \"split\", \"steps\": {\"split_idx\": \"def split_idx(df, seed, groups=None, test_size=0.25):\\n    import numpy as np\\n    n = len(df)\\n    k = int(n * (1 - test_size))\\n    tr = np.arange(k)\\n    te = np.arange(k, n)\\n    return tr, te\" }}}, \"predicted_drop_pp\": {\"fix_A\": 15.0, \"fix_B\": 10.0, \"fix_both\": 25.0}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"Source chemistry column for high-value flag remains in 12 features, inflating random-split accuracy; random split also mixes batches. Removing source drops most; sequential holdout drops independently.\"}",
+   "prereg_sha256": "008fe44520a193dcd96b3a5561488b8c62106e1076f444ff09dba234b1249a3d"
+  },
+  "g4_visit_history_clean": {
+   "plan": {
+    "A": "add_history uses row-wise KFold for out-of-fold patient rate, leaking same-patient labels across folds",
+    "A_code_line": "    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):",
+    "B": "single fixed-seed group holdout reports a lucky split, not new-patient performance",
+    "B_code_line": "    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed).split(df, groups=df[PATIENT]))",
+    "edits": {
+     "A": {
+      "kind": "fit_scope",
+      "steps": {
+       "add_history": "def add_history(trd, ted, seed):\n    from sklearn.model_selection import GroupKFold\n    prior = trd[TARGET].mean()\n    trd[HIST] = prior\n    for a, b in GroupKFold(5).split(trd, groups=trd[PATIENT]):\n        m = trd.iloc[a].groupby(PATIENT)[TARGET].mean()\n        trd.loc[trd.index[b], HIST] = trd.iloc[b][PATIENT].map(m).fillna(prior).to_numpy()\n    ted[HIST] = ted[PATIENT].map(trd.groupby(PATIENT)[TARGET].mean()).fillna(prior)\n    return trd, ted"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "split_idx": "def split_idx(df, seed, test_size=0.25):\n    from sklearn.model_selection import GroupShuffleSplit\n    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed + 99999).split(df, groups=df[PATIENT]))"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 0.8,
+     "fix_B": 5.5,
+     "fix_both": 6.0
+    },
+    "culprit_ranking": [
+     "B",
+     "A",
+     "AxB"
+    ],
+    "reason": "Test HIST is constant prior so train OOF patient leakage mainly mis-calibrates training; reported 61% is inflated mainly by single lucky group split variance vs true new-patient accuracy.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "1926e487080e0deb3425d6daaa2132379d15e7cd549a7d4639e00749ec296977"
+   },
+   "raw": "{\"A\": \"add_history uses row-wise KFold for out-of-fold patient rate, leaking same-patient labels across folds\", \"A_code_line\": \"    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):\", \"B\": \"single fixed-seed group holdout reports a lucky split, not new-patient performance\", \"B_code_line\": \"    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed).split(df, groups=df[PATIENT]))\", \"edits\": {\"A\": {\"kind\": \"fit_scope\", \"steps\": {\"add_history\": \"def add_history(trd, ted, seed):\\n    from sklearn.model_selection import GroupKFold\\n    prior = trd[TARGET].mean()\\n    trd[HIST] = prior\\n    for a, b in GroupKFold(5).split(trd, groups=trd[PATIENT]):\\n        m = trd.iloc[a].groupby(PATIENT)[TARGET].mean()\\n        trd.loc[trd.index[b], HIST] = trd.iloc[b][PATIENT].map(m).fillna(prior).to_numpy()\\n    ted[HIST] = ted[PATIENT].map(trd.groupby(PATIENT)[TARGET].mean()).fillna(prior)\\n    return trd, ted\"}}, \"B\": {\"kind\": \"split\", \"steps\": {\"split_idx\": \"def split_idx(df, seed, test_size=0.25):\\n    from sklearn.model_selection import GroupShuffleSplit\\n    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed + 99999).split(df, groups=df[PATIENT]))\"}}, \"both_overrides\": {}}, \"predicted_drop_pp\": {\"fix_A\": 0.8, \"fix_B\": 5.5, \"fix_both\": 6.0}, \"culprit_ranking\": [\"B\", \"A\", \"AxB\"], \"reason\": \"Test HIST is constant prior so train OOF patient leakage mainly mis-calibrates training; reported 61% is inflated mainly by single lucky group split variance vs true new-patient accuracy.\"}",
+   "prereg_sha256": "4f71de43ae5e2a32a7eb601e92bdca0236f04aa7644c1f56963f8f43fa3fce2f"
+  }
+ },
+ "loop": {
+  "g4_freight_delay": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.6429548563611491,
+       "fix_A": 0.5827633378932968,
+       "fix_B": 0.8030095759233926,
+       "fix_both": 0.7099863201094391
+      },
+      "n": {
+       "orig": 731,
+       "fix_A": 731,
+       "fix_B": 731,
+       "fix_both": 731
+      },
+      "drop": {
+       "fix_A": 0.06019151846785231,
+       "fix_B": -0.16005471956224349,
+       "fix_both": -0.06703146374828994
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.009575923392612925,
+        0.10807113543091662
+       ],
+       "fix_B": [
+        -0.20519835841313272,
+        -0.11764705882352944
+       ],
+       "fix_both": [
+        -0.11627906976744184,
+        -0.019151846785225746
+       ]
+      },
+      "I": 0.03283173734610123,
+      "I_ci": [
+       -0.03146374829001375,
+       0.09849521203830358
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.6429548563611491,
+       "fix_A": 0.5827633378932968,
+       "fix_B": 0.8030095759233926,
+       "fix_both": 0.7099863201094391
+      },
+      "n": {
+       "orig": 731,
+       "fix_A": 731,
+       "fix_B": 731,
+       "fix_both": 731
+      },
+      "drop": {
+       "fix_A": 0.06019151846785231,
+       "fix_B": -0.16005471956224349,
+       "fix_both": -0.06703146374828994
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.009575923392612817,
+        0.1094391244870041
+       ],
+       "fix_B": [
+        -0.20249658002735982,
+        -0.11624487004103969
+       ],
+       "fix_both": [
+        -0.11354309165526677,
+        -0.017783857729138153
+       ]
+      },
+      "I": 0.03283173734610123,
+      "I_ci": [
+       -0.03012995896032834,
+       0.09989740082079344
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.6634746922024624,
+       "fix_A": 0.5759233926128591,
+       "fix_B": 0.8372093023255814,
+       "fix_both": 0.707250341997264
+      },
+      "n": {
+       "orig": 731,
+       "fix_A": 731,
+       "fix_B": 731,
+       "fix_both": 731
+      },
+      "drop": {
+       "fix_A": 0.08755129958960328,
+       "fix_B": -0.17373461012311908,
+       "fix_both": -0.04377564979480164
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.0369357045143639,
+        0.13683310533515733
+       ],
+       "fix_B": [
+        -0.2175444596443229,
+        -0.12859097127222985
+       ],
+       "fix_both": [
+        -0.09035567715458273,
+        0.0041381668946648235
+       ]
+      },
+      "I": 0.04240766073871416,
+      "I_ci": [
+       -0.024623803009575788,
+       0.11084131326949374
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.6634746922024624,
+       "fix_A": 0.5759233926128591,
+       "fix_B": 0.8372093023255814,
+       "fix_both": 0.707250341997264
+      },
+      "n": {
+       "orig": 731,
+       "fix_A": 731,
+       "fix_B": 731,
+       "fix_both": 731
+      },
+      "drop": {
+       "fix_A": 0.08755129958960328,
+       "fix_B": -0.17373461012311908,
+       "fix_both": -0.04377564979480164
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.03967168262653897,
+        0.13816689466484267
+       ],
+       "fix_B": [
+        -0.2162106703146375,
+        -0.12859097127222985
+       ],
+       "fix_both": [
+        -0.09165526675786595,
+        0.005471956224350261
+       ]
+      },
+      "I": 0.04240766073871416,
+      "I_ci": [
+       -0.028761969904240858,
+       0.10807113543091651
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.6607387140902873,
+       "fix_A": 0.5964432284541724,
+       "fix_B": 0.8303693570451436,
+       "fix_both": 0.7154582763337893
+      },
+      "n": {
+       "orig": 731,
+       "fix_A": 731,
+       "fix_B": 731,
+       "fix_both": 731
+      },
+      "drop": {
+       "fix_A": 0.06429548563611487,
+       "fix_B": -0.1696306429548563,
+       "fix_both": -0.05471956224350205
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.015047879616963078,
+        0.1094391244870041
+       ],
+       "fix_B": [
+        -0.21340629274965806,
+        -0.12585499316005466
+       ],
+       "fix_both": [
+        -0.09849521203830369,
+        -0.00547195622435015
+       ]
+      },
+      "I": 0.050615595075239384,
+      "I_ci": [
+       -0.015047879616963078,
+       0.11494528043775652
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.6607387140902873,
+       "fix_A": 0.5964432284541724,
+       "fix_B": 0.8303693570451436,
+       "fix_both": 0.7154582763337893
+      },
+      "n": {
+       "orig": 731,
+       "fix_A": 731,
+       "fix_B": 731,
+       "fix_both": 731
+      },
+      "drop": {
+       "fix_A": 0.06429548563611487,
+       "fix_B": -0.1696306429548563,
+       "fix_both": -0.05471956224350205
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.01911764705882345,
+        0.11217510259917918
+       ],
+       "fix_B": [
+        -0.21340629274965806,
+        -0.1285567715458277
+       ],
+       "fix_both": [
+        -0.10533515731874143,
+        -0.006805745554035584
+       ]
+      },
+      "I": 0.050615595075239384,
+      "I_ci": [
+       -0.013679890560875489,
+       0.11491108071135425
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "carrier historical rate computed on full data before split leaks test labels",
+    "A_code_line": "    df[RATE] = df.groupby(CARRIER)[TARGET].transform(\"mean\")",
+    "B": "test missing values imputed with 0 instead of training median",
+    "B_code_line": "    return Xtr.fillna(med), Xte.fillna(0)  # held-out rows: a missing dwell reading counts as no dwell",
+    "edits": {
+     "A": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    train = df.iloc[tr]\n    test = df.iloc[te]\n    rate_map = train.groupby(CARRIER)[TARGET].mean()\n    global_mean = train[TARGET].mean()\n    train2 = train.copy()\n    test2 = test.copy()\n    train2[RATE] = train2[CARRIER].map(rate_map)\n    test2[RATE] = test2[CARRIER].map(rate_map).fillna(global_mean)\n    f = feats(train2)\n    Xtr, Xte = impute(train2[f], test2[f])\n    y = df[TARGET].to_numpy()\n    return y[te], fit_predict(Xtr.to_numpy(), y[tr], Xte.to_numpy(), seed)"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "impute": "def impute(Xtr, Xte):\n    med = Xtr.median()\n    return Xtr.fillna(med), Xte.fillna(med)"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 7.0,
+     "fix_B": 1.5,
+     "fix_both": 8.0
+    },
+    "culprit_ranking": [
+     "A",
+     "AxB",
+     "B"
+    ],
+    "reason": "Carrier-rate leakage fits target mean on test rows before split, directly inflating accuracy for existing carriers; test-only 0-imputation violates stated training-median rule and shifts held-out distribution but has smaller effect.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "0198695a126df1a62aaa4c5fddc5014bd0c8c37a37a3dc637cbcec2298f4c8c9"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:39:26Z",
+     "prereg_sha256": "0198695a126df1a62aaa4c5fddc5014bd0c8c37a37a3dc637cbcec2298f4c8c9"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "impute"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "claimed_eval",
+        "impute"
+       ],
+       "kinds": [
+        "fit_scope",
+        "fit_scope"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) claimed_eval changed (fit_scope)",
+    "fix_B": "only step(s) impute changed (fit_scope)",
+    "fix_both": "only step(s) claimed_eval, impute changed (fit_scope/fit_scope)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_37aed2'\nCARRIER = 'c_318a2b'\nRATE = 'carrier_late_rate'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_carrier_rate(df):\n    df = df.copy()\n    df[RATE] = df.groupby(CARRIER)[TARGET].transform('mean')\n    return df\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, CARRIER)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=3, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef impute(Xtr, Xte):\n    med = Xtr.median()\n    return (Xtr.fillna(med), Xte.fillna(0))\n\ndef claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    train = df.iloc[tr]\n    test = df.iloc[te]\n    rate_map = train.groupby(CARRIER)[TARGET].mean()\n    global_mean = train[TARGET].mean()\n    train2 = train.copy()\n    test2 = test.copy()\n    train2[RATE] = train2[CARRIER].map(rate_map)\n    test2[RATE] = test2[CARRIER].map(rate_map).fillna(global_mean)\n    f = feats(train2)\n    Xtr, Xte = impute(train2[f], test2[f])\n    y = df[TARGET].to_numpy()\n    return (y[te], fit_predict(Xtr.to_numpy(), y[tr], Xte.to_numpy(), seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_37aed2'\nCARRIER = 'c_318a2b'\nRATE = 'carrier_late_rate'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_carrier_rate(df):\n    df = df.copy()\n    df[RATE] = df.groupby(CARRIER)[TARGET].transform('mean')\n    return df\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, CARRIER)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=3, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef impute(Xtr, Xte):\n    med = Xtr.median()\n    return (Xtr.fillna(med), Xte.fillna(med))\n\ndef claimed_eval(df, seed):\n    data = add_carrier_rate(df)\n    tr, te = split_idx(data, seed)\n    f = feats(data)\n    Xtr, Xte = impute(data.iloc[tr][f], data.iloc[te][f])\n    y = data[TARGET].to_numpy()\n    return (y[te], fit_predict(Xtr.to_numpy(), y[tr], Xte.to_numpy(), seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_37aed2'\nCARRIER = 'c_318a2b'\nRATE = 'carrier_late_rate'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_carrier_rate(df):\n    df = df.copy()\n    df[RATE] = df.groupby(CARRIER)[TARGET].transform('mean')\n    return df\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, CARRIER)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=3, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef impute(Xtr, Xte):\n    med = Xtr.median()\n    return (Xtr.fillna(med), Xte.fillna(med))\n\ndef claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    train = df.iloc[tr]\n    test = df.iloc[te]\n    rate_map = train.groupby(CARRIER)[TARGET].mean()\n    global_mean = train[TARGET].mean()\n    train2 = train.copy()\n    test2 = test.copy()\n    train2[RATE] = train2[CARRIER].map(rate_map)\n    test2[RATE] = test2[CARRIER].map(rate_map).fillna(global_mean)\n    f = feats(train2)\n    Xtr, Xte = impute(train2[f], test2[f])\n    y = df[TARGET].to_numpy()\n    return (y[te], fit_predict(Xtr.to_numpy(), y[tr], Xte.to_numpy(), seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "g4_pump_inspection": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.8866666666666667,
+       "fix_A": 0.7466666666666667,
+       "fix_B": 0.8866666666666667,
+       "fix_both": 0.7466666666666667
+      },
+      "n": {
+       "orig": 750,
+       "fix_A": 750,
+       "fix_B": 750,
+       "fix_both": 750
+      },
+      "drop": {
+       "fix_A": 0.14,
+       "fix_B": 0.0,
+       "fix_both": 0.14
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.10133333333333339,
+        0.18003333333333335
+       ],
+       "fix_B": [
+        -0.03199999999999992,
+        0.03200000000000003
+       ],
+       "fix_both": [
+        0.10133333333333339,
+        0.17733333333333334
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.052033333333333376,
+       0.05600000000000005
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.8866666666666667,
+       "fix_A": 0.7466666666666667,
+       "fix_B": 0.8866666666666667,
+       "fix_both": 0.7466666666666667
+      },
+      "n": {
+       "orig": 750,
+       "fix_A": 750,
+       "fix_B": 750,
+       "fix_both": 750
+      },
+      "drop": {
+       "fix_A": 0.14,
+       "fix_B": 0.0,
+       "fix_both": 0.14
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.09866666666666668,
+        0.17733333333333334
+       ],
+       "fix_B": [
+        -0.03200000000000003,
+        0.03066666666666673
+       ],
+       "fix_both": [
+        0.09999999999999998,
+        0.17866666666666664
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.05466666666666675,
+       0.05466666666666664
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.8893333333333333,
+       "fix_A": 0.704,
+       "fix_B": 0.8893333333333333,
+       "fix_both": 0.704
+      },
+      "n": {
+       "orig": 750,
+       "fix_A": 750,
+       "fix_B": 750,
+       "fix_both": 750
+      },
+      "drop": {
+       "fix_A": 0.18533333333333335,
+       "fix_B": 0.0,
+       "fix_both": 0.18533333333333335
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.14666666666666672,
+        0.22399999999999998
+       ],
+       "fix_B": [
+        -0.03066666666666662,
+        0.03066666666666662
+       ],
+       "fix_both": [
+        0.14400000000000002,
+        0.2240333333333334
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.05603333333333338,
+       0.05333333333333323
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.8893333333333333,
+       "fix_A": 0.704,
+       "fix_B": 0.8893333333333333,
+       "fix_both": 0.704
+      },
+      "n": {
+       "orig": 750,
+       "fix_A": 750,
+       "fix_B": 750,
+       "fix_both": 750
+      },
+      "drop": {
+       "fix_A": 0.18533333333333335,
+       "fix_B": 0.0,
+       "fix_both": 0.18533333333333335
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.14800000000000002,
+        0.22533333333333327
+       ],
+       "fix_B": [
+        -0.03199999999999992,
+        0.029366666666666624
+       ],
+       "fix_both": [
+        0.14533333333333343,
+        0.22533333333333339
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.05736666666666657,
+       0.053366666666666646
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.8893333333333333,
+       "fix_A": 0.736,
+       "fix_B": 0.8893333333333333,
+       "fix_both": 0.736
+      },
+      "n": {
+       "orig": 750,
+       "fix_A": 750,
+       "fix_B": 750,
+       "fix_both": 750
+      },
+      "drop": {
+       "fix_A": 0.15333333333333332,
+       "fix_B": 0.0,
+       "fix_both": 0.15333333333333332
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.1146666666666667,
+        0.19333333333333336
+       ],
+       "fix_B": [
+        -0.03070000000000006,
+        0.029366666666666624
+       ],
+       "fix_both": [
+        0.11199999999999999,
+        0.18933333333333335
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.05470000000000008,
+       0.05599999999999994
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.8893333333333333,
+       "fix_A": 0.736,
+       "fix_B": 0.8893333333333333,
+       "fix_both": 0.736
+      },
+      "n": {
+       "orig": 750,
+       "fix_A": 750,
+       "fix_B": 750,
+       "fix_both": 750
+      },
+      "drop": {
+       "fix_A": 0.15333333333333332,
+       "fix_B": 0.0,
+       "fix_both": 0.15333333333333332
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.1133333333333334,
+        0.19333333333333336
+       ],
+       "fix_B": [
+        -0.03066666666666662,
+        0.03200000000000003
+       ],
+       "fix_both": [
+        0.11463333333333325,
+        0.19599999999999995
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.05733333333333335,
+       0.058666666666666645
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "add_lag",
+    "A_code_line": "    df[\"prev_load\"] = df.groupby(PUMP)[LOAD].shift(-1)",
+    "B": "claimed_eval",
+    "B_code_line": "    cols = select(data, feats(data))",
+    "edits": {
+     "A": {
+      "kind": "feature",
+      "steps": {
+       "add_lag": "def add_lag(df):\n    # previous inspection's load for the same pump\n    df = df.sort_values([PUMP, ORDER]).copy()\n    df[\"prev_load\"] = df.groupby(PUMP)[LOAD].shift(1)\n    return df.dropna(subset=[\"prev_load\"]).reset_index(drop=True)"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    data = add_lag(df)\n    tr, te = split_idx(data, seed)\n    cols_all = feats(data)\n    cols = select(data.iloc[tr], cols_all)\n    X, y = data[cols].to_numpy(), data[TARGET].to_numpy()\n    return y[te], fit_predict(X[tr], y[tr], X[te], seed)"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 14.0,
+     "fix_B": 3.0,
+     "fix_both": 16.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "A uses shift(-1)=next load not previous load, giving future leakage for next-fault prediction; B fits SelectKBest on all data before split, leaking test labels into feature choice. Fixing lag removes future info (large drop), fixing selection removes small optimism.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "9727d4041c15e6f3fcfcf67017ced9045d865296d9d2540c405b4bb62833d6d4"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:39:36Z",
+     "prereg_sha256": "9727d4041c15e6f3fcfcf67017ced9045d865296d9d2540c405b4bb62833d6d4"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "add_lag"
+       ],
+       "kinds": [
+        "feature"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "add_lag",
+        "claimed_eval"
+       ],
+       "kinds": [
+        "feature",
+        "fit_scope"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) add_lag changed (feature)",
+    "fix_B": "only step(s) claimed_eval changed (fit_scope)",
+    "fix_both": "only step(s) add_lag, claimed_eval changed (feature/fit_scope)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.feature_selection import SelectKBest, f_classif\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_7564a7'\nPUMP = 'c_24a94d'\nORDER = 'c_f25755'\nLOAD = 'c_bb1e39'\nK = 6\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_lag(df):\n    df = df.sort_values([PUMP, ORDER]).copy()\n    df['prev_load'] = df.groupby(PUMP)[LOAD].shift(1)\n    return df.dropna(subset=['prev_load']).reset_index(drop=True)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, PUMP, ORDER)]\n\ndef select(df, cols):\n    sel = SelectKBest(f_classif, k=K).fit(df[cols], df[TARGET])\n    return [c for c, keep in zip(cols, sel.get_support()) if keep]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=2, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    data = add_lag(df)\n    cols = select(data, feats(data))\n    tr, te = split_idx(data, seed)\n    X, y = (data[cols].to_numpy(), data[TARGET].to_numpy())\n    return (y[te], fit_predict(X[tr], y[tr], X[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.feature_selection import SelectKBest, f_classif\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_7564a7'\nPUMP = 'c_24a94d'\nORDER = 'c_f25755'\nLOAD = 'c_bb1e39'\nK = 6\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_lag(df):\n    df = df.sort_values([PUMP, ORDER]).copy()\n    df['prev_load'] = df.groupby(PUMP)[LOAD].shift(-1)\n    return df.dropna(subset=['prev_load']).reset_index(drop=True)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, PUMP, ORDER)]\n\ndef select(df, cols):\n    sel = SelectKBest(f_classif, k=K).fit(df[cols], df[TARGET])\n    return [c for c, keep in zip(cols, sel.get_support()) if keep]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=2, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    import numpy as np\n    data = add_lag(df)\n    tr, te = split_idx(data, seed)\n    cols_all = feats(data)\n    cols = select(data.iloc[tr], cols_all)\n    X, y = (data[cols].to_numpy(), data[TARGET].to_numpy())\n    return (y[te], fit_predict(X[tr], y[tr], X[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.feature_selection import SelectKBest, f_classif\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_7564a7'\nPUMP = 'c_24a94d'\nORDER = 'c_f25755'\nLOAD = 'c_bb1e39'\nK = 6\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_lag(df):\n    df = df.sort_values([PUMP, ORDER]).copy()\n    df['prev_load'] = df.groupby(PUMP)[LOAD].shift(1)\n    return df.dropna(subset=['prev_load']).reset_index(drop=True)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, PUMP, ORDER)]\n\ndef select(df, cols):\n    sel = SelectKBest(f_classif, k=K).fit(df[cols], df[TARGET])\n    return [c for c, keep in zip(cols, sel.get_support()) if keep]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=2, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    import numpy as np\n    data = add_lag(df)\n    tr, te = split_idx(data, seed)\n    cols_all = feats(data)\n    cols = select(data.iloc[tr], cols_all)\n    X, y = (data[cols].to_numpy(), data[TARGET].to_numpy())\n    return (y[te], fit_predict(X[tr], y[tr], X[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "g4_crop_irrigation": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.67625,
+       "fix_A": 0.68375,
+       "fix_B": 0.67625,
+       "fix_both": 0.69375
+      },
+      "n": {
+       "orig": 800,
+       "fix_A": 800,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": -0.007499999999999951,
+       "fix_B": 0.0,
+       "fix_both": -0.01749999999999996
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.053749999999999964,
+        0.03749999999999998
+       ],
+       "fix_B": [
+        -0.045031250000000037,
+        0.04253124999999995
+       ],
+       "fix_both": [
+        -0.0625,
+        0.03125
+       ]
+      },
+      "I": -0.010000000000000009,
+      "I_ci": [
+       -0.07128124999999992,
+       0.05131249999999996
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.67625,
+       "fix_A": 0.68375,
+       "fix_B": 0.67625,
+       "fix_both": 0.69375
+      },
+      "n": {
+       "orig": 800,
+       "fix_A": 800,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": -0.007499999999999951,
+       "fix_B": 0.0,
+       "fix_both": -0.01749999999999996
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.05378125000000007,
+        0.037531249999999954
+       ],
+       "fix_B": [
+        -0.050000000000000044,
+        0.04128124999999998
+       ],
+       "fix_both": [
+        -0.06874999999999998,
+        0.026249999999999996
+       ]
+      },
+      "I": -0.010000000000000009,
+      "I_ci": [
+       -0.07374999999999998,
+       0.05503125000000002
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.68,
+       "fix_A": 0.67625,
+       "fix_B": 0.67375,
+       "fix_both": 0.67625
+      },
+      "n": {
+       "orig": 800,
+       "fix_A": 800,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": 0.003750000000000031,
+       "fix_B": 0.006250000000000089,
+       "fix_both": 0.003750000000000031
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.04125000000000001,
+        0.04878125000000004
+       ],
+       "fix_B": [
+        -0.03875000000000006,
+        0.05124999999999991
+       ],
+       "fix_both": [
+        -0.040000000000000036,
+        0.05125000000000002
+       ]
+      },
+      "I": -0.006250000000000089,
+      "I_ci": [
+       -0.06625000000000003,
+       0.057499999999999996
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.68,
+       "fix_A": 0.67625,
+       "fix_B": 0.67375,
+       "fix_both": 0.67625
+      },
+      "n": {
+       "orig": 800,
+       "fix_A": 800,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": 0.003750000000000031,
+       "fix_B": 0.006250000000000089,
+       "fix_both": 0.003750000000000031
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.043749999999999956,
+        0.04749999999999999
+       ],
+       "fix_B": [
+        -0.039999999999999925,
+        0.050000000000000044
+       ],
+       "fix_both": [
+        -0.04625000000000001,
+        0.04628124999999998
+       ]
+      },
+      "I": -0.006250000000000089,
+      "I_ci": [
+       -0.06624999999999992,
+       0.05999999999999994
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.69875,
+       "fix_A": 0.70375,
+       "fix_B": 0.69875,
+       "fix_both": 0.705
+      },
+      "n": {
+       "orig": 800,
+       "fix_A": 800,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": -0.0050000000000000044,
+       "fix_B": 0.0,
+       "fix_both": -0.006249999999999978
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.05124999999999991,
+        0.04125000000000001
+       ],
+       "fix_B": [
+        -0.039999999999999925,
+        0.04749999999999999
+       ],
+       "fix_both": [
+        -0.05124999999999991,
+        0.03749999999999998
+       ]
+      },
+      "I": -0.0012499999999999734,
+      "I_ci": [
+       -0.06378125000000008,
+       0.06003125000000002
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.69875,
+       "fix_A": 0.70375,
+       "fix_B": 0.69875,
+       "fix_both": 0.705
+      },
+      "n": {
+       "orig": 800,
+       "fix_A": 800,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": -0.0050000000000000044,
+       "fix_B": 0.0,
+       "fix_both": -0.006249999999999978
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.04999999999999993,
+        0.040000000000000036
+       ],
+       "fix_B": [
+        -0.045031250000000037,
+        0.043781249999999924
+       ],
+       "fix_both": [
+        -0.05003125000000004,
+        0.03628124999999997
+       ]
+      },
+      "I": -0.0012499999999999734,
+      "I_ci": [
+       -0.06128125000000002,
+       0.06000000000000005
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "scaling and PCA fitted on full data before split",
+    "A_code_line": "    Z = StandardScaler().fit_transform(df[feats(df)])",
+    "B": "grid-search hyperparameters tuned on full data before split",
+    "B_code_line": "    return grid.fit(X, y).best_params_",
+    "edits": {
+     "A": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.decomposition import PCA\n    from sklearn.ensemble import RandomForestClassifier\n    tr, te = split_idx(df, seed)\n    y = df[TARGET].to_numpy()\n    feats_list = feats(df)\n    Xfull = df[feats_list].to_numpy()\n    scaler = StandardScaler()\n    Z_tr = scaler.fit_transform(Xfull[tr])\n    Z_all = scaler.transform(Xfull)\n    pca = PCA(n_components=8, random_state=0)\n    X_tr = pca.fit_transform(Z_tr)\n    X_all = pca.transform(Z_all)\n    params = tune(X_all, y)\n    X_te = pca.transform(scaler.transform(Xfull[te]))\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return y[te], m.fit(X_tr, y[tr]).predict(X_te)"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.ensemble import RandomForestClassifier\n    X, y = prepare(df)\n    tr, te = split_idx(df, seed)\n    params = tune(X[tr], y[tr])\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return y[te], m.fit(X[tr], y[tr]).predict(X[te])"
+      }
+     },
+     "both_overrides": {
+      "claimed_eval": "def claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.decomposition import PCA\n    from sklearn.ensemble import RandomForestClassifier\n    tr, te = split_idx(df, seed)\n    y = df[TARGET].to_numpy()\n    feats_list = feats(df)\n    Xfull = df[feats_list].to_numpy()\n    scaler = StandardScaler()\n    Z_tr = scaler.fit_transform(Xfull[tr])\n    Z_te = scaler.transform(Xfull[te])\n    pca = PCA(n_components=8, random_state=0)\n    X_tr = pca.fit_transform(Z_tr)\n    X_te = pca.transform(Z_te)\n    params = tune(X_tr, y[tr])\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return y[te], m.fit(X_tr, y[tr]).predict(X_te)"
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 2.0,
+     "fix_B": 1.5,
+     "fix_both": 3.5
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "prepare fits scaler+PCA on test data and tune selects hyperparameters on test data; both inflate held-out accuracy vs same-farm deployment where transforms and params must come from train only",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "0e6882a60429f2848258bfede8b482c1e9939ad51d1f25ba9aa6f8ed2f22a2b8"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:39:48Z",
+     "prereg_sha256": "0e6882a60429f2848258bfede8b482c1e9939ad51d1f25ba9aa6f8ed2f22a2b8"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "fit_scope",
+        "fit_scope"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) claimed_eval changed (fit_scope)",
+    "fix_B": "only step(s) claimed_eval changed (fit_scope)",
+    "fix_both": "only step(s) claimed_eval changed (fit_scope/fit_scope)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_4efd62'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef prepare(df):\n    Z = StandardScaler().fit_transform(df[feats(df)])\n    return (PCA(n_components=8, random_state=0).fit_transform(Z), df[TARGET].to_numpy())\n\ndef tune(X, y):\n    grid = GridSearchCV(RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=1), {'max_depth': [8, None], 'min_samples_leaf': [1, 5]}, cv=3, refit=False)\n    return grid.fit(X, y).best_params_\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.decomposition import PCA\n    from sklearn.ensemble import RandomForestClassifier\n    tr, te = split_idx(df, seed)\n    y = df[TARGET].to_numpy()\n    feats_list = feats(df)\n    Xfull = df[feats_list].to_numpy()\n    scaler = StandardScaler()\n    Z_tr = scaler.fit_transform(Xfull[tr])\n    Z_all = scaler.transform(Xfull)\n    pca = PCA(n_components=8, random_state=0)\n    X_tr = pca.fit_transform(Z_tr)\n    X_all = pca.transform(Z_all)\n    params = tune(X_all, y)\n    X_te = pca.transform(scaler.transform(Xfull[te]))\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return (y[te], m.fit(X_tr, y[tr]).predict(X_te))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_4efd62'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef prepare(df):\n    Z = StandardScaler().fit_transform(df[feats(df)])\n    return (PCA(n_components=8, random_state=0).fit_transform(Z), df[TARGET].to_numpy())\n\ndef tune(X, y):\n    grid = GridSearchCV(RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=1), {'max_depth': [8, None], 'min_samples_leaf': [1, 5]}, cv=3, refit=False)\n    return grid.fit(X, y).best_params_\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.ensemble import RandomForestClassifier\n    X, y = prepare(df)\n    tr, te = split_idx(df, seed)\n    params = tune(X[tr], y[tr])\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return (y[te], m.fit(X[tr], y[tr]).predict(X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GridSearchCV\nfrom sklearn.preprocessing import StandardScaler\nfrom sklearn.decomposition import PCA\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_4efd62'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef prepare(df):\n    Z = StandardScaler().fit_transform(df[feats(df)])\n    return (PCA(n_components=8, random_state=0).fit_transform(Z), df[TARGET].to_numpy())\n\ndef tune(X, y):\n    grid = GridSearchCV(RandomForestClassifier(n_estimators=100, random_state=0, n_jobs=1), {'max_depth': [8, None], 'min_samples_leaf': [1, 5]}, cv=3, refit=False)\n    return grid.fit(X, y).best_params_\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    import numpy as np\n    import pandas as pd\n    from sklearn.preprocessing import StandardScaler\n    from sklearn.decomposition import PCA\n    from sklearn.ensemble import RandomForestClassifier\n    tr, te = split_idx(df, seed)\n    y = df[TARGET].to_numpy()\n    feats_list = feats(df)\n    Xfull = df[feats_list].to_numpy()\n    scaler = StandardScaler()\n    Z_tr = scaler.fit_transform(Xfull[tr])\n    Z_te = scaler.transform(Xfull[te])\n    pca = PCA(n_components=8, random_state=0)\n    X_tr = pca.fit_transform(Z_tr)\n    X_te = pca.transform(Z_te)\n    params = tune(X_tr, y[tr])\n    m = RandomForestClassifier(n_estimators=100, random_state=seed, n_jobs=1, **params)\n    return (y[te], m.fit(X_tr, y[tr]).predict(X_te))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "g4_assay_replicates": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.9161904761904762,
+       "fix_A": 0.819047619047619,
+       "fix_B": 0.8647619047619047,
+       "fix_both": 0.6628571428571428
+      },
+      "n": {
+       "orig": 525,
+       "fix_A": 525,
+       "fix_B": 525,
+       "fix_both": 525
+      },
+      "drop": {
+       "fix_A": 0.0971428571428572,
+       "fix_B": 0.05142857142857149,
+       "fix_both": 0.2533333333333334
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.0552380952380952,
+        0.13528571428571426
+       ],
+       "fix_B": [
+        0.013333333333333308,
+        0.08952380952380956
+       ],
+       "fix_both": [
+        0.2094761904761904,
+        0.30095238095238097
+       ]
+      },
+      "I": 0.10476190476190472,
+      "I_ci": [
+       0.039999999999999925,
+       0.16761904761904767
+      ],
+      "I_excludes_0": true
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.9161904761904762,
+       "fix_A": 0.819047619047619,
+       "fix_B": 0.8647619047619047,
+       "fix_both": 0.6628571428571428
+      },
+      "n": {
+       "orig": 525,
+       "fix_A": 525,
+       "fix_B": 525,
+       "fix_both": 525
+      },
+      "drop": {
+       "fix_A": 0.0971428571428572,
+       "fix_B": 0.05142857142857149,
+       "fix_both": 0.2533333333333334
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.05714285714285716,
+        0.13714285714285712
+       ],
+       "fix_B": [
+        0.015190476190476119,
+        0.08571428571428574
+       ],
+       "fix_both": [
+        0.20571428571428574,
+        0.299047619047619
+       ]
+      },
+      "I": 0.10476190476190472,
+      "I_ci": [
+       0.040000000000000036,
+       0.1695714285714285
+      ],
+      "I_excludes_0": true
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.9238095238095239,
+       "fix_A": 0.8076190476190476,
+       "fix_B": 0.8323809523809523,
+       "fix_both": 0.5866666666666667
+      },
+      "n": {
+       "orig": 525,
+       "fix_A": 525,
+       "fix_B": 525,
+       "fix_both": 525
+      },
+      "drop": {
+       "fix_A": 0.11619047619047629,
+       "fix_B": 0.09142857142857153,
+       "fix_both": 0.3371428571428572
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.07995238095238091,
+        0.1562380952380952
+       ],
+       "fix_B": [
+        0.05328571428571419,
+        0.1295714285714286
+       ],
+       "fix_both": [
+        0.2895238095238095,
+        0.3829047619047619
+       ]
+      },
+      "I": 0.12952380952380937,
+      "I_ci": [
+       0.06095238095238098,
+       0.19242857142857142
+      ],
+      "I_excludes_0": true
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.9238095238095239,
+       "fix_A": 0.8076190476190476,
+       "fix_B": 0.8323809523809523,
+       "fix_both": 0.5866666666666667
+      },
+      "n": {
+       "orig": 525,
+       "fix_A": 525,
+       "fix_B": 525,
+       "fix_both": 525
+      },
+      "drop": {
+       "fix_A": 0.11619047619047629,
+       "fix_B": 0.09142857142857153,
+       "fix_both": 0.3371428571428572
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.07619047619047614,
+        0.15433333333333335
+       ],
+       "fix_B": [
+        0.05142857142857138,
+        0.1295714285714286
+       ],
+       "fix_both": [
+        0.2914285714285715,
+        0.3866666666666666
+       ]
+      },
+      "I": 0.12952380952380937,
+      "I_ci": [
+       0.06471428571428564,
+       0.19999999999999996
+      ],
+      "I_excludes_0": true
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.9257142857142857,
+       "fix_A": 0.8152380952380952,
+       "fix_B": 0.88,
+       "fix_both": 0.6190476190476191
+      },
+      "n": {
+       "orig": 525,
+       "fix_A": 525,
+       "fix_B": 525,
+       "fix_both": 525
+      },
+      "drop": {
+       "fix_A": 0.1104761904761905,
+       "fix_B": 0.04571428571428571,
+       "fix_both": 0.30666666666666664
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.07042857142857142,
+        0.15047619047619043
+       ],
+       "fix_B": [
+        0.009523809523809601,
+        0.08380952380952378
+       ],
+       "fix_both": [
+        0.2628571428571429,
+        0.3504761904761905
+       ]
+      },
+      "I": 0.15047619047619043,
+      "I_ci": [
+       0.08761904761904771,
+       0.21523809523809523
+      ],
+      "I_excludes_0": true
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.9257142857142857,
+       "fix_A": 0.8152380952380952,
+       "fix_B": 0.88,
+       "fix_both": 0.6190476190476191
+      },
+      "n": {
+       "orig": 525,
+       "fix_A": 525,
+       "fix_B": 525,
+       "fix_both": 525
+      },
+      "drop": {
+       "fix_A": 0.1104761904761905,
+       "fix_B": 0.04571428571428571,
+       "fix_both": 0.30666666666666664
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.07047619047619047,
+        0.14857142857142858
+       ],
+       "fix_B": [
+        0.00952380952380949,
+        0.08380952380952378
+       ],
+       "fix_both": [
+        0.25900000000000006,
+        0.35619047619047617
+       ]
+      },
+      "I": 0.15047619047619043,
+      "I_ci": [
+       0.08761904761904771,
+       0.21719047619047618
+      ],
+      "I_excludes_0": true
+     }
+    }
+   },
+   "final_plan": {
+    "A": "random well split leaks same compound into train and test instead of holding out whole compounds",
+    "A_code_line": "    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)",
+    "B": "target-grouped mean imputation leaks label and test rows into features",
+    "B_code_line": "    df[cols] = df.groupby(TARGET)[cols].transform(lambda s: s.fillna(s.mean()))",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "split_idx": "def split_idx(df, seed, test_size=0.25):\n    import numpy as np\n    from sklearn.model_selection import GroupShuffleSplit\n    groups = df[COMPOUND].to_numpy()\n    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n    tr, te = next(gss.split(np.arange(len(df)), groups=groups))\n    return tr, te"
+      }
+     },
+     "B": {
+      "kind": "fit_scope",
+      "steps": {
+       "impute": "def impute(df):\n    import pandas as pd\n    df = df.copy()\n    cols = [c for c in df.columns if c not in (TARGET, COMPOUND)]\n    df[cols] = df[cols].fillna(df[cols].mean())\n    return df",
+       "claimed_eval": "def claimed_eval(df, seed):\n    import pandas as pd\n    tr, te = split_idx(df, seed)\n    f = feats(df)\n    train_df = df.iloc[tr].copy()\n    test_df = df.iloc[te].copy()\n    means = train_df[f].mean()\n    train_df[f] = train_df[f].fillna(means)\n    test_df[f] = test_df[f].fillna(means)\n    Xtr = train_df[f].to_numpy()\n    ytr = train_df[TARGET].to_numpy()\n    Xte = test_df[f].to_numpy()\n    yte = test_df[TARGET].to_numpy()\n    return yte, fit_predict(Xtr, ytr, Xte, seed)"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 18.0,
+     "fix_B": 6.0,
+     "fix_both": 22.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Intended use is new compounds so must hold out whole compounds; random-well split lets same compound appear both sides inflating most. Target-grouped test-inclusive imputation adds label leakage inflating less.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "ebf4242b2af32ae61ec6d8486cd19be0dcfc8bd1a5cd497aeaac4cc689b3cfd2"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:40:46Z",
+     "prereg_sha256": "ebf4242b2af32ae61ec6d8486cd19be0dcfc8bd1a5cd497aeaac4cc689b3cfd2"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "split_idx"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "claimed_eval",
+        "impute"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "claimed_eval",
+        "impute",
+        "split_idx"
+       ],
+       "kinds": [
+        "split",
+        "fit_scope"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) split_idx changed (split)",
+    "fix_B": "only step(s) claimed_eval, impute changed (fit_scope)",
+    "fix_both": "only step(s) claimed_eval, impute, split_idx changed (split/fit_scope)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_51b771'\nCOMPOUND = 'c_2cd377'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, COMPOUND)]\n\ndef impute(df):\n    df = df.copy()\n    cols = feats(df)\n    df[cols] = df.groupby(TARGET)[cols].transform(lambda s: s.fillna(s.mean()))\n    return df\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=300, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    import numpy as np\n    from sklearn.model_selection import GroupShuffleSplit\n    groups = df[COMPOUND].to_numpy()\n    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n    tr, te = next(gss.split(np.arange(len(df)), groups=groups))\n    return (tr, te)\n\ndef claimed_eval(df, seed):\n    data = impute(df)\n    tr, te = split_idx(data, seed)\n    f = feats(data)\n    X, y = (data[f].to_numpy(), data[TARGET].to_numpy())\n    return (y[te], fit_predict(X[tr], y[tr], X[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_51b771'\nCOMPOUND = 'c_2cd377'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, COMPOUND)]\n\ndef impute(df):\n    import pandas as pd\n    df = df.copy()\n    cols = [c for c in df.columns if c not in (TARGET, COMPOUND)]\n    df[cols] = df[cols].fillna(df[cols].mean())\n    return df\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=300, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed):\n    import pandas as pd\n    tr, te = split_idx(df, seed)\n    f = feats(df)\n    train_df = df.iloc[tr].copy()\n    test_df = df.iloc[te].copy()\n    means = train_df[f].mean()\n    train_df[f] = train_df[f].fillna(means)\n    test_df[f] = test_df[f].fillna(means)\n    Xtr = train_df[f].to_numpy()\n    ytr = train_df[TARGET].to_numpy()\n    Xte = test_df[f].to_numpy()\n    yte = test_df[TARGET].to_numpy()\n    return (yte, fit_predict(Xtr, ytr, Xte, seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_51b771'\nCOMPOUND = 'c_2cd377'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, COMPOUND)]\n\ndef impute(df):\n    import pandas as pd\n    df = df.copy()\n    cols = [c for c in df.columns if c not in (TARGET, COMPOUND)]\n    df[cols] = df[cols].fillna(df[cols].mean())\n    return df\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=300, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    import numpy as np\n    from sklearn.model_selection import GroupShuffleSplit\n    groups = df[COMPOUND].to_numpy()\n    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n    tr, te = next(gss.split(np.arange(len(df)), groups=groups))\n    return (tr, te)\n\ndef claimed_eval(df, seed):\n    import pandas as pd\n    tr, te = split_idx(df, seed)\n    f = feats(df)\n    train_df = df.iloc[tr].copy()\n    test_df = df.iloc[te].copy()\n    means = train_df[f].mean()\n    train_df[f] = train_df[f].fillna(means)\n    test_df[f] = test_df[f].fillna(means)\n    Xtr = train_df[f].to_numpy()\n    ytr = train_df[TARGET].to_numpy()\n    Xte = test_df[f].to_numpy()\n    yte = test_df[TARGET].to_numpy()\n    return (yte, fit_predict(Xtr, ytr, Xte, seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "clean_control": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.9711111111111111,
+       "fix_A": 0.9666666666666667,
+       "fix_B": 0.9711111111111111,
+       "fix_both": 0.9666666666666667
+      },
+      "n": {
+       "orig": 450,
+       "fix_A": 450,
+       "fix_B": 450,
+       "fix_both": 450
+      },
+      "drop": {
+       "fix_A": 0.004444444444444473,
+       "fix_B": 0.0,
+       "fix_both": 0.004444444444444473
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.01777777777777778,
+        0.028888888888888853
+       ],
+       "fix_B": [
+        -0.020055555555555566,
+        0.022222222222222254
+       ],
+       "fix_both": [
+        -0.01783333333333333,
+        0.026666666666666727
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.03111111111111109,
+       0.031111111111111093
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.9711111111111111,
+       "fix_A": 0.9666666666666667,
+       "fix_B": 0.9711111111111111,
+       "fix_both": 0.9666666666666667
+      },
+      "n": {
+       "orig": 450,
+       "fix_A": 450,
+       "fix_B": 450,
+       "fix_both": 450
+      },
+      "drop": {
+       "fix_A": 0.004444444444444473,
+       "fix_B": 0.0,
+       "fix_both": 0.004444444444444473
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.01777777777777778,
+        0.026666666666666727
+       ],
+       "fix_B": [
+        -0.022222222222222254,
+        0.022277777777777757
+       ],
+       "fix_both": [
+        -0.020000000000000018,
+        0.028888888888888853
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.033333333333333215,
+       0.033333333333333326
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.9733333333333334,
+       "fix_A": 0.9733333333333334,
+       "fix_B": 0.9733333333333334,
+       "fix_both": 0.9733333333333334
+      },
+      "n": {
+       "orig": 450,
+       "fix_A": 450,
+       "fix_B": 450,
+       "fix_both": 450
+      },
+      "drop": {
+       "fix_A": 0.0,
+       "fix_B": 0.0,
+       "fix_both": 0.0
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.022222222222222254,
+        0.022222222222222254
+       ],
+       "fix_B": [
+        -0.020000000000000018,
+        0.022222222222222254
+       ],
+       "fix_both": [
+        -0.022222222222222143,
+        0.02005555555555552
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.028888888888888964,
+       0.028888888888888853
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.9733333333333334,
+       "fix_A": 0.9733333333333334,
+       "fix_B": 0.9733333333333334,
+       "fix_both": 0.9733333333333334
+      },
+      "n": {
+       "orig": 450,
+       "fix_A": 450,
+       "fix_B": 450,
+       "fix_both": 450
+      },
+      "drop": {
+       "fix_A": 0.0,
+       "fix_B": 0.0,
+       "fix_both": 0.0
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.020000000000000018,
+        0.020000000000000018
+       ],
+       "fix_B": [
+        -0.020055555555555566,
+        0.022222222222222254
+       ],
+       "fix_both": [
+        -0.020000000000000018,
+        0.020000000000000018
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.028888888888888853,
+       0.028888888888888856
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.98,
+       "fix_A": 0.96,
+       "fix_B": 0.98,
+       "fix_both": 0.96
+      },
+      "n": {
+       "orig": 450,
+       "fix_A": 450,
+       "fix_B": 450,
+       "fix_both": 450
+      },
+      "drop": {
+       "fix_A": 0.020000000000000018,
+       "fix_B": 0.0,
+       "fix_both": 0.020000000000000018
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.0,
+        0.04222222222222227
+       ],
+       "fix_B": [
+        -0.01777777777777778,
+        0.019999999999999907
+       ],
+       "fix_both": [
+        -0.0022222222222222365,
+        0.04005555555555554
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.028888888888888964,
+       0.028888888888888964
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.98,
+       "fix_A": 0.96,
+       "fix_B": 0.98,
+       "fix_both": 0.96
+      },
+      "n": {
+       "orig": 450,
+       "fix_A": 450,
+       "fix_B": 450,
+       "fix_both": 450
+      },
+      "drop": {
+       "fix_A": 0.020000000000000018,
+       "fix_B": 0.0,
+       "fix_both": 0.020000000000000018
+      },
+      "drop_ci": {
+       "fix_A": [
+        -5.555555555554998e-05,
+        0.04222222222222227
+       ],
+       "fix_B": [
+        -0.01777777777777778,
+        0.01777777777777778
+       ],
+       "fix_both": [
+        0.0,
+        0.0444444444444444
+       ]
+      },
+      "I": 0.0,
+      "I_ci": [
+       -0.03111111111111109,
+       0.0311111111111112
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "Random 25% image split without grouping duplicate images inflates accuracy vs new-image use",
+    "A_code_line": "    tr, te = split_idx(df, seed, groups)",
+    "B": "Including all 64 pixel columns includes a highly predictive central pixel; removing one pixel checks feature-leakage/dependence",
+    "B_code_line": "    return [c for c in df.columns if c != TARGET]",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed, groups=None):\n    import numpy as np\n    f = feats(df)\n    X = df[f].to_numpy()\n    grp = ['_'.join(map(str, r)) for r in X]\n    tr, te = split_idx(df, seed, grp)\n    return df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed)"
+      }
+     },
+     "B": {
+      "kind": "feature",
+      "steps": {
+       "feats": "def feats(df):\n    return [c for c in df.columns if c != TARGET and c != 'c_4a669f']"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 1.2,
+     "fix_B": 0.4,
+     "fix_both": 1.6
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Only visible inflation is train-test leakage via duplicate/near-duplicate 8x8 images under random split; scaler is already train-only so no fit_scope leak. Grouping exact-duplicate images carries most inflation, single-pixel removal is minor control.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "df72dd90388b0887b69fdb7fb02578d5e4fa7cc132bae2f871aac112635b1246"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:41:03Z",
+     "prereg_sha256": "df72dd90388b0887b69fdb7fb02578d5e4fa7cc132bae2f871aac112635b1246"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "feats"
+       ],
+       "kinds": [
+        "feature"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "claimed_eval",
+        "feats"
+       ],
+       "kinds": [
+        "split",
+        "feature"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) claimed_eval changed (split)",
+    "fix_B": "only step(s) feats changed (feature)",
+    "fix_both": "only step(s) claimed_eval, feats changed (split/feature)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nTARGET = 'c_efa8ff'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=3000, random_state=seed))\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    import numpy as np\n    f = feats(df)\n    X = df[f].to_numpy()\n    grp = ['_'.join(map(str, r)) for r in X]\n    tr, te = split_idx(df, seed, grp)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nTARGET = 'c_efa8ff'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET and c != 'c_4a669f']\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=3000, random_state=seed))\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nTARGET = 'c_efa8ff'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET and c != 'c_4a669f']\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=3000, random_state=seed))\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    import numpy as np\n    f = feats(df)\n    X = df[f].to_numpy()\n    grp = ['_'.join(map(str, r)) for r in X]\n    tr, te = split_idx(df, seed, grp)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "clean_group_correct": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.78,
+       "fix_A": 0.765,
+       "fix_B": 0.7425,
+       "fix_both": 0.74
+      },
+      "n": {
+       "orig": 200,
+       "fix_A": 200,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": 0.015000000000000013,
+       "fix_B": 0.03749999999999998,
+       "fix_both": 0.040000000000000036
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.06499999999999995,
+        0.10012499999999998
+       ],
+       "fix_B": [
+        -0.026281249999999992,
+        0.10003124999999995
+       ],
+       "fix_both": [
+        -0.02375000000000005,
+        0.10249999999999992
+       ]
+      },
+      "I": -0.012499999999999956,
+      "I_ci": [
+       -0.10999999999999999,
+       0.07628125000000001
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.78,
+       "fix_A": 0.765,
+       "fix_B": 0.755,
+       "fix_both": 0.73
+      },
+      "n": {
+       "orig": 200,
+       "fix_A": 200,
+       "fix_B": 200,
+       "fix_both": 200
+      },
+      "drop": {
+       "fix_A": 0.015000000000000013,
+       "fix_B": 0.025000000000000022,
+       "fix_both": 0.050000000000000044
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.06999999999999995,
+        0.09999999999999998
+       ],
+       "fix_B": [
+        -0.06500000000000006,
+        0.1050000000000001
+       ],
+       "fix_both": [
+        -0.03500000000000003,
+        0.13
+       ]
+      },
+      "I": 0.010000000000000009,
+      "I_ci": [
+       -0.10499999999999998,
+       0.13
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.755,
+       "fix_A": 0.765,
+       "fix_B": 0.74375,
+       "fix_both": 0.74875
+      },
+      "n": {
+       "orig": 200,
+       "fix_A": 200,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": -0.010000000000000009,
+       "fix_B": 0.011249999999999982,
+       "fix_both": 0.006249999999999978
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.09000000000000008,
+        0.07499999999999996
+       ],
+       "fix_B": [
+        -0.05625000000000002,
+        0.08003125000000004
+       ],
+       "fix_both": [
+        -0.05875000000000008,
+        0.07503125000000004
+       ]
+      },
+      "I": 0.0050000000000000044,
+      "I_ci": [
+       -0.08503125000000007,
+       0.09253124999999988
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.755,
+       "fix_A": 0.765,
+       "fix_B": 0.76,
+       "fix_both": 0.725
+      },
+      "n": {
+       "orig": 200,
+       "fix_A": 200,
+       "fix_B": 200,
+       "fix_both": 200
+      },
+      "drop": {
+       "fix_A": -0.010000000000000009,
+       "fix_B": -0.0050000000000000044,
+       "fix_both": 0.030000000000000027
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.09000000000000008,
+        0.07012499999999995
+       ],
+       "fix_B": [
+        -0.09000000000000008,
+        0.08000000000000007
+       ],
+       "fix_both": [
+        -0.05500000000000005,
+        0.12
+       ]
+      },
+      "I": 0.04500000000000004,
+      "I_ci": [
+       -0.08012500000000006,
+       0.17000000000000004
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.78,
+       "fix_A": 0.76,
+       "fix_B": 0.7425,
+       "fix_both": 0.7425
+      },
+      "n": {
+       "orig": 200,
+       "fix_A": 200,
+       "fix_B": 800,
+       "fix_both": 800
+      },
+      "drop": {
+       "fix_A": 0.020000000000000018,
+       "fix_B": 0.03749999999999998,
+       "fix_both": 0.03749999999999998
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.06999999999999995,
+        0.10499999999999998
+       ],
+       "fix_B": [
+        -0.02503125000000002,
+        0.10128124999999992
+       ],
+       "fix_both": [
+        -0.02375000000000005,
+        0.1025312499999999
+       ]
+      },
+      "I": -0.020000000000000018,
+      "I_ci": [
+       -0.11378125000000001,
+       0.07750000000000001
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.78,
+       "fix_A": 0.76,
+       "fix_B": 0.765,
+       "fix_both": 0.74
+      },
+      "n": {
+       "orig": 200,
+       "fix_A": 200,
+       "fix_B": 200,
+       "fix_both": 200
+      },
+      "drop": {
+       "fix_A": 0.020000000000000018,
+       "fix_B": 0.015000000000000013,
+       "fix_both": 0.040000000000000036
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.06000000000000005,
+        0.10499999999999998
+       ],
+       "fix_B": [
+        -0.060125000000000046,
+        0.09499999999999997
+       ],
+       "fix_both": [
+        -0.050000000000000044,
+        0.12
+       ]
+      },
+      "I": 0.0050000000000000044,
+      "I_ci": [
+       -0.10499999999999998,
+       0.12
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "One measurement is a post-outcome proxy that would not be available at prediction time; removing it should collapse accuracy.",
+    "A_code_line": "    return [c for c in df.columns if c not in (TARGET, SITE)]",
+    "B": "Single fixed-seed GroupShuffleSplit cherry-picks easy held-out wards; group K-fold averaging removes seed/test-set selection bias.",
+    "B_code_line": "        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "feature",
+      "steps": {
+       "feats": "def feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE, \"c_c95911\")]"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "claimed_eval": "def claimed_eval(df, seed, groups=None):\n    import numpy as np\n    from sklearn.model_selection import GroupKFold\n    g = np.asarray(df[SITE]) if groups is None else np.asarray(groups)\n    f = feats(df)\n    X = df[f].to_numpy()\n    y = df[TARGET].to_numpy()\n    gkf = GroupKFold(n_splits=5)\n    preds = np.empty_like(y)\n    for tr, te in gkf.split(X, y, groups=g):\n        preds[te] = fit_predict(X[tr], y[tr], X[te], seed)\n    return y, preds"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 18.0,
+     "fix_B": 6.0,
+     "fix_both": 23.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Feature leakage carries most inflation; single-seed ward selection adds smaller optimism; combination removes both.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "affd848df4a0ab27189662ca2ff4f77ffc2907e26548d9d2f6a5d5a2bb57de9d"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:41:07Z",
+     "prereg_sha256": "affd848df4a0ab27189662ca2ff4f77ffc2907e26548d9d2f6a5d5a2bb57de9d"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "feats"
+       ],
+       "kinds": [
+        "feature"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "claimed_eval"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "claimed_eval",
+        "feats"
+       ],
+       "kinds": [
+        "feature",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) feats changed (feature)",
+    "fix_B": "only step(s) claimed_eval changed (split)",
+    "fix_both": "only step(s) claimed_eval, feats changed (feature/split)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_0f6b5b'\nSITE = 'c_9a104c'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE, 'c_c95911')]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, np.asarray(df[SITE]) if groups is None else np.asarray(groups))\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_0f6b5b'\nSITE = 'c_9a104c'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    import numpy as np\n    from sklearn.model_selection import GroupKFold\n    g = np.asarray(df[SITE]) if groups is None else np.asarray(groups)\n    f = feats(df)\n    X = df[f].to_numpy()\n    y = df[TARGET].to_numpy()\n    gkf = GroupKFold(n_splits=5)\n    preds = np.empty_like(y)\n    for tr, te in gkf.split(X, y, groups=g):\n        preds[te] = fit_predict(X[tr], y[tr], X[te], seed)\n    return (y, preds)\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_0f6b5b'\nSITE = 'c_9a104c'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE, 'c_c95911')]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    import numpy as np\n    from sklearn.model_selection import GroupKFold\n    g = np.asarray(df[SITE]) if groups is None else np.asarray(groups)\n    f = feats(df)\n    X = df[f].to_numpy()\n    y = df[TARGET].to_numpy()\n    gkf = GroupKFold(n_splits=5)\n    preds = np.empty_like(y)\n    for tr, te in gkf.split(X, y, groups=g):\n        preds[te] = fit_predict(X[tr], y[tr], X[te], seed)\n    return (y, preds)\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "clean_wine_correct": {
+   "retries": 0,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.8666666666666667,
+       "fix_A": 0.8222222222222222,
+       "fix_B": 0.5111111111111111,
+       "fix_both": 0.4666666666666667
+      },
+      "n": {
+       "orig": 45,
+       "fix_A": 45,
+       "fix_B": 45,
+       "fix_both": 45
+      },
+      "drop": {
+       "fix_A": 0.04444444444444451,
+       "fix_B": 0.3555555555555556,
+       "fix_both": 0.4
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.08944444444444442,
+        0.17833333333333287
+       ],
+       "fix_B": [
+        0.1777777777777778,
+        0.5333333333333334
+       ],
+       "fix_both": [
+        0.24444444444444435,
+        0.5777777777777777
+       ]
+      },
+      "I": -1.1102230246251565e-16,
+      "I_ci": [
+       -0.2666666666666666,
+       0.24499999999999958
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.8666666666666667,
+       "fix_A": 0.8222222222222222,
+       "fix_B": 0.5111111111111111,
+       "fix_both": 0.4666666666666667
+      },
+      "n": {
+       "orig": 45,
+       "fix_A": 45,
+       "fix_B": 45,
+       "fix_both": 45
+      },
+      "drop": {
+       "fix_A": 0.04444444444444451,
+       "fix_B": 0.3555555555555556,
+       "fix_both": 0.4
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.11111111111111105,
+        0.19999999999999996
+       ],
+       "fix_B": [
+        0.1777777777777778,
+        0.5333333333333333
+       ],
+       "fix_both": [
+        0.2222222222222222,
+        0.5777777777777778
+       ]
+      },
+      "I": -1.1102230246251565e-16,
+      "I_ci": [
+       -0.2666666666666667,
+       0.24444444444444452
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.9111111111111111,
+       "fix_A": 0.9333333333333333,
+       "fix_B": 0.5111111111111111,
+       "fix_both": 0.4666666666666667
+      },
+      "n": {
+       "orig": 45,
+       "fix_A": 45,
+       "fix_B": 45,
+       "fix_both": 45
+      },
+      "drop": {
+       "fix_A": -0.022222222222222254,
+       "fix_B": 0.4,
+       "fix_both": 0.4444444444444444
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.1333333333333333,
+        0.0888888888888889
+       ],
+       "fix_B": [
+        0.2222222222222222,
+        0.5555555555555556
+       ],
+       "fix_both": [
+        0.2666666666666667,
+        0.6000000000000001
+       ]
+      },
+      "I": 0.06666666666666665,
+      "I_ci": [
+       -0.15611111111111114,
+       0.28944444444444406
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.9111111111111111,
+       "fix_A": 0.9333333333333333,
+       "fix_B": 0.5111111111111111,
+       "fix_both": 0.4666666666666667
+      },
+      "n": {
+       "orig": 45,
+       "fix_A": 45,
+       "fix_B": 45,
+       "fix_both": 45
+      },
+      "drop": {
+       "fix_A": -0.022222222222222254,
+       "fix_B": 0.4,
+       "fix_both": 0.4444444444444444
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.13333333333333341,
+        0.0888888888888889
+       ],
+       "fix_B": [
+        0.2222222222222222,
+        0.5555555555555556
+       ],
+       "fix_both": [
+        0.2666666666666667,
+        0.6222222222222222
+       ]
+      },
+      "I": 0.06666666666666665,
+      "I_ci": [
+       -0.15555555555555556,
+       0.311111111111111
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.8,
+       "fix_A": 0.8222222222222222,
+       "fix_B": 0.5111111111111111,
+       "fix_both": 0.4666666666666667
+      },
+      "n": {
+       "orig": 45,
+       "fix_A": 45,
+       "fix_B": 45,
+       "fix_both": 45
+      },
+      "drop": {
+       "fix_A": -0.022222222222222143,
+       "fix_B": 0.288888888888889,
+       "fix_both": 0.33333333333333337
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.1777777777777778,
+        0.1333333333333333
+       ],
+       "fix_B": [
+        0.0888888888888889,
+        0.4888888888888888
+       ],
+       "fix_both": [
+        0.13333333333333341,
+        0.5111111111111111
+       ]
+      },
+      "I": 0.06666666666666654,
+      "I_ci": [
+       -0.19999999999999996,
+       0.3555555555555555
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.8,
+       "fix_A": 0.8222222222222222,
+       "fix_B": 0.5111111111111111,
+       "fix_both": 0.4666666666666667
+      },
+      "n": {
+       "orig": 45,
+       "fix_A": 45,
+       "fix_B": 45,
+       "fix_both": 45
+      },
+      "drop": {
+       "fix_A": -0.022222222222222143,
+       "fix_B": 0.288888888888889,
+       "fix_both": 0.33333333333333337
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.19999999999999996,
+        0.1333333333333333
+       ],
+       "fix_B": [
+        0.11111111111111105,
+        0.4888888888888889
+       ],
+       "fix_both": [
+        0.13333333333333341,
+        0.5111111111111111
+       ]
+      },
+      "I": 0.06666666666666654,
+      "I_ci": [
+       -0.2005555555555556,
+       0.3111111111111111
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "leaky source measurement kept as feature",
+    "A_code_line": "    return [c for c in df.columns if c != TARGET]",
+    "B": "random holdout leaks batches/groups; intended use is new-batch holdout",
+    "B_code_line": "    return train_test_split(idx, test_size=test_size, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "feature",
+      "steps": {
+       "feats": "def feats(df):\n    import pandas as pd\n    return [c for c in df.columns if c not in (TARGET, \"c_55565a\")]"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "split_idx": "def split_idx(df, seed, groups=None, test_size=0.25):\n    import numpy as np\n    n = len(df)\n    k = int(n * (1 - test_size))\n    tr = np.arange(k)\n    te = np.arange(k, n)\n    return tr, te"
+      }
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 15.0,
+     "fix_B": 10.0,
+     "fix_both": 25.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Source chemistry column for high-value flag remains in 12 features, inflating random-split accuracy; random split also mixes batches. Removing source drops most; sequential holdout drops independently.",
+    "mode": "LIVE muse-spark-1.3",
+    "prereg_sha256": "712871c832d5a2896c856110330f0a54169716815b8548c91be7a6de7d9c40a9"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:41:24Z",
+     "prereg_sha256": "712871c832d5a2896c856110330f0a54169716815b8548c91be7a6de7d9c40a9"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "feats"
+       ],
+       "kinds": [
+        "feature"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "split_idx"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "feats",
+        "split_idx"
+       ],
+       "kinds": [
+        "feature",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) feats changed (feature)",
+    "fix_B": "only step(s) split_idx changed (split)",
+    "fix_both": "only step(s) feats, split_idx changed (feature/split)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nTARGET = 'c_56cf14'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    import pandas as pd\n    return [c for c in df.columns if c not in (TARGET, 'c_55565a')]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=3000, random_state=seed))\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nTARGET = 'c_56cf14'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=3000, random_state=seed))\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    import numpy as np\n    n = len(df)\n    k = int(n * (1 - test_size))\n    tr = np.arange(k)\n    te = np.arange(k, n)\n    return (tr, te)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.linear_model import LogisticRegression\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.preprocessing import StandardScaler\nTARGET = 'c_56cf14'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    import pandas as pd\n    return [c for c in df.columns if c not in (TARGET, 'c_55565a')]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = make_pipeline(StandardScaler(), LogisticRegression(max_iter=3000, random_state=seed))\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    import numpy as np\n    n = len(df)\n    k = int(n * (1 - test_size))\n    tr = np.arange(k)\n    te = np.arange(k, n)\n    return (tr, te)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].iloc[tr], df[TARGET].iloc[tr], df[f].iloc[te], seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "g4_visit_history_clean": {
+   "retries": 1,
+   "status": "ok",
+   "stats": {
+    "42": {
+     "full": {
+      "acc": {
+       "orig": 0.5968586387434555,
+       "fix_A": 0.5654450261780105,
+       "fix_B": 0.5911504424778761,
+       "fix_both": 0.5929203539823009
+      },
+      "n": {
+       "orig": 573,
+       "fix_A": 573,
+       "fix_B": 565,
+       "fix_both": 565
+      },
+      "drop": {
+       "fix_A": 0.03141361256544495,
+       "fix_B": 0.0057081962655793905,
+       "fix_both": 0.003938284761154542
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.01924083769633511,
+        0.0872600349040139
+       ],
+       "fix_B": [
+        -0.047122889928801905,
+        0.061880801247895745
+       ],
+       "fix_both": [
+        -0.04898091090209891,
+        0.0616818792568225
+       ]
+      },
+      "I": -0.033183524069869796,
+      "I_ci": [
+       -0.1157305904338291,
+       0.045994841619175636
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.5964601769911504,
+       "fix_A": 0.5663716814159292,
+       "fix_B": 0.5911504424778761,
+       "fix_both": 0.5929203539823009
+      },
+      "n": {
+       "orig": 565,
+       "fix_A": 565,
+       "fix_B": 565,
+       "fix_both": 565
+      },
+      "drop": {
+       "fix_A": 0.030088495575221197,
+       "fix_B": 0.005309734513274322,
+       "fix_both": 0.003539823008849474
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.02831858407079646,
+        0.08849557522123896
+       ],
+       "fix_B": [
+        -0.04960176991150447,
+        0.058451327433628346
+       ],
+       "fix_both": [
+        -0.05840707964601766,
+        0.06371681415929198
+       ]
+      },
+      "I": -0.031858407079646045,
+      "I_ci": [
+       -0.11504424778761058,
+       0.0477876106194689
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "acc": {
+       "orig": 0.5824742268041238,
+       "fix_A": 0.5790378006872853,
+       "fix_B": 0.6151142355008787,
+       "fix_both": 0.5799648506151143
+      },
+      "n": {
+       "orig": 582,
+       "fix_A": 582,
+       "fix_B": 569,
+       "fix_both": 569
+      },
+      "drop": {
+       "fix_A": 0.0034364261168384758,
+       "fix_B": -0.032640008696754985,
+       "fix_both": 0.0025093761890094823
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.055025773195876315,
+        0.05841924398625431
+       ],
+       "fix_B": [
+        -0.09333097796218129,
+        0.026257179352454082
+       ],
+       "fix_both": [
+        -0.056698917133211325,
+        0.06186170951630335
+       ]
+      },
+      "I": 0.03171295876892599,
+      "I_ci": [
+       -0.0462494489035445,
+       0.11488964482210919
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.5817223198594025,
+       "fix_A": 0.5782073813708261,
+       "fix_B": 0.6151142355008787,
+       "fix_both": 0.5799648506151143
+      },
+      "n": {
+       "orig": 569,
+       "fix_A": 569,
+       "fix_B": 569,
+       "fix_both": 569
+      },
+      "drop": {
+       "fix_A": 0.0035149384885764245,
+       "fix_B": -0.033391915641476255,
+       "fix_both": 0.0017574692442882123
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.05272407732864681,
+        0.06331282952548326
+       ],
+       "fix_B": [
+        -0.09314586994727592,
+        0.02464850615114236
+       ],
+       "fix_both": [
+        -0.05623901581722324,
+        0.05975395430579966
+       ]
+      },
+      "I": 0.03163444639718804,
+      "I_ci": [
+       -0.04925307557117748,
+       0.11599297012302279
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "acc": {
+       "orig": 0.6472663139329806,
+       "fix_A": 0.6067019400352733,
+       "fix_B": 0.612565445026178,
+       "fix_both": 0.5671902268760908
+      },
+      "n": {
+       "orig": 567,
+       "fix_A": 567,
+       "fix_B": 573,
+       "fix_both": 573
+      },
+      "drop": {
+       "fix_A": 0.040564373897707284,
+       "fix_B": 0.03470086890680257,
+       "fix_both": 0.08007608705688984
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.015873015873015817,
+        0.09171075837742504
+       ],
+       "fix_B": [
+        -0.019920681089965524,
+        0.08876746354931345
+       ],
+       "fix_both": [
+        0.023770972418441862,
+        0.14301458027461522
+       ]
+      },
+      "I": 0.004810844252379987,
+      "I_ci": [
+       -0.07782510134168069,
+       0.08344737158000684
+      ],
+      "I_excludes_0": false
+     },
+     "same_n": {
+      "acc": {
+       "orig": 0.6472663139329806,
+       "fix_A": 0.6067019400352733,
+       "fix_B": 0.6119929453262787,
+       "fix_both": 0.5661375661375662
+      },
+      "n": {
+       "orig": 567,
+       "fix_A": 567,
+       "fix_B": 567,
+       "fix_both": 567
+      },
+      "drop": {
+       "fix_A": 0.040564373897707284,
+       "fix_B": 0.03527336860670194,
+       "fix_both": 0.08112874779541446
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.014109347442680775,
+        0.09700176366843039
+       ],
+       "fix_B": [
+        -0.01940035273368601,
+        0.08818342151675485
+       ],
+       "fix_both": [
+        0.022927689594356315,
+        0.13756613756613756
+       ]
+      },
+      "I": 0.005291005291005235,
+      "I_ci": [
+       -0.07231040564373892,
+       0.08465608465608465
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "add_history uses row-wise KFold for out-of-fold patient rate, leaking same-patient labels across folds",
+    "A_code_line": "    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):",
+    "B": "single fixed-seed group holdout reports a lucky split, not new-patient performance",
+    "B_code_line": "    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed).split(df, groups=df[PATIENT]))",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "add_history": "def add_history(trd, ted, seed):\n    from sklearn.model_selection import GroupKFold\n    prior = trd[TARGET].mean()\n    trd[HIST] = prior\n    for a, b in GroupKFold(5).split(trd, groups=trd[PATIENT]):\n        m = trd.iloc[a].groupby(PATIENT)[TARGET].mean()\n        trd.loc[trd.index[b], HIST] = trd.iloc[b][PATIENT].map(m).fillna(prior).to_numpy()\n    ted[HIST] = ted[PATIENT].map(trd.groupby(PATIENT)[TARGET].mean()).fillna(prior)\n    return trd, ted"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "split_idx": "def split_idx(df, seed, test_size=0.25):\n    from sklearn.model_selection import GroupShuffleSplit\n    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed + 99999).split(df, groups=df[PATIENT]))"
+      }
+     },
+     "both_overrides": {}
+    },
+    "predicted_drop_pp": {
+     "fix_A": 0.8,
+     "fix_B": 5.5,
+     "fix_both": 6.0
+    },
+    "culprit_ranking": [
+     "B",
+     "A",
+     "AxB"
+    ],
+    "reason": "Test HIST is constant prior so train OOF patient leakage mainly mis-calibrates training; reported 61% is inflated mainly by single lucky group split variance vs true new-patient accuracy.",
+    "mode": "LIVE muse-spark-1.3 (retry)",
+    "prereg_sha256": "55ec2e6cd39303522679e21f154fe2f8fa5c3d1a234d6bff3386d80673208378"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "07:41:27Z",
+     "prereg_sha256": "1926e487080e0deb3425d6daaa2132379d15e7cd549a7d4639e00749ec296977"
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "REJECT",
+     "violations": [
+      "fix_A: SPLIT changed: evaluation splitter calls differ (removed ['KFold(5, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+     ],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "add_history"
+       ],
+       "kinds": [
+        "fit_scope"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "split_idx"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "add_history",
+        "split_idx"
+       ],
+       "kinds": [
+        "fit_scope",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Recover (one live retry with the violation text)",
+     "prereg_sha256": "d1337bb8e912865b268453abeec6ab8bcc75be4b9f44688b5a01d79d57fe7691",
+     "retry_raw_len": 1536
+    },
+    {
+     "phase": "Verify (static fidelity)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "add_history"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "split_idx"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "add_history",
+        "split_idx"
+       ],
+       "kinds": [
+        "split",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    },
+    {
+     "phase": "Report",
+     "verdict": "measured"
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) add_history changed (split)",
+    "fix_B": "only step(s) split_idx changed (split)",
+    "fix_both": "only step(s) add_history, split_idx changed (split/split)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, KFold\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_ce8309'\nPATIENT = 'c_286b8d'\nHIST = 'patient_event_rate'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_history(trd, ted, seed):\n    from sklearn.model_selection import GroupKFold\n    prior = trd[TARGET].mean()\n    trd[HIST] = prior\n    for a, b in GroupKFold(5).split(trd, groups=trd[PATIENT]):\n        m = trd.iloc[a].groupby(PATIENT)[TARGET].mean()\n        trd.loc[trd.index[b], HIST] = trd.iloc[b][PATIENT].map(m).fillna(prior).to_numpy()\n    ted[HIST] = ted[PATIENT].map(trd.groupby(PATIENT)[TARGET].mean()).fillna(prior)\n    return (trd, ted)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, PATIENT)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=2, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed).split(df, groups=df[PATIENT]))\n\ndef claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    trd, ted = add_history(df.iloc[tr].reset_index(drop=True).copy(), df.iloc[te].reset_index(drop=True).copy(), seed)\n    f = feats(trd)\n    return (ted[TARGET].to_numpy(), fit_predict(trd[f].to_numpy(), trd[TARGET].to_numpy(), ted[f].to_numpy(), seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, KFold\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_ce8309'\nPATIENT = 'c_286b8d'\nHIST = 'patient_event_rate'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_history(trd, ted, seed):\n    prior = trd[TARGET].mean()\n    trd[HIST] = prior\n    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):\n        m = trd.iloc[a].groupby(PATIENT)[TARGET].mean()\n        trd.loc[trd.index[b], HIST] = trd.iloc[b][PATIENT].map(m).fillna(prior).to_numpy()\n    ted[HIST] = ted[PATIENT].map(trd.groupby(PATIENT)[TARGET].mean()).fillna(prior)\n    return (trd, ted)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, PATIENT)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=2, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    from sklearn.model_selection import GroupShuffleSplit\n    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed + 99999).split(df, groups=df[PATIENT]))\n\ndef claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    trd, ted = add_history(df.iloc[tr].reset_index(drop=True).copy(), df.iloc[te].reset_index(drop=True).copy(), seed)\n    f = feats(trd)\n    return (ted[TARGET].to_numpy(), fit_predict(trd[f].to_numpy(), trd[TARGET].to_numpy(), ted[f].to_numpy(), seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, KFold\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_ce8309'\nPATIENT = 'c_286b8d'\nHIST = 'patient_event_rate'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef add_history(trd, ted, seed):\n    from sklearn.model_selection import GroupKFold\n    prior = trd[TARGET].mean()\n    trd[HIST] = prior\n    for a, b in GroupKFold(5).split(trd, groups=trd[PATIENT]):\n        m = trd.iloc[a].groupby(PATIENT)[TARGET].mean()\n        trd.loc[trd.index[b], HIST] = trd.iloc[b][PATIENT].map(m).fillna(prior).to_numpy()\n    ted[HIST] = ted[PATIENT].map(trd.groupby(PATIENT)[TARGET].mean()).fillna(prior)\n    return (trd, ted)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, PATIENT)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, min_samples_leaf=2, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, test_size=0.25):\n    from sklearn.model_selection import GroupShuffleSplit\n    return next(GroupShuffleSplit(1, test_size=test_size, random_state=seed + 99999).split(df, groups=df[PATIENT]))\n\ndef claimed_eval(df, seed):\n    tr, te = split_idx(df, seed)\n    trd, ted = add_history(df.iloc[tr].reset_index(drop=True).copy(), df.iloc[te].reset_index(drop=True).copy(), seed)\n    f = feats(trd)\n    return (ted[TARGET].to_numpy(), fit_predict(trd[f].to_numpy(), trd[TARGET].to_numpy(), ted[f].to_numpy(), seed))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  }
+ }
+}

@@ -8,14 +8,20 @@
   "value": 0.96,
   "split_desc": "The scaler and the classifier are fit on the training portion only; 25% of the images are held out for testing with a fixed random seed.",
   "methods_line": "The scaler and the classifier are fit on the training portion only; 25% of the images are held out for testing with a fixed random seed.",
+  "methods_line_no": 3,
   "code_line": "tr, te = split_idx(df, seed, groups)",
+  "code_line_no": 32,
   "mode": "MOCK (stub, not a model result)",
   "grounding": {
    "flags": {
     "methods_line": true,
     "code_line": true
    },
-   "precision": 1.0
+   "precision": 1.0,
+   "line_numbers": {
+    "methods_line_no": 3,
+    "code_line_no": 32
+   }
   }
  },
  "hyp": {
@@ -68,7 +74,11 @@
      "methods_line": true,
      "code_line": true
     },
-    "precision": 1.0
+    "precision": 1.0,
+    "line_numbers": {
+     "methods_line_no": 3,
+     "code_line_no": 32
+    }
    }
   },
   {
@@ -97,23 +107,23 @@
    ]
   },
   {
-   "t": 2.73,
+   "t": 4.17,
    "phase": "Act",
    "msg": "sandbox[subprocess] -> error",
    "status": "error"
   },
   {
-   "t": 2.73,
+   "t": 4.17,
    "phase": "Recover",
-   "msg": "Act failed (ed_eval(df, s)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\raved\\AppData\\Local\\Temp\\nulllab__1ahrcnv\\patch.py\", line 2, in controlled_eval\n    raise ValueError('boom')\nValueError: boom\n); auto-retry once with a repaired patch"
+   "msg": "Act failed (ed_eval(df, s)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\raved\\AppData\\Local\\Temp\\nulllab_kxyoimqm\\patch.py\", line 2, in controlled_eval\n    raise ValueError('boom')\nValueError: boom\n); auto-retry once with a repaired patch"
   },
   {
-   "t": 6.29,
+   "t": 10.94,
    "phase": "Act",
    "msg": "retry -> ok"
   },
   {
-   "t": 6.29,
+   "t": 10.94,
    "phase": "Verify",
    "msg": "paired-bootstrap deltas per seed {'42': -0.001, '43': 0.004, '44': 0.007}; seed calls {'42': 'SURVIVED', '43': 'SURVIVED', '44': 'SURVIVED'} -> SURVIVED"
   }
@@ -157,5 +167,5 @@
   "agree": true,
   "cites_ok": true
  },
- "elapsed_s": 6.3
+ "elapsed_s": 10.9
 }

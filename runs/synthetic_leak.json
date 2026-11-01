@@ -8,14 +8,20 @@
   "value": 0.91,
   "split_desc": "Records are randomly divided into 75% training and 25% test with a fixed seed.",
   "methods_line": "Records are randomly divided into 75% training and 25% test with a fixed seed.",
+  "methods_line_no": 3,
   "code_line": "df[\"prior_rate\"] = df.groupby(CAT)[TARGET].transform(\"mean\")",
+  "code_line_no": 17,
   "mode": "MOCK (stub, not a model result)",
   "grounding": {
    "flags": {
     "methods_line": true,
     "code_line": true
    },
-   "precision": 1.0
+   "precision": 1.0,
+   "line_numbers": {
+    "methods_line_no": 3,
+    "code_line_no": 17
+   }
   }
  },
  "hyp": {
@@ -63,7 +69,11 @@
      "methods_line": true,
      "code_line": true
     },
-    "precision": 1.0
+    "precision": 1.0,
+    "line_numbers": {
+     "methods_line_no": 3,
+     "code_line_no": 17
+    }
    }
   },
   {
@@ -92,13 +102,13 @@
    ]
   },
   {
-   "t": 6.11,
+   "t": 9.46,
    "phase": "Act",
    "msg": "sandbox[subprocess] -> ok",
    "status": "ok"
   },
   {
-   "t": 6.11,
+   "t": 9.46,
    "phase": "Verify",
    "msg": "paired-bootstrap deltas per seed {'42': 0.109, '43': 0.131, '44': 0.115}; seed calls {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} -> FALSIFIED"
   }
@@ -142,5 +152,5 @@
   "agree": true,
   "cites_ok": true
  },
- "elapsed_s": 6.1
+ "elapsed_s": 9.5
 }

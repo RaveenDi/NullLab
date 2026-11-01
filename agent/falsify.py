@@ -45,6 +45,75 @@ def controlled_eval(df, seed):
     return ted[T].to_numpy(), train.fit_predict(trd[f], trd[T], ted[f], seed)
 '''
 
+PATCH_SELECT = '''import numpy as np
+import train
+from sklearn.model_selection import KFold
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectKBest, f_classif
+
+
+def controlled_eval(df, seed):
+    # scaling + selection are re-fit inside each training fold (leak-free protocol)
+    X = df[train.feats(df)].to_numpy()
+    y = df[train.TARGET].to_numpy()
+    ys, ps = [], []
+    for tr, te in KFold(5, shuffle=True, random_state=seed).split(df):
+        sc = StandardScaler().fit(X[tr])
+        sel = SelectKBest(f_classif, k=train.K).fit(sc.transform(X[tr]), y[tr])
+        Xtr = sel.transform(sc.transform(X[tr]))
+        Xte = sel.transform(sc.transform(X[te]))
+        ys.append(y[te])
+        ps.append(train.fit_predict(Xtr, y[tr], Xte, seed))
+    return np.concatenate(ys), np.concatenate(ps)
+'''
+
+PATCH_TIME = '''import numpy as np
+import train
+
+
+def controlled_eval(df, seed):
+    # respect time: train on the earliest 75% of records, test on the latest 25%
+    order = np.argsort(df[train.TIME].to_numpy())
+    cut = int(0.75 * len(df))
+    tr, te = order[:cut], order[cut:]
+    f = train.feats(df)
+    X = df[f].to_numpy()
+    y = df[train.TARGET].to_numpy()
+    return y[te], train.fit_predict(X[tr], y[tr], X[te], seed)
+'''
+
+PATCH_PROXY = '''import numpy as np
+import train
+from sklearn.model_selection import KFold
+
+
+def controlled_eval(df, seed):
+    # same protocol minus the proxy column, which must not be a model input
+    f = [c for c in train.feats(df) if c != train.PROXY]
+    X = df[f].to_numpy()
+    y = df[train.TARGET].to_numpy()
+    ys, ps = [], []
+    for tr, te in KFold(5, shuffle=True, random_state=seed + 1000).split(df):
+        ys.append(y[te])
+        ps.append(train.fit_predict(X[tr], y[tr], X[te], seed))
+    return np.concatenate(ys), np.concatenate(ps)
+'''
+
+PATCH_GROUP = '''import numpy as np
+import train
+from sklearn.model_selection import GroupShuffleSplit
+
+
+def controlled_eval(df, seed):
+    # unseen groups are held out: split by the grouping column instead of by row
+    gss = GroupShuffleSplit(n_splits=1, test_size=0.25, random_state=seed)
+    tr, te = next(gss.split(df, groups=df[train.SITE].to_numpy()))
+    f = train.feats(df)
+    X = df[f].to_numpy()
+    y = df[train.TARGET].to_numpy()
+    return y[te], train.fit_predict(X[tr], y[tr], X[te], seed)
+'''
+
 PATCH_GENERIC = '''import numpy as np
 import train
 from sklearn.model_selection import KFold
@@ -73,6 +142,26 @@ def _mock(code):
                 "split_key": "category column used by the group-by",
                 "sig": "claimed accuracy exceeds accuracy when the statistic is computed from training labels only",
                 "patch": PATCH_TE, "kind": "target-derived feature"}
+    if "SelectKBest" in code:
+        return {"broken": "scaling and feature selection are fit on all rows before the split, so test labels shape the features",
+                "split_key": "none (preprocessing fit scope, not a row group)",
+                "sig": "claimed accuracy exceeds accuracy when scaling and selection are re-fit inside each training fold",
+                "patch": PATCH_SELECT, "kind": "pre-split preprocessing leakage"}
+    if "chronological" in code:
+        return {"broken": "records span time with a shifting label boundary but are evaluated with a random split",
+                "split_key": "record time (earliest 75% train, latest 25% test)",
+                "sig": "claimed accuracy exceeds accuracy when training only on past records and testing on future ones",
+                "patch": PATCH_TIME, "kind": "temporal leakage"}
+    if "PROXY = " in code:
+        return {"broken": "a proxy column carrying the label is used as a model input",
+                "split_key": "none (feature removal, not a row group)",
+                "sig": "claimed accuracy exceeds accuracy when the proxy column is removed from the inputs",
+                "patch": PATCH_PROXY, "kind": "proxy/target feature leakage"}
+    if "SITE = " in code and "split_idx(df, seed, groups)" in ev:
+        return {"broken": "a group identifier is used as a feature while groups repeat on both sides of the split",
+                "split_key": "grouping column held out whole per split",
+                "sig": "claimed accuracy exceeds accuracy when whole groups are held out of training",
+                "patch": PATCH_GROUP, "kind": "group non-independence"}
     return {"broken": "none found by static inspection; fall back to an independent re-evaluation",
             "split_key": "none", "sig": "accuracy under independent 5-fold CV matches claimed accuracy",
             "patch": PATCH_GENERIC, "kind": "no flaw found"}
@@ -114,6 +203,6 @@ def recover(case_dir, claim, hyp, error, mode="mock"):
     """Auto-retry once after a failed/timed-out Act step. Mock: swap in the generic independent-CV patch."""
     if mode == "live":
         text = llm.live_complete(SYSTEM, f"Your previous patch failed with:\n{error}\nPREVIOUS PATCH:\n{hyp['code_patch']}\nReturn corrected JSON.",
-                                 est_usd=0.05, max_tokens=10000)
+                                 est_usd=0.05, max_tokens=12000)
         return llm.parse_json(text)["code_patch"]
     return PATCH_GENERIC

@@ -1,0 +1,207 @@
+{
+ "B0": {
+  "per_case": {
+   "hero_tabular": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "clean_control": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_prescale": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_temporal": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_proxy": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "leak_group": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "clean_wine_correct": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "clean_group_correct": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "synthetic_leak": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   }
+  },
+  "recall": "0/6",
+  "false_alarms": "0/3"
+ },
+ "B1": {
+  "per_case": {
+   "hero_tabular": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "clean_control": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_prescale": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_temporal": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_proxy": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "leak_group": {
+    "baseline": "B1 fixed GroupKFold",
+    "applicable": true,
+    "group_col": "c_8d423f",
+    "flagged": true,
+    "per_seed": [
+     "FALSIFIED",
+     "FALSIFIED",
+     "FALSIFIED"
+    ]
+   },
+   "clean_wine_correct": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "clean_group_correct": {
+    "baseline": "B1 fixed GroupKFold",
+    "applicable": true,
+    "group_col": "c_9a104c",
+    "flagged": false,
+    "per_seed": [
+     "SURVIVED",
+     "SURVIVED",
+     "SURVIVED"
+    ]
+   },
+   "synthetic_leak": {
+    "baseline": "B1 fixed GroupKFold",
+    "applicable": true,
+    "group_col": "c_f158ce",
+    "flagged": false,
+    "per_seed": [
+     "SURVIVED",
+     "SURVIVED",
+     "SURVIVED"
+    ]
+   }
+  },
+  "recall": "1/6",
+  "false_alarms": "0/3"
+ },
+ "B3": {
+  "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+  "per_case": {
+   "hero_tabular": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "clean_control": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "leak_prescale": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "leak_temporal": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "leak_proxy": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "leak_group": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "clean_wine_correct": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "clean_group_correct": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   },
+   "synthetic_leak": {
+    "baseline": "B3 single-prompt muse-spark-1.3 (no execution)",
+    "status": "NOT RUN (mock mode; single-prompt judgement needs --live)",
+    "flagged": null
+   }
+  }
+ },
+ "real_suites": {
+  "deepchecks": "not installed (reimplementation used; install with `pip install deepchecks` to run the real suite)",
+  "giskard": "not installed (reimplementation used; install with `pip install giskard` to run the real suite)"
+ },
+ "NullLab": {
+  "mode": "MOCK (stub, not a model result)",
+  "verdicts": {
+   "hero_tabular": "FALSIFIED",
+   "clean_control": "SURVIVED",
+   "leak_prescale": "FALSIFIED",
+   "leak_temporal": "FALSIFIED",
+   "leak_proxy": "FALSIFIED",
+   "leak_group": "FALSIFIED",
+   "clean_wine_correct": "SURVIVED",
+   "clean_group_correct": "SURVIVED",
+   "synthetic_leak": "FALSIFIED"
+  },
+  "recall": "6/6",
+  "false_alarms": "0/3"
+ },
+ "grounding_precision": 1.0,
+ "non_checklist_win": {
+  "hero_tabular": true,
+  "leak_prescale": true,
+  "leak_temporal": true,
+  "leak_proxy": true,
+  "leak_group": false,
+  "synthetic_leak": true
+ }
+}
