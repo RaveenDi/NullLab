@@ -1,0 +1,12 @@
+<!doctype html><meta charset=utf-8><title>NullLab</title><style>body{font:15px system-ui;background:#0e1116;color:#e6e9ef;margin:0;padding:24px;max-width:900px;margin:auto}
+.wm{display:inline-block;padding:3px 10px;border:2px solid;border-radius:4px;font-weight:700;letter-spacing:.08em}
+.REAL{color:#3fb950}.SYNTH{color:#f0883e}.mock{color:#f0883e;font-weight:700}
+.bars{display:flex;gap:60px;align-items:flex-end;height:260px;margin:24px 0;border-bottom:1px solid #444;position:relative}
+.bar{width:140px;position:relative;border-radius:4px 4px 0 0}.bar b{position:absolute;top:-24px;width:100%;text-align:center}
+.bar small{position:absolute;bottom:-42px;width:100%;text-align:center;color:#9aa4b2}
+#claim{background:#58a6ff;animation:none}#ctrl{background:#f85149;animation:grow 1.4s ease-out both}
+@keyframes grow{from{height:var(--from)}to{height:var(--to)}}
+.stamp{position:absolute;right:0;top:20px;transform:rotate(-8deg);font-size:34px;font-weight:900;padding:4px 14px;border:5px solid;border-radius:6px;opacity:.9}
+.FALSIFIED{color:#f85149}.SURVIVED{color:#3fb950}.INCONCLUSIVE{color:#d29922}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0}.step{background:#161b22;border-radius:6px;padding:8px;font-size:13px}
+.step h4{margin:0 0 6px}table{border-collapse:collapse}td,th{padding:3px 10px;border-bottom:1px solid #30363d;text-align:left}small.c{color:#9aa4b2}</style><h1>NullLab</h1><ul><li><a href='clean_control.html'>clean_control</a> REAL-PINNED SURVIVED<li><a href='hero_tabular.html'>hero_tabular</a> REAL-PINNED FALSIFIED<li><a href='synthetic_leak.html'>synthetic_leak</a> SYNTHETIC FALSIFIED</ul><h2>Ablation (3 cases, same blind inputs)</h2><table><tr><th>method<th>recall (2 leaky)<th>false alarms (1 clean)<tr><td>B0 Deepchecks-style checklist<td>0/2<td>0/1<tr><td>B1 fixed GroupKFold<td>0/2<td>0/1<tr><td>B3 generic coder<td colspan=2>NOT RUN (UNVERIFIED)<tr><td>NullLab [MOCK (stub, not a model result)]<td>2/2<td>0/1</table>

@@ -1,0 +1,70 @@
+{
+ "B0": {
+  "per_case": {
+   "hero_tabular": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "clean_control": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   },
+   "synthetic_leak": {
+    "baseline": "B0 Deepchecks-style checklist",
+    "flagged": false,
+    "flags": []
+   }
+  },
+  "recall": "0/2",
+  "false_alarms": "0/1"
+ },
+ "B1": {
+  "per_case": {
+   "hero_tabular": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "clean_control": {
+    "baseline": "B1 fixed GroupKFold",
+    "flagged": false,
+    "applicable": false,
+    "reason": "no group column found"
+   },
+   "synthetic_leak": {
+    "baseline": "B1 fixed GroupKFold",
+    "applicable": true,
+    "group_col": "c_f158ce",
+    "flagged": false,
+    "per_seed": [
+     "SURVIVED",
+     "SURVIVED",
+     "SURVIVED"
+    ]
+   }
+  },
+  "recall": "0/2",
+  "false_alarms": "0/1"
+ },
+ "B3": {
+  "status": "NOT RUN (UNVERIFIED)"
+ },
+ "NullLab": {
+  "mode": "MOCK (stub, not a model result)",
+  "verdicts": {
+   "hero_tabular": "FALSIFIED",
+   "clean_control": "SURVIVED",
+   "synthetic_leak": "FALSIFIED"
+  },
+  "recall": "2/2",
+  "false_alarms": "0/1"
+ },
+ "grounding_precision": 1.0,
+ "non_checklist_win": {
+  "hero_tabular": true,
+  "synthetic_leak": true
+ }
+}

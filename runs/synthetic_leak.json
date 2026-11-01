@@ -1,0 +1,146 @@
+{
+ "case": "synthetic_leak",
+ "mode": "MOCK (stub, not a model result)",
+ "provenance": "SYNTHETIC",
+ "claim": {
+  "claim": "Our classifier achieves 91% accuracy and generalizes across sites.",
+  "metric": "accuracy",
+  "value": 0.91,
+  "split_desc": "Records are randomly divided into 75% training and 25% test with a fixed seed.",
+  "methods_line": "Records are randomly divided into 75% training and 25% test with a fixed seed.",
+  "code_line": "df[\"prior_rate\"] = df.groupby(CAT)[TARGET].transform(\"mean\")",
+  "mode": "MOCK (stub, not a model result)",
+  "grounding": {
+   "flags": {
+    "methods_line": true,
+    "code_line": true
+   },
+   "precision": 1.0
+  }
+ },
+ "hyp": {
+  "mode": "MOCK (regex heuristics, not a model result)",
+  "hypotheses": [
+   {
+    "id": "H1",
+    "text": "a category-level target statistic is computed on all rows before the split, so test labels leak into a feature",
+    "direction": "claimed>controlled",
+    "predicted_signature": "claimed accuracy exceeds accuracy when the statistic is computed from training labels only"
+   },
+   {
+    "id": "H2",
+    "text": "result is specific to the one random partition (seed sensitivity)",
+    "direction": "claimed~controlled",
+    "predicted_signature": "per-seed deltas change sign"
+   },
+   {
+    "id": "H3",
+    "text": "accuracy is carried by a distribution shift between train and test rows",
+    "direction": "claimed>controlled",
+    "predicted_signature": "not run (primary-only policy)"
+   }
+  ],
+  "primary": "H1",
+  "broken_assumption": "a category-level target statistic is computed on all rows before the split, so test labels leak into a feature",
+  "split_key": "category column used by the group-by",
+  "code_patch": "import numpy as np\nimport train\nfrom sklearn.model_selection import KFold\n\n\ndef controlled_eval(df, seed):\n    # same split as claimed; the category target-rate feature is computed from training labels only (out-of-fold)\n    tr, te = train.split_idx(df, seed)\n    T, C = train.TARGET, train.CAT\n    trd, ted = df.iloc[tr].reset_index(drop=True).copy(), df.iloc[te].reset_index(drop=True).copy()\n    prior = trd[T].mean()\n    trd[\"prior_rate\"] = prior\n    for a, b in KFold(5, shuffle=True, random_state=seed).split(trd):\n        m = trd.iloc[a].groupby(C)[T].mean()\n        trd.loc[trd.index[b], \"prior_rate\"] = trd.iloc[b][C].map(m).fillna(prior).to_numpy()\n    ted[\"prior_rate\"] = ted[C].map(trd.groupby(C)[T].mean()).fillna(prior)\n    f = [c for c in trd.columns if c not in (T, C)]\n    return ted[T].to_numpy(), train.fit_predict(trd[f], trd[T], ted[f], seed)\n",
+  "prereg_sha256": "74bd4773dbfc8ff9ec0b126413f96efa701aae51153011691885a3d859307315"
+ },
+ "runs": [
+  {
+   "attempt": 1,
+   "patch": "primary",
+   "status": "ok"
+  }
+ ],
+ "log": [
+  {
+   "t": 0.0,
+   "phase": "Plan",
+   "msg": "claim extracted [MOCK (stub, not a model result)]: Our classifier achieves 91% accuracy and generalizes across sites.",
+   "grounding": {
+    "flags": {
+     "methods_line": true,
+     "code_line": true
+    },
+    "precision": 1.0
+   }
+  },
+  {
+   "t": 0.0,
+   "phase": "Plan",
+   "msg": "3 hypotheses preregistered before any run (sha256 74bd4773dbfc); primary H1: a category-level target statistic is computed on all rows before the split, so test labels leak into a feature",
+   "hypotheses": [
+    {
+     "id": "H1",
+     "text": "a category-level target statistic is computed on all rows before the split, so test labels leak into a feature",
+     "direction": "claimed>controlled",
+     "predicted_signature": "claimed accuracy exceeds accuracy when the statistic is computed from training labels only"
+    },
+    {
+     "id": "H2",
+     "text": "result is specific to the one random partition (seed sensitivity)",
+     "direction": "claimed~controlled",
+     "predicted_signature": "per-seed deltas change sign"
+    },
+    {
+     "id": "H3",
+     "text": "accuracy is carried by a distribution shift between train and test rows",
+     "direction": "claimed>controlled",
+     "predicted_signature": "not run (primary-only policy)"
+    }
+   ]
+  },
+  {
+   "t": 6.11,
+   "phase": "Act",
+   "msg": "sandbox[subprocess] -> ok",
+   "status": "ok"
+  },
+  {
+   "t": 6.11,
+   "phase": "Verify",
+   "msg": "paired-bootstrap deltas per seed {'42': 0.109, '43': 0.131, '44': 0.115}; seed calls {'42': 'FALSIFIED', '43': 'FALSIFIED', '44': 'FALSIFIED'} -> FALSIFIED"
+  }
+ ],
+ "seeds": {
+  "42": {
+   "claimed_acc": 0.7813333333333333,
+   "controlled_acc": 0.672,
+   "delta": 0.10933333333333328,
+   "ci_lo": 0.05193333333333338,
+   "ci_hi": 0.1706666666666667,
+   "n_claimed": 375,
+   "n_controlled": 375
+  },
+  "43": {
+   "claimed_acc": 0.784,
+   "controlled_acc": 0.6533333333333333,
+   "delta": 0.1306666666666667,
+   "ci_lo": 0.07200000000000001,
+   "ci_hi": 0.19733333333333336,
+   "n_claimed": 375,
+   "n_controlled": 375
+  },
+  "44": {
+   "claimed_acc": 0.7733333333333333,
+   "controlled_acc": 0.6586666666666666,
+   "delta": 0.1146666666666667,
+   "ci_lo": 0.055999999999999994,
+   "ci_hi": 0.17739999999999995,
+   "n_claimed": 375,
+   "n_controlled": 375
+  }
+ },
+ "verdict": {
+  "verdict": "FALSIFIED",
+  "per_seed": {
+   "42": "FALSIFIED",
+   "43": "FALSIFIED",
+   "44": "FALSIFIED"
+  },
+  "agree": true,
+  "cites_ok": true
+ },
+ "elapsed_s": 6.1
+}

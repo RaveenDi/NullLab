@@ -1,0 +1,25 @@
+<!doctype html><meta charset=utf-8><title>NullLab verdict: hero_tabular</title><style>body{font:15px system-ui;background:#0e1116;color:#e6e9ef;margin:0;padding:24px;max-width:900px;margin:auto}
+.wm{display:inline-block;padding:3px 10px;border:2px solid;border-radius:4px;font-weight:700;letter-spacing:.08em}
+.REAL{color:#3fb950}.SYNTH{color:#f0883e}.mock{color:#f0883e;font-weight:700}
+.bars{display:flex;gap:60px;align-items:flex-end;height:260px;margin:24px 0;border-bottom:1px solid #444;position:relative}
+.bar{width:140px;position:relative;border-radius:4px 4px 0 0}.bar b{position:absolute;top:-24px;width:100%;text-align:center}
+.bar small{position:absolute;bottom:-42px;width:100%;text-align:center;color:#9aa4b2}
+#claim{background:#58a6ff;animation:none}#ctrl{background:#f85149;animation:grow 1.4s ease-out both}
+@keyframes grow{from{height:var(--from)}to{height:var(--to)}}
+.stamp{position:absolute;right:0;top:20px;transform:rotate(-8deg);font-size:34px;font-weight:900;padding:4px 14px;border:5px solid;border-radius:6px;opacity:.9}
+.FALSIFIED{color:#f85149}.SURVIVED{color:#3fb950}.INCONCLUSIVE{color:#d29922}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:20px 0}.step{background:#161b22;border-radius:6px;padding:8px;font-size:13px}
+.step h4{margin:0 0 6px}table{border-collapse:collapse}td,th{padding:3px 10px;border-bottom:1px solid #30363d;text-align:left}small.c{color:#9aa4b2}</style>
+<h1>NullLab <small class=c>every AI can give you an answer; this one tries to prove it wrong</small></h1>
+<span class="wm REAL">REAL-PINNED</span> <span class=mock>MOCK (stub, not a model result)</span>
+<p><b>Claim:</b> Our classifier achieves 96% accuracy on held-out data and generalizes to new samples.</p>
+<div class=bars style="--from:260px;--to:207px">
+ <div class=bar id=claim style="height:260px"><b>100.0%</b><small>claimed protocol</small></div>
+ <div class=bar id=ctrl style="height:207px"><b>79.6%</b><small>controlled re-evaluation</small></div>
+ <div class="stamp FALSIFIED">FALSIFIED</div></div>
+<p style="margin-top:50px"><b>Why:</b> augmented copies of one record can land on both sides of the train/test split</p>
+<div class=steps><div class=step><h4>Plan</h4>claim extracted [MOCK (stub, not a model result)]: Our classifier achieves 96% accuracy on held-out data and generalizes to new samples.<br>3 hypotheses preregistered before any run (sha256 d5e8076ec212); primary H1: augmented copies of one record can land on both sides of the train/test split</div><div class=step><h4>Act</h4>sandbox[subprocess] -&gt; ok</div><div class=step><h4>Verify</h4>paired-bootstrap deltas per seed {&#x27;42&#x27;: 0.197, &#x27;43&#x27;: 0.208, &#x27;44&#x27;: 0.208}; seed calls {&#x27;42&#x27;: &#x27;FALSIFIED&#x27;, &#x27;43&#x27;: &#x27;FALSIFIED&#x27;, &#x27;44&#x27;: &#x27;FALSIFIED&#x27;} -&gt; FALSIFIED</div><div class=step><h4>Recover</h4><small class=c>not needed</small></div></div>
+<table><tr><th>seed<th>claimed acc<th>controlled acc<th>delta<th>95% CI of delta<th>call</tr><tr><td>42<td>1.000<td>0.803<td>+0.197<td>[+0.140, +0.258]<td>FALSIFIED<tr><td>43<td>1.000<td>0.792<td>+0.208<td>[+0.146, +0.270]<td>FALSIFIED<tr><td>44<td>1.000<td>0.792<td>+0.208<td>[+0.152, +0.264]<td>FALSIFIED</table>
+<p><small class=c>Cites (verbatim): methods line "The augmented pool was randomly divided into 75% training and 25% test records using a fixed random seed." | code line "<code>data = augment(df, seed)</code>"<br>
+Verdict rule: FALSIFIED only if the delta CI excludes 0 and delta &gt;= 0.03 on all 3 seeds (42,43,44); SURVIVED if all three CIs include 0; otherwise INCONCLUSIVE.
+Prereg sha256 d5e8076ec2122763. CIs: [+0.140, +0.258], [+0.146, +0.270], [+0.152, +0.264]</small></p>

@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+runs/live_calls.jsonl
+# secrets
+.env
+.env.*
+!.env.example
+# python
+venv/
+*.pyc
+.pytest_cache/
+# runtime noise
+*.log
+*.pid
+node_modules/
+.DS_Store
+Thumbs.db
+# internal builder briefs (kept locally)
+docs/BUILDER-BRIEF.md
+docs/BRIEF-*.md
+docs/MUSE-BRIEF-*.md

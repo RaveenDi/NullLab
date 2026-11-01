@@ -1,0 +1,161 @@
+{
+ "case": "clean_control",
+ "mode": "MOCK (stub, not a model result)",
+ "provenance": "REAL-PINNED",
+ "claim": {
+  "claim": "Our classifier achieves 96% accuracy on held-out images.",
+  "metric": "accuracy",
+  "value": 0.96,
+  "split_desc": "The scaler and the classifier are fit on the training portion only; 25% of the images are held out for testing with a fixed random seed.",
+  "methods_line": "The scaler and the classifier are fit on the training portion only; 25% of the images are held out for testing with a fixed random seed.",
+  "code_line": "tr, te = split_idx(df, seed, groups)",
+  "mode": "MOCK (stub, not a model result)",
+  "grounding": {
+   "flags": {
+    "methods_line": true,
+    "code_line": true
+   },
+   "precision": 1.0
+  }
+ },
+ "hyp": {
+  "mode": "MOCK (regex heuristics, not a model result)",
+  "hypotheses": [
+   {
+    "id": "H1",
+    "text": "x",
+    "direction": "claimed>controlled",
+    "predicted_signature": "x"
+   },
+   {
+    "id": "H2",
+    "text": "result is specific to the one random partition (seed sensitivity)",
+    "direction": "claimed~controlled",
+    "predicted_signature": "per-seed deltas change sign"
+   },
+   {
+    "id": "H3",
+    "text": "accuracy is carried by a distribution shift between train and test rows",
+    "direction": "claimed>controlled",
+    "predicted_signature": "not run (primary-only policy)"
+   }
+  ],
+  "primary": "H1",
+  "broken_assumption": "x",
+  "split_key": "x",
+  "code_patch": "def controlled_eval(df, seed):\n    raise ValueError('boom')\n",
+  "prereg_sha256": "d4014d72cf2f82472f0fc962fa0988b24b369efc446c7ebb3f599fc4fd6407d9"
+ },
+ "runs": [
+  {
+   "attempt": 1,
+   "patch": "primary",
+   "status": "error"
+  },
+  {
+   "attempt": 2,
+   "patch": "recovered",
+   "status": "ok"
+  }
+ ],
+ "log": [
+  {
+   "t": 0.0,
+   "phase": "Plan",
+   "msg": "claim extracted [MOCK (stub, not a model result)]: Our classifier achieves 96% accuracy on held-out images.",
+   "grounding": {
+    "flags": {
+     "methods_line": true,
+     "code_line": true
+    },
+    "precision": 1.0
+   }
+  },
+  {
+   "t": 0.0,
+   "phase": "Plan",
+   "msg": "3 hypotheses preregistered before any run (sha256 d4014d72cf2f); primary H1: x",
+   "hypotheses": [
+    {
+     "id": "H1",
+     "text": "x",
+     "direction": "claimed>controlled",
+     "predicted_signature": "x"
+    },
+    {
+     "id": "H2",
+     "text": "result is specific to the one random partition (seed sensitivity)",
+     "direction": "claimed~controlled",
+     "predicted_signature": "per-seed deltas change sign"
+    },
+    {
+     "id": "H3",
+     "text": "accuracy is carried by a distribution shift between train and test rows",
+     "direction": "claimed>controlled",
+     "predicted_signature": "not run (primary-only policy)"
+    }
+   ]
+  },
+  {
+   "t": 2.73,
+   "phase": "Act",
+   "msg": "sandbox[subprocess] -> error",
+   "status": "error"
+  },
+  {
+   "t": 2.73,
+   "phase": "Recover",
+   "msg": "Act failed (ed_eval(df, s)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\raved\\AppData\\Local\\Temp\\nulllab__1ahrcnv\\patch.py\", line 2, in controlled_eval\n    raise ValueError('boom')\nValueError: boom\n); auto-retry once with a repaired patch"
+  },
+  {
+   "t": 6.29,
+   "phase": "Act",
+   "msg": "retry -> ok"
+  },
+  {
+   "t": 6.29,
+   "phase": "Verify",
+   "msg": "paired-bootstrap deltas per seed {'42': -0.001, '43': 0.004, '44': 0.007}; seed calls {'42': 'SURVIVED', '43': 'SURVIVED', '44': 'SURVIVED'} -> SURVIVED"
+  }
+ ],
+ "seeds": {
+  "42": {
+   "claimed_acc": 0.9711111111111111,
+   "controlled_acc": 0.9716193656093489,
+   "delta": -0.0005082544982377701,
+   "ci_lo": -0.011913652383602341,
+   "ci_hi": 0.011480894082730493,
+   "n_claimed": 450,
+   "n_controlled": 1797
+  },
+  "43": {
+   "claimed_acc": 0.9733333333333334,
+   "controlled_acc": 0.9688369504730105,
+   "delta": 0.004496382860322834,
+   "ci_lo": -0.010905954368391752,
+   "ci_hi": 0.02128751623075498,
+   "n_claimed": 450,
+   "n_controlled": 1797
+  },
+  "44": {
+   "claimed_acc": 0.98,
+   "controlled_acc": 0.9727323316638843,
+   "delta": 0.007267668336115696,
+   "ci_lo": -0.012734279354479728,
+   "ci_hi": 0.012725746614728299,
+   "n_claimed": 450,
+   "n_controlled": 1797
+  }
+ },
+ "verdict": {
+  "verdict": "SURVIVED",
+  "per_seed": {
+   "42": "SURVIVED",
+   "43": "SURVIVED",
+   "44": "SURVIVED"
+  },
+  "agree": true,
+  "cites_ok": true
+ },
+ "elapsed_s": 6.3
+}

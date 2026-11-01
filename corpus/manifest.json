@@ -1,0 +1,14 @@
+{
+ "hero_tabular": {
+  "provenance": "REAL-PINNED",
+  "note": "real UCI wine data (sklearn bundled); pipeline authored for this corpus"
+ },
+ "clean_control": {
+  "provenance": "REAL-PINNED",
+  "note": "real UCI digits data (sklearn bundled); correct pipeline"
+ },
+ "synthetic_leak": {
+  "provenance": "SYNTHETIC",
+  "note": "generated data, planted text-dependent leak"
+ }
+}
