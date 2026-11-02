@@ -89,6 +89,44 @@ def test_g9_slot_is_defensive(tmp_path):
     assert spa_data._g9(tmp_path) is None
 
 
+def _g9b_file(complete=True):
+    def unit(c, r, src, out):
+        return {"unit": f"g9-{r}:{c}", "case": c, "repeat": r, "source": src, "outcome": out}
+    return {"complete": complete, "units_present_g9": 8, "units_present_g9b": 8,
+            "usage_g9b": {"run_estimated_usd_incl_transport_retries": 1.6},
+            "union": {"ehg": {"n_leaky": 5, "n_clean": 5, "direction_right": 5, "clean_false_alarms": 0, "magnitude_within_0.15": 5,
+                              "reference": 0.43, "b3_gets_it_leaky": 5, "b3_false_alarms_clean": 0},
+                      "civilwar": {"n_leaky": 3, "n_clean": 3, "direction_right": 3, "clean_false_alarms": 0, "magnitude_within_0.15": 3,
+                                   "b3_gets_it_leaky": 1, "b3_false_alarms_clean": 3},
+                      "overall": {"cases_scored": 16, "cases_planned": 16, "harness_inconclusive": 0, "harness_target_met": True,
+                                  "EHG_PASS": True, "CIVILWAR_REGRESSION_PASS": True}},
+            "per_unit": [unit("ehg_disguised", "r1", "g9", "inflation found"), unit("civilwar_disguised", "r1", "g9b", "inflation found")]}
+
+
+def test_g9_prefers_complete_g9b_and_falls_back(tmp_path):
+    (tmp_path / "runs_g9").mkdir()
+    (tmp_path / "runs_g9b").mkdir()
+    (tmp_path / "runs_g9" / "score.json").write_text(json.dumps({"acceptance": {"a": "3/5"}}), encoding="utf-8")
+    b = tmp_path / "runs_g9b" / "score.json"
+    b.write_text(json.dumps(_g9b_file()), encoding="utf-8")
+    g = spa_data._g9(tmp_path)
+    assert g["complete"] and "Caveats before the numbers" in g["read_first"] and "nominal" in g["read_first"]
+    assert {u["guard"] for u in g["units"]} == {"pre-fix guard", "speed-fixed guard"}
+    assert any("5 of 5" in r["val"] for r in g["rows"]) and "runs_g9b" in g["src"]
+    for bad in (json.dumps(_g9b_file(False)), "{ garbled", "[]", json.dumps({"complete": True, "union": {"ehg": 1}})):
+        b.write_text(bad, encoding="utf-8")
+        g = spa_data._g9(tmp_path)
+        assert g and not g.get("complete") and g["src"] == "runs_g9/score.json"   # falls back to the partial view
+    assert spa_data._g9(tmp_path / "nope") is None
+
+
+def test_g9b_payload_has_no_banned_words():
+    txt = json.dumps(spa_data.scrub(spa_data._g9() or {})).lower()
+    for w in spa_data.BANNED:
+        assert not re.search(r"\b" + re.escape(w) + r"\b", txt), w
+    assert "civil" not in txt
+
+
 def test_scrub_renames_topic_in_keys_and_values():
     out = spa_data.scrub({"civilwar_x": ["Civil-war onset by Muchlinski"]})
     assert "civil" not in json.dumps(out).lower() and "muchlinski" not in json.dumps(out).lower()

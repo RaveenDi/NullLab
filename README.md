@@ -4,7 +4,7 @@
 
 Re-runs an ML claim's suspect step and measures how inflated it was.
 
-`tests: 77 passed at G6 (docs/EVAL-6.md; later phases add tests)` | `CI: agent.ci_check, exit 0/1/2 (workflow in .github/workflows, not yet run on GitHub: UNVERIFIED)` | `offline by default` | `rules-only path: $0, no key`
+`tests: 387 collected (77 passed at G6, docs/EVAL-6.md)` | `CI: agent.ci_check, exit 0/1/2 (workflow in .github/workflows, not yet run on GitHub: UNVERIFIED)` | `offline by default` | `rules-only path: $0, no key`
 
 ## Try it (offline, no key, $0)
 
@@ -47,6 +47,15 @@ A famous published ML result reported a score that did not survive a re-check: t
 
 G8 leaky repeats that executed measured +0.340, +0.339, +0.341, +0.328 (published +0.36; a Python port of the original measures +0.299); the one that did not is a read timeout after about 500 s, counted as not met and not re-rolled. G7 measured +0.308 in each executed repeat. All five G8 clean repeats: no effect, interval spans 0 (-0.005, -0.005, -0.004, -0.015, -0.005). Reading only (one prompt, no execution) got the G7 leaky case right 4/5 and false-alarmed 5/5 on the clean twin; it was not run on G8. Caveats that matter: the guard rejected a random-split first plan in the executed repeats, so the time split comes from the guard plus the model; the fixed rules were never run on this disguised case; the disguise passed a 2-call probe, which is not proof of no memory; n = 5 per arm, counts not rates. Everything has n and a file on the demo page (`python -m report.render`, then open `report/index.html`).
 
+**G9 (a third, separately labelled run; typed edit language, speed-fixed guard; shown beside G7 and G8, never merged).** The EHG disguised pair (a second real dataset: oversampling before cross-validation; 5 repeats) and a regression check on the headline pair (3 repeats), 16 units in all: 8 from G9, which was stopped when the guard analysis proved too slow on the large case, and 8 from G9b, run after the guard was sped up with identical decisions ([EVAL-14](docs/EVAL-14-GUARD-SPEED.md), [EVAL-15](docs/EVAL-15-G9B-PREREG.md)). The stalled units had no observed outcome, so G9b is a continuation, not a re-roll; each unit is labelled by guard version in `runs_g9b/score.json`.
+
+| G9 + G9b union (counts) | Direction found (leaky) | False alarms (clean twin) | Inflation within 0.15 | Reading only (leaky found / clean false alarms) |
+|---|---|---|---|---|
+| EHG disguised pair, 5 repeats | **5/5** | **0/5** | **5/5**, +0.424 every repeat (offline reference +0.43) | 5/5 / 0/5 (matched the loop) |
+| Headline pair regression, 3 repeats | **3/3** | **0/3** | **3/3**, +0.332 each (published +0.36) | 1/3 / 3/3 |
+
+Preregistered clauses (EVAL-13), scored on the union: EHG PASS, regression PASS, harness target met (0 of 16 INCONCLUSIVE; G9b used one guard repair and one bad-JSON repair). Estimated G9b spend about USD 1.6 (estimate, not billing). Caveats: (1) the 5 repeats gave identical numbers (same plan and seeds), so n = 5 is nominal for stability, not 5 independent confirmations; (2) EHG is not held out for the typed edit language, which was informed by failures we had already seen; (3) the contract states the temporal-split rule up front, so the headline pair no longer tests whether the model finds that split itself; (4) 8 of 16 units ran under the pre-fix guard and 8 under the fixed one; (5) the fixed-rules baseline fires nothing on EHG (0.000), and rules vs loop overall stays MIXED. Source: `runs_g9b/score.json`.
+
 One-page card: [docs/RESULTS-CARD.md](docs/RESULTS-CARD.md). Synthetic hard cases (**11/12** signs right, reading only wrong **9/12**, fixed rules with no model **6/12**; SYNTHETIC, n = 12): [docs/EVAL-8-RULEBASED.md](docs/EVAL-8-RULEBASED.md).
 
 ## Where Meta's models sit
@@ -85,7 +94,8 @@ Setup first: `python -m venv .venv && .venv\Scripts\activate && pip install -r r
 - **Rules vs loop is MIXED**, not a pass: the loop has more hard-case signs right (11/12 vs 6/12) and more clean false alarms (1/12 vs 0/12). The rule author had read every `train.py`.
 - The guard checks edits stay in their step and, since G7, that a forecast gets a time split; it cannot check direction or whether a fix is the right one.
 - The sandbox is a restricted subprocess (network cut, timeout, evaluator paths blocked), not a locked container; the `Dockerfile` path is untested.
-- Estimated Meta credits G4 to G8: about $15.35 over 200 live calls (per-call estimates; G0 to G3 not included). Test suite: 77 passed at G6 (later phases add tests).
+- **G9 caveats:** identical repeats (n = 5 is nominal), EHG not held out for the typed edit language, temporal-split rule stated up front, 8 of 16 units under the pre-fix guard. See the G9 paragraph above.
+- Estimated Meta credits G4 to G8: about $15.35 over 200 live calls; G9b adds about $1.6 (per-call estimates, not billing; G0 to G3 and G9 are not in the G4 to G8 sum). Test suite: 387 tests collected on Nov 2 (collection only; the full suite was not re-run for this edit, the report tests pass; 77 passed at G6).
 
 ## What is in the repo
 - `agent/` loop, guard, auditor; `baselines/` single-prompt, checklist and rule baselines; `sandbox/` executor; `eval/` builders and host-only truth; `real/` real, disguised and textbook cases (raw data pinned by checksum, see `real/README.md`); `report/` the demo page (plain HTML/CSS/JS, no external requests); `runs_*/` every run file behind every number; `docs/` EVAL-2 to EVAL-8, audit report, results card, demo script, video storyboard.

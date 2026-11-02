@@ -1,0 +1,401 @@
+{
+ "repeat": "g9-r2",
+ "instrument": "g9b",
+ "model": "muse-spark-1.3-contributor",
+ "temperature": 0.7,
+ "b3": {},
+ "loop": {
+  "civilwar_disguised": {
+   "rid": "g9-r2",
+   "instrument": "g9b",
+   "first_plan": {
+    "verdict": "flaw",
+    "factors": [
+     {
+      "id": "A",
+      "flaw": "train-on-test resubstitution with non-temporal hold-out while intended use is forecasting future line-shifts",
+      "evidence_line": "return idx, idx",
+      "ops": [
+       {
+        "op": "replace_split",
+        "step": "split_rows",
+        "kind": "temporal",
+        "col": "epoch"
+       }
+      ]
+     }
+    ],
+    "predicted_drop_pp": {
+     "fix_all": 0.35
+    },
+    "culprit_ranking": [
+     "A"
+    ],
+    "reason": "split_rows scores on the same rows used to fit and to tune mtry, inflating PR-AUC/ROC-AUC; forecasting use requires training strictly earlier than scored epochs, so temporal split removes overlap and future leakage",
+    "mode": "LIVE muse-spark-1.3-contributor",
+    "prereg_sha256": "3ce19c8ec4f92f47336674968648962bfdb1fc1ec36a568b1d40745b03da6bbd"
+   },
+   "first_plan_prereg": "3ce19c8ec4f92f47336674968648962bfdb1fc1ec36a568b1d40745b03da6bbd",
+   "first_plan_guard": {
+    "decision": "ACCEPT",
+    "problems": []
+   },
+   "status": "ok",
+   "verdict": "flaw",
+   "metric": "pr_auc",
+   "stats": {
+    "42": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.39502994156238547,
+       "fix_A": 0.05224203857620847,
+       "fix_B": 0.05224203857620847,
+       "fix_both": 0.05224203857620847
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1524,
+       "fix_B": 1524,
+       "fix_both": 1524
+      },
+      "drop": {
+       "fix_A": 0.342787902986177,
+       "fix_B": 0.342787902986177,
+       "fix_both": 0.342787902986177
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.23851165676810124,
+        0.4346093804707232
+       ],
+       "fix_B": [
+        0.24191746384359494,
+        0.4386470953358851
+       ],
+       "fix_both": [
+        0.23349042385166952,
+        0.4336592378534667
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.342787902986177,
+      "I_ci": [
+       -0.45760446403373334,
+       -0.22452071553819825
+      ],
+      "I_excludes_0": true
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.9714844670489357,
+       "fix_A": 0.8936516825332179,
+       "fix_B": 0.8936516825332179,
+       "fix_both": 0.8936516825332179
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1524,
+       "fix_B": 1524,
+       "fix_both": 1524
+      },
+      "drop": {
+       "fix_A": 0.07783278451571773,
+       "fix_B": 0.07783278451571773,
+       "fix_both": 0.07783278451571773
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.027161653420772012,
+        0.14301925290121956
+       ],
+       "fix_B": [
+        0.02633319086006573,
+        0.13780359065935263
+       ],
+       "fix_both": [
+        0.02248581298436109,
+        0.14022962751139836
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.07783278451571773,
+      "I_ci": [
+       -0.18363211896778894,
+       0.016625592867576915
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.38433557574065996,
+       "fix_A": 0.04696590630177497,
+       "fix_B": 0.04696590630177497,
+       "fix_both": 0.04696590630177497
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1524,
+       "fix_B": 1524,
+       "fix_both": 1524
+      },
+      "drop": {
+       "fix_A": 0.337369669438885,
+       "fix_B": 0.337369669438885,
+       "fix_both": 0.337369669438885
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.2463462345901817,
+        0.4184844743226439
+       ],
+       "fix_B": [
+        0.24414060878960436,
+        0.4227738492388906
+       ],
+       "fix_both": [
+        0.25062371318280546,
+        0.4184761711499265
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.337369669438885,
+      "I_ci": [
+       -0.4368604627332812,
+       -0.23021491598183913
+      ],
+      "I_excludes_0": true
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.9712482081140523,
+       "fix_A": 0.885837193911317,
+       "fix_B": 0.885837193911317,
+       "fix_both": 0.885837193911317
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1524,
+       "fix_B": 1524,
+       "fix_both": 1524
+      },
+      "drop": {
+       "fix_A": 0.08541101420273534,
+       "fix_B": 0.08541101420273534,
+       "fix_both": 0.08541101420273534
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.03414364381745882,
+        0.14913753275711664
+       ],
+       "fix_B": [
+        0.03171500802305415,
+        0.14637532477086218
+       ],
+       "fix_both": [
+        0.031871286567385526,
+        0.14757986489103053
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.08541101420273534,
+      "I_ci": [
+       -0.18188386371795245,
+       0.013471879156898733
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.37324573159548613,
+       "fix_A": 0.056139694082207356,
+       "fix_B": 0.056139694082207356,
+       "fix_both": 0.056139694082207356
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1524,
+       "fix_B": 1524,
+       "fix_both": 1524
+      },
+      "drop": {
+       "fix_A": 0.31710603751327876,
+       "fix_B": 0.31710603751327876,
+       "fix_both": 0.31710603751327876
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.2141669733489073,
+        0.40786606341228043
+       ],
+       "fix_B": [
+        0.2217130442337422,
+        0.4137445816339665
+       ],
+       "fix_both": [
+        0.20798193777918464,
+        0.40999773633993203
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.31710603751327876,
+      "I_ci": [
+       -0.4325173564735885,
+       -0.1935129244135696
+      ],
+      "I_excludes_0": true
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.9680283363443563,
+       "fix_A": 0.8957643944407676,
+       "fix_B": 0.8957643944407676,
+       "fix_both": 0.8957643944407676
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1524,
+       "fix_B": 1524,
+       "fix_both": 1524
+      },
+      "drop": {
+       "fix_A": 0.07226394190358865,
+       "fix_B": 0.07226394190358865,
+       "fix_both": 0.07226394190358865
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.020868581163947512,
+        0.12934395040488408
+       ],
+       "fix_B": [
+        0.024481280252730563,
+        0.12873853107108427
+       ],
+       "fix_both": [
+        0.018242990670701335,
+        0.1325923466801415
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.07226394190358865,
+      "I_ci": [
+       -0.1747386214948394,
+       0.021739825165671006
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "verdict": "flaw",
+    "factors": [
+     {
+      "id": "A",
+      "flaw": "train-on-test resubstitution with non-temporal hold-out while intended use is forecasting future line-shifts",
+      "evidence_line": "return idx, idx",
+      "ops": [
+       {
+        "op": "replace_split",
+        "step": "split_rows",
+        "kind": "temporal",
+        "col": "epoch"
+       }
+      ]
+     }
+    ],
+    "predicted_drop_pp": {
+     "fix_all": 0.35
+    },
+    "culprit_ranking": [
+     "A"
+    ],
+    "reason": "split_rows scores on the same rows used to fit and to tune mtry, inflating PR-AUC/ROC-AUC; forecasting use requires training strictly earlier than scored epochs, so temporal split removes overlap and future leakage",
+    "mode": "LIVE muse-spark-1.3-contributor",
+    "prereg_sha256": "3ce19c8ec4f92f47336674968648962bfdb1fc1ec36a568b1d40745b03da6bbd"
+   },
+   "log": [
+    {
+     "phase": "Verify",
+     "verdict": "ACCEPT",
+     "problems": [],
+     "configs": {
+      "fix_all": "ACCEPT"
+     }
+    },
+    {
+     "phase": "Smoke",
+     "ok": true,
+     "stage": "smoke",
+     "kind": null,
+     "definitive": false,
+     "message": "",
+     "elapsed_s": 6.9
+    },
+    {
+     "phase": "Act",
+     "status": "ok",
+     "cached_exec": {
+      "orig_cache_hits": [],
+      "orig_computed": [
+       42,
+       43,
+       44
+      ],
+      "workers": 6,
+      "jobs_run": 12,
+      "wall_s": 277.1
+     }
+    }
+   ],
+   "calls": [
+    {
+     "kind": "plan",
+     "tag": "g9_planner",
+     "est_usd": 0.12,
+     "usage": {
+      "completion_tokens": 1679,
+      "prompt_tokens": 5093,
+      "total_tokens": 6772,
+      "completion_tokens_details": {
+       "reasoning_tokens": 1514
+      },
+      "prompt_tokens_details": {
+       "cached_tokens": 0
+      }
+     },
+     "real_total_tokens": 6772,
+     "reply_len": 588,
+     "transport_attempts": 1,
+     "transport_retries": 0
+    }
+   ],
+   "retries": 0,
+   "repairs_used": [],
+   "layout": "single",
+   "guard": {
+    "ok": true,
+    "layout": "single",
+    "decision": "ACCEPT",
+    "configs": {
+     "fix_all": "ACCEPT"
+    },
+    "problems": []
+   },
+   "n_factors": 1,
+   "sources": {
+    "fix_all": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\n\ndef _g9_take(x, idx):\n    return x.iloc[idx] if hasattr(x, 'iloc') else x[idx]\n\ndef _g9_holdout(n, kind, seed, frac, key=None):\n    import numpy as np\n    n = int(n)\n    if kind == 'random':\n        perm = np.random.default_rng(seed).permutation(n)\n        k = max(1, int(round(n * frac)))\n        return (np.sort(perm[k:]), np.sort(perm[:k]))\n    key = np.asarray(key)\n    if kind == 'temporal':\n        order = np.argsort(key, kind='stable')\n        cut = key[order[min(n - 1, int(n * (1 - frac)))]]\n        tr, te = (np.flatnonzero(key < cut), np.flatnonzero(key >= cut))\n    else:\n        ug = np.unique(key)\n        pick = np.random.default_rng(seed).permutation(len(ug))[:max(1, int(round(len(ug) * frac)))]\n        mask = np.isin(key, ug[pick])\n        tr, te = (np.flatnonzero(~mask), np.flatnonzero(mask))\n    if len(tr) == 0 or len(te) == 0:\n        raise ValueError('g9 hold-out is empty for kind ' + kind)\n    return (tr, te)\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    \"\"\"Grid-search tuning: 10-fold CV ROC-AUC for each mtry in the grid; returns the best mtry.\"\"\"\n    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    return _g9_holdout(len(df), 'temporal', seed, 0.2, df['epoch'].to_numpy())\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  }
+ }
+}

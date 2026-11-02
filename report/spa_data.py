@@ -408,7 +408,76 @@ def _g9_structured(j):
     return {"rows": rows, "src": "runs_g9/score.json", "badge": "REAL-PINNED, disguised", "status": status}
 
 
+def _g9b(root=None):
+    """Union view of G9 + G9b (16 units, each labelled by guard version). Only when runs_g9b/score.json parses, says
+    complete: true and has the known layout; otherwise None so the caller falls back to the partial G9 view."""
+    try:
+        p = Path(root or ROOT) / "runs_g9b" / "score.json"
+        if not p.is_file():
+            return None
+        j = json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(j, dict) or j.get("complete") is not True:
+            return None
+        u = j.get("union") or {}
+        eh, cw, ov = u.get("ehg"), u.get("civilwar"), u.get("overall")
+        if not (isinstance(eh, dict) and isinstance(cw, dict) and isinstance(ov, dict)):
+            return None
+        if not isinstance(ov.get("cases_scored"), int) or ov.get("cases_scored") != ov.get("cases_planned"):
+            return None
+
+        def g(d, k):
+            return d.get(k) if isinstance(d.get(k), (int, float)) else "n/a"
+
+        ref = eh.get("reference")
+        rows = [
+            {"key": "EHG disguised pair: direction right", "val": f"{g(eh, 'direction_right')} of {g(eh, 'n_leaky')} repeats"},
+            {"key": "EHG clean twin: false alarms", "val": f"{g(eh, 'clean_false_alarms')} of {g(eh, 'n_clean')}"},
+            {"key": "EHG inflation within 0.15 of +" + (f"{ref:.2f}" if isinstance(ref, (int, float)) else "n/a"),
+             "val": f"{g(eh, 'magnitude_within_0.15')} of {g(eh, 'n_leaky')} (+0.424 in every repeat; published range +0.36 to +0.49)"},
+            {"key": "Harness failures", "val": f"{g(ov, 'harness_inconclusive')} of {g(ov, 'cases_scored')} units (G9b used 1 guard repair and 1 bad-JSON repair)"},
+            {"key": "EHG, reading only", "val": f"found the leaky case {g(eh, 'b3_gets_it_leaky')} of {g(eh, 'n_leaky')}; false alarms on the clean twin {g(eh, 'b3_false_alarms_clean')} of {g(eh, 'n_clean')} (matched the loop)"},
+            {"key": "Second case, regression: direction right", "val": f"{g(cw, 'direction_right')} of {g(cw, 'n_leaky')}; clean false alarms {g(cw, 'clean_false_alarms')} of {g(cw, 'n_clean')}"},
+            {"key": "Second case: magnitude (+0.332 vs published +0.36)", "val": f"{g(cw, 'magnitude_within_0.15')} of {g(cw, 'n_leaky')} within 0.15"},
+            {"key": "Second case, reading only", "val": f"found the leaky case {g(cw, 'b3_gets_it_leaky')} of {g(cw, 'n_leaky')}; false alarms on the clean twin {g(cw, 'b3_false_alarms_clean')} of {g(cw, 'n_clean')}"},
+            {"key": "Preregistered clauses (EVAL-13, scored on the union)",
+             "val": f"EHG {'PASS' if ov.get('EHG_PASS') else 'not met'}; regression {'PASS' if ov.get('CIVILWAR_REGRESSION_PASS') else 'not met'}; harness target {'met' if ov.get('harness_target_met') else 'not met'}"},
+        ]
+        units = []
+        for x in j.get("per_unit") or []:
+            if not isinstance(x, dict):
+                continue
+            case = str(x.get("case", ""))
+            lab = ("EHG" if case.startswith("ehg") else "second case") + (" clean twin" if case.endswith("_clean") else " leaky")
+            gv = "speed-fixed guard" if x.get("source") == "g9b" else "pre-fix guard"
+            units.append({"unit": f"{lab} {x.get('repeat', '')}".strip(), "guard": gv, "outcome": str(x.get("outcome", ""))[:70]})
+        n9, n9b = j.get("units_present_g9"), j.get("units_present_g9b")
+        spend = (j.get("usage_g9b") or {}).get("run_estimated_usd_incl_transport_retries")
+        return {
+            "rows": rows, "units": units, "src": "runs_g9b/score.json (union with runs_g9/score.json)", "badge": "REAL-PINNED, disguised",
+            "status": None, "complete": True,
+            "read_first": ("Caveats before the numbers: the 5 repeats gave identical numbers (same plan, same seeds), so n=5 is nominal for stability, not 5 independent confirmations. "
+                           "EHG is not held out for the typed edit language. The contract states the temporal-split rule up front, so the second pair no longer tests whether the model finds that split itself. "
+                           "G7 failed its bar; G8 is a separate labelled run, shown beside G9, never merged. The fixed-rules baseline fires nothing on EHG; rules were mixed against the loop overall."),
+            "guard_note": (f"{n9} of 16 units ran under the guard before a speed fix, {n9b} under the fixed one. The earlier run stalled on a slow guard analysis on the large case; "
+                           "the fix gives identical decisions (docs/EVAL-14-GUARD-SPEED.md). The stalled units had no observed outcome, so G9b continues them and is not a re-roll."),
+            "spend_note": (f"G9b spend about ${spend:.2f} (estimate, not billing)." if isinstance(spend, (int, float)) else ""),
+        }
+    except Exception:
+        return None
+
+
 def _g9(root=None):
+    """Prefers the complete G9b union; falls back to the partial G9 file. Never raises."""
+    try:
+        b = _g9b(root)
+        if b:
+            return b
+    except Exception:
+        pass
+    return _g9_partial(root)
+
+
+def _g9_partial(root=None):
     """Defensive: the G9 file may not exist yet or may be partial/garbled. Returns None (slot stays hidden) unless it parses."""
     try:
         p = Path(root or ROOT) / "runs_g9" / "score.json"
