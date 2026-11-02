@@ -48,7 +48,6 @@ def main(pipeline_mode="mock", runs_dir=None):
     b3 = {c: b3_single_prompt(ROOT / "corpus" / c, mode="live" if pipeline_mode == "live" else "mock") for c in GT}
     if all(v["flagged"] is None for v in b3.values()):
         b3out = {"status": "NOT RUN (mock mode; single-prompt judgement needs --live)", "per_case": b3}
-        loop_vs_single = "UNMEASURED (B3 needs --live)"
     else:
         b3flags = {c: bool(v["flagged"]) for c, v in b3.items()}
         b3out = {"mode": "LIVE muse-spark-1.3 (one call per case, no execution)", "per_case": b3, **score_rows(b3flags)}

@@ -24,6 +24,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -87,7 +88,7 @@ class Ledger:
 
 
 @contextlib.contextmanager
-def recording_llm(ledger, role, live):
+def recording_llm(ledger: Any, role: str, live: bool) -> Any:
     """Route agent.llm.live_complete through the ledger: enforces the call cap BEFORE the call, refuses a real call unless
     `live`, and books the call (replayed calls cost 0). Restores the original function on exit."""
     from agent import llm
@@ -124,7 +125,7 @@ def _sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def summarize(rec):
+def summarize(rec: dict) -> dict | None:
     """Uniform numbers from a measured record (rule-baseline or loop). None if the record has no usable stats."""
     if not rec or rec.get("status") != "ok" or not rec.get("stats"):
         return None
@@ -139,7 +140,7 @@ def summarize(rec):
             "seeds": [str(r["seed"]) for r in rows], "n_controlled": [r["n_controlled"] for r in rows]}
 
 
-def default_measure(case_dir, fresh=False, root=ROOT):
+def default_measure(case_dir: str | Path, fresh: bool = False, root: str | Path = ROOT) -> tuple[dict, str]:
     """Measure the rule fix. Returns (record, how). A stored runs_rulefix record is reused ONLY for a case that lives in this
     repository AND whose generated patch hash equals the stored one (the data hash is not stored: UNVERIFIED if data.csv changed)."""
     case_dir = Path(case_dir)
@@ -158,7 +159,7 @@ def default_measure(case_dir, fresh=False, root=ROOT):
     return rules_measure.run_case(case_dir), "fresh sandbox run (local, no model)"
 
 
-def find_recorded_spark(case_dir, root=ROOT):
+def find_recorded_spark(case_dir: str | Path, root: str | Path = ROOT) -> tuple[dict, str] | None:
     """A finished loop record of this case in runs_g*/ (newest dir first). Only for cases inside this repository."""
     if not _under_root(case_dir, root):
         return None
@@ -176,7 +177,8 @@ def find_recorded_spark(case_dir, root=ROOT):
 
 
 # ---------------- the Spark loop (existing planner + guard + sandbox), every piece injectable ----------------
-def spark_loop(case_dir, ledger, live, plan_fn=None, retry_fn=None, execute_fn=None, repeat_id="hybrid"):
+def spark_loop(case_dir: Any, ledger: Any, live: bool, plan_fn: Any = None, retry_fn: Any = None, execute_fn: Any = None,
+               repeat_id: str = "hybrid") -> dict:
     """Plan -> guard (agent/fidelity) -> sandbox -> stats; one retry on a guard/execution failure, as in g5.loop_case.
     Returns a loop-shaped record. plan_fn(case_dir, rid)->(plan, raw); retry_fn(case_dir, rid, prev, problems)->(plan, raw);
     execute_fn(case_dir, patches)->raw result dict or raises. Defaults are the real planner and sandbox."""
@@ -243,7 +245,7 @@ REFEREE_SYSTEM = ("You are a skeptical referee of a machine-learning leakage aud
                   'Reply with JSON only: {"veto": true|false, "reason": "<one sentence>"}')
 
 
-def wonder_referee(case_dir, ledger, live, finding):
+def wonder_referee(case_dir: Any, ledger: Any, live: bool, finding: dict) -> dict:
     """Default referee: one call to the Wonder model. Returns {"veto": bool, "reason": str, "called": bool}."""
     from agent import llm
     ledger.check("referee")
@@ -269,8 +271,9 @@ def _verdict_from(summary):
     return "INFLATED" if summary and summary["sign"] == "+" else "NOT INFLATED"
 
 
-def run_hybrid(case_dir, *, live=False, referee=False, referee_fn=None, measure=None, spark_runner=None, detector=None,
-               fresh=False, allow_recorded=True, out_dir=None, max_spark_calls=MAX_SPARK_CALLS, root=ROOT):
+def run_hybrid(case_dir: str | Path, *, live: bool = False, referee: bool = False, referee_fn: Any = None, measure: Any = None,
+               spark_runner: Any = None, detector: Any = None, fresh: bool = False, allow_recorded: bool = True,
+               out_dir: str | Path | None = None, max_spark_calls: int = MAX_SPARK_CALLS, root: str | Path = ROOT) -> dict:
     """Audit one case folder (train.py, data.csv, excerpt.md). Returns the result dict (also written to out_dir/hybrid.json).
 
     measure(case_dir)->(rule_record, how)            default: default_measure (stored-if-identical, else local sandbox)
@@ -314,7 +317,7 @@ def run_hybrid(case_dir, *, live=False, referee=False, referee_fn=None, measure=
 
     # --- model branch
     if res["verdict"] is None:
-        runner = spark_runner or (lambda c, led, lv: spark_loop(c, led, lv))
+        runner = spark_runner or spark_loop
         got = None
         try:
             from agent import llm
@@ -389,7 +392,7 @@ def run_hybrid(case_dir, *, live=False, referee=False, referee_fn=None, measure=
 
 
 # ---------------- report ----------------
-def render_report(res, case_dir=None, detail=True):
+def render_report(res: dict, case_dir: str | Path | None = None, detail: bool = True) -> str:
     """Markdown: verdict, who produced each step, cost ledger, then (when a record exists) the full reviewer audit report."""
     s = res["summary"]
     L = [f"# NullLab hybrid audit: {res['case']}", "",
@@ -426,7 +429,8 @@ def render_report(res, case_dir=None, detail=True):
     return "\n".join(L) + "\n"
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
+    """Command line: audit one case folder and write the hybrid record."""
     ap = argparse.ArgumentParser(prog="python -m agent.hybrid", description=__doc__.split("\n")[0])
     ap.add_argument("case_dir")
     ap.add_argument("--live", action="store_true", help="allow real model calls (still passes the spend gate); default is offline")

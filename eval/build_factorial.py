@@ -113,7 +113,7 @@ def controlled_eval(df, seed):
     return y[te], train.fit_predict(X[tr], y[tr], X[te], seed)
 '''
 
-REF_FIX_BOTH = REF_FIX_A.split("def controlled_eval")[0].replace(
+REF_FIX_BOTH = REF_FIX_A.split("def controlled_eval", maxsplit=1)[0].replace(
     "from sklearn.model_selection import KFold", "from sklearn.model_selection import KFold, GroupShuffleSplit") + '''def controlled_eval(df, seed):
     # fix both: whole patients held out AND patient rate from training labels only (unseen patients get the prior)
     tr, te = next(GroupShuffleSplit(1, test_size=0.25, random_state=seed).split(df, groups=df[train.PATIENT]))
@@ -152,7 +152,7 @@ def main(claimed_acc=None):
         "agent_view_sha256": {n: hashlib.sha256((OUT / n).read_bytes()).hexdigest() for n in ("train.py", "data.csv", "excerpt.md")},
     }
     (ROOT / "eval" / "factorial_truth.json").write_text(json.dumps(truth, indent=1))
-    print(CASE, df.shape, "patients", df[SUBJ].nunique(), "event rate %.3f" % df[TARGET].mean())
+    print(CASE, df.shape, "patients", df[SUBJ].nunique(), f"event rate {df[TARGET].mean():.3f}")
 
 
 if __name__ == "__main__":

@@ -25,12 +25,13 @@ class PatchError(RuntimeError):
     pass
 
 
-def normalized_base(case_dir):
+def normalized_base(case_dir: str | Path) -> str:
     """The text the patch applies to: ast.unparse(train.py) plus a final newline."""
     return audit._norm_src((Path(case_dir) / "train.py").read_text(encoding="utf-8")) + "\n"
 
 
-def provenance_of(kind, rec, override=None):
+def provenance_of(kind: str, rec: dict, override: str | None = None) -> str:
+    """Where the patch came from (rule library or recorded model plan)."""
     if override:
         return override
     if kind == "rulefix":
@@ -38,7 +39,8 @@ def provenance_of(kind, rec, override=None):
     return "Spark: " + str((rec.get("final_plan") or {}).get("mode", "model-written plan"))
 
 
-def build_patch(case_dir, rec, kind, cfg="fix_both", provenance=None, run_name=None):
+def build_patch(case_dir: str | Path, rec: dict, kind: str, cfg: str = "fix_both", provenance: str | None = None,
+                run_name: str | None = None) -> str:
     """-> patch text (header + unified diff). Raises PatchError when the config changed nothing."""
     if cfg not in (rec.get("sources") or {}):
         raise PatchError(f"record has no source for {cfg}")
@@ -79,7 +81,7 @@ def build_patch(case_dir, rec, kind, cfg="fix_both", provenance=None, run_name=N
     return "\n".join(hdr) + "\n" + diff + "\n"
 
 
-def apply_unified(base_text, patch_text):
+def apply_unified(base_text: str, patch_text: str) -> str:
     """Minimal unified-diff applier (hunks only; ignores the free-text header). Raises PatchError if a hunk does not match."""
     lines = patch_text.splitlines()
     i = next((j for j, ln in enumerate(lines) if ln.startswith("--- ")), None)
@@ -121,7 +123,8 @@ def apply_unified(base_text, patch_text):
     return "\n".join(out) + "\n"
 
 
-def export_patch(case_dir, out_path, run=None, case=None, cfg="fix_both", provenance=None, rec=None, kind=None):
+def export_patch(case_dir: str | Path, out_path: str | Path, run: str | None = None, case: str | None = None,
+                 cfg: str = "fix_both", provenance: str | None = None, rec: dict | None = None, kind: str | None = None) -> str:
     """Locate the stored run (or take rec/kind directly), write the patch, return its text."""
     case_dir = Path(case_dir)
     run_name = None
@@ -135,7 +138,8 @@ def export_patch(case_dir, out_path, run=None, case=None, cfg="fix_both", proven
     return text
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
+    """Command line: export the verified fix as a unified diff."""
     ap = argparse.ArgumentParser(prog="python -m agent.patch_export", description=__doc__.split("\n")[0])
     ap.add_argument("case_dir")
     ap.add_argument("--run", help="run file (rK.json or runs_rulefix/<case>.json)")

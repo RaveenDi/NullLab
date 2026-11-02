@@ -19,7 +19,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-from agent import contract_g9 as ct, edit_dsl, factorial_g5, factorial_g7 as g7, guard_g9  # noqa: E402
+from agent import contract_g9 as ct, edit_dsl, factorial_g5, factorial_g7 as g7  # noqa: E402
 import g4  # noqa: E402
 
 DOC = ROOT / "docs" / "EVAL-12-G9-DSL.md"
@@ -223,7 +223,7 @@ def translate_step(orig_tree, header, step, kind, new_src):
         learners = {c for c in _calls(defs[r]) if c[:1].isupper()}
         if learners and any(learners & _calls(lp) for lp in loops):
             return [{"op": "move_into_fold", "step": step, "call": r}], f"'{r}' ran before the split and its learners now run inside the fold loop -> move_into_fold"
-    if kind == "fit_scope" and not removed and any(c in oc for c in defs if c != step and c != "load" and any(isinstance(n, ast.For) for n in ast.walk(defs[c]))):
+    if kind == "fit_scope" and not removed and any(c in oc for c in defs if c not in (step, "load") and any(isinstance(n, ast.For) for n in ast.walk(defs[c]))):
         return None, "rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
     return None, "free-form rewrite not expressible with the frozen ops"
 
@@ -339,7 +339,7 @@ def main():
     rows, snap2 = collect()
     snap.update(snap2)
     prepared = [evaluate_row(r) for r in rows]
-    for (row, dsl, cdir), r0 in zip(prepared, rows):
+    for (row, _dsl, cdir), r0 in zip(prepared, rows):
         row["clean_case"] = row["case"] in CLEAN_CASES
         row["old_today"] = old_decision(cdir, r0["plan"])
         row["old_rightly_rejected"] = (row["old_today"]["decision"] == "REJECT" and row["clean_case"] and

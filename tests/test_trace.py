@@ -2,7 +2,6 @@
 Offline: the HTTP layer, the spend check and the key are mocked; everything is written to pytest temp dirs."""
 import io
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -205,7 +204,7 @@ def test_schema_invalid_twice_raises_and_valid_first_uses_one_call(monkeypatch):
 @pytest.mark.skipif(not (CASE / "data.csv").exists(), reason="corpus case missing")
 def test_schema_checked_before_fidelity_guard(monkeypatch, tmp_path):
     """loop_case never reaches the guard / sandbox with a schema-invalid retry reply."""
-    seen = _stub_replies(monkeypatch, [json.dumps({"A": "x"}), json.dumps({"A": "x"})])
+    _stub_replies(monkeypatch, [json.dumps({"A": "x"}), json.dumps({"A": "x"})])
     bad_plan = json.loads(json.dumps(GOOD))
     bad_plan["edits"]["A"]["steps"] = {"nonexistent_step": "def nonexistent_step(): pass"}
     monkeypatch.setattr(g7, "_execute", lambda *a: (_ for _ in ()).throw(AssertionError("executed")))

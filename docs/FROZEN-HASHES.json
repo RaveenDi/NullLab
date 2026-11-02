@@ -1,0 +1,96 @@
+{
+  "files": {
+    "agent/cached_exec.py": "5b5e82a45b3815bc57c88b1b0d579e147267e45426843aab98c795798375eef8",
+    "agent/contract_g9.py": "99c3117dc9b592810d02489a30e9952969bc05092ae18b6430928339db91b011",
+    "agent/edit_dsl.py": "8964d560ce7a76acacb4828ef6db5ed198fa858fd34937daf46c72704239b1e5",
+    "agent/factorial.py": "68d326f1bfd55a118efa402fcf60c47506a6c3ae499b5c2685e162aee7658ae3",
+    "agent/factorial_ehg.py": "1ea35bbcc44ad49e984b3d95f4ec36a842319ee463201541b75aec6706fbf38d",
+    "agent/factorial_g5.py": "b681cdb1e0372a52819ce02d925ebb45618b86a279d486002afef94782e627f8",
+    "agent/factorial_g6.py": "83abdfb3b2cbee64b4d90595f7c60e8cc3fd94a661b1ba822d4978d286dd2f8d",
+    "agent/factorial_g7.py": "dc17c381206872400fa14a99a3bd9ffb02240f370ac792189c5e7a30723290ce",
+    "agent/factorial_g8.py": "0cf32783d3d7ef2cf8519cfa956197666d1b690ac2552ea5170858df260ed73c",
+    "agent/factorial_g9.py": "c04a9ec522ca27652568a2ff974a8f06b925c54bc37c2daf89d7a7e1e5a49b4e",
+    "agent/fidelity.py": "9cde95bddadfb665ff30c33c020a5e9196d7dfec9163025978e025a2cb77e44a",
+    "agent/guard_g9.py": "4a084a1c466b1e8ff53ce3da94307796dc7475c275e0fdb889888f182fa17dba",
+    "agent/llm.py": "230a54e8c1120c29b6a0531d0755d29918c33c47ff85d70b8b37432255afc8ab",
+    "agent/smoke.py": "520c93d9b0c5e67c05e878628ce009b3d922b8190a18a6000f6d82a3161319e4",
+    "agent/transport.py": "ddee7ac6af710640f19299af7df3ff0115aeef364d715bc70e3e8a4295c1aefa",
+    "baselines/rulefix.py": "5b9c687586e9d995ba80fd3f8c5d1668d2bff6ae10d8e555b0b2a685f31f537e",
+    "docs/EVAL-10-CASES.md": "aa37653796c119856d0cf3be23ca8e9bacfd35c12b27aafcdaa6d48db708ebae",
+    "docs/EVAL-11-EHG-PREREG.md": "6493c083a0539010bf2ed529cffc3d66649994637b0786c6c827f73756f0b086",
+    "docs/EVAL-12-G9-DSL.md": "beefd69df7b57adc956c336d4f926c59e30f2c39365a14c8a47066f4d8145cab",
+    "docs/EVAL-12-G9-INSTRUMENT.md": "50ac32ff3967f7934f1bc1a65dc53a4fe191198ef52d60da9df23dd654290709",
+    "docs/EVAL-13-G9-PREREG.md": "26e7212458c3fc0d625389ab0d0a126c030f14a985005eb60e812d3f3ee27162",
+    "docs/EVAL-9-G8-PREREG.md": "c49325a4eeb493673297e3182c62a4ab3ff4fe73e546fd05622d6fcbec429dc4",
+    "docs/EVAL-9-G8-RESULT.md": "49e632f4a3d64c2a859e77e64331820ec3ba5597afcb6291f06e7c788bc2f5ea",
+    "eval/build_g7.py": "4d465c56eb4d4bb11d734d76dd7033d13defb529896e11bab99dc48535561a6e",
+    "eval/build_g8_cases.py": "437332f18df7a27ae5d05ee277cf4af09393df995034f788cfd188e4257c55d8",
+    "eval/g7_truth.json": "87172dd80738e137a37a60b7737adeb0d3b4cb1bb19cbc019548b8195bb3761a",
+    "eval/g8_truth.json": "4875bf5386f4c32f8fac2d6088f99f3544a4067e2cfd3dedea01aec070117a4d",
+    "eval/regress.py": "a1f8075722fd3fb941b77bf6add0de246eb2014877d9894216fa6ccaa63bece0",
+    "eval/run_rulefix.py": "6540eee1eb86a0c0a70a62159ba0366b1d715f4080141c548b6116b31d0047ec",
+    "g4.py": "f6e9765cfd8ff6d59e20df9a1776da31b0794aa2c7b5dbb22ea236e32573d53a",
+    "real/civilwar_disguised/data.csv": "cf57588172d589e646ed74ed25ffad740d64f437e0b75712a4b1db14ee01393c",
+    "real/civilwar_disguised/excerpt.md": "9785fa074181225fe9996a7c6d1ffc70a35e64ead4d3a06e6eedeb7b931c2129",
+    "real/civilwar_disguised/train.py": "69c7892e0fae60f8730908f9f86d296e2109e5faff4417800a46cbd9b13fc162",
+    "real/civilwar_disguised_clean/data.csv": "cf57588172d589e646ed74ed25ffad740d64f437e0b75712a4b1db14ee01393c",
+    "real/civilwar_disguised_clean/excerpt.md": "9785fa074181225fe9996a7c6d1ffc70a35e64ead4d3a06e6eedeb7b931c2129",
+    "real/civilwar_disguised_clean/train.py": "3773cdf8ffd1fa5cf391442c7ac725069c3668db55b48bd439404ced5cd57e59",
+    "real/ehg_disguised/data.csv": "4116c7323991d9f483adf3a4bb2b482f4cf86b11996553c56b900fa603bb1242",
+    "real/ehg_disguised/excerpt.md": "6f83de23fe2c283fcaa300a9a8a1529d630681eb868fdfee42c011563cb777a4",
+    "real/ehg_disguised/train.py": "ec467eb0a0abb29898ef694b0818234eea0c2814ffff267f90eb90e7d48d5c17",
+    "real/ehg_disguised_clean/data.csv": "4116c7323991d9f483adf3a4bb2b482f4cf86b11996553c56b900fa603bb1242",
+    "real/ehg_disguised_clean/excerpt.md": "6f83de23fe2c283fcaa300a9a8a1529d630681eb868fdfee42c011563cb777a4",
+    "real/ehg_disguised_clean/train.py": "35721f4e21241b09ae01dbb5e54fe81f5e28e6325a211534cd33ac0564ac0758",
+    "sandbox/executor.py": "3edf9ecc1db0a61129a2d02290ed337f71df7c6cea8cbb72bc1cbccddf8159dd",
+    "sandbox/factorial_stats.py": "fcc8223659535bad0581ebd5eeb9bc2eb8b10f10e98c42137fb39f2d55a82495",
+    "sandbox/run.py": "3628a795cee96b1d4d7b5691f002980986465a8b0e9430e6793033d4a6149ad8",
+    "sandbox/run_factorial.py": "0eb2130abbea85e38420d353eec4c99368e99d9ea5953b9a04c91d92d0e819cb",
+    "tests/test_dsl.py": "12eac2ecca08706bbd4a951945ac88c453b4d9a9b576d502bbf09c8064ffc513",
+    "tests/test_ehg_runner.py": "abc007aadf2f3110f118a2586d55df4507c779f75926be41bafc9129e071e16e",
+    "tests/test_g7.py": "27dd8494e94a72533c2273fa98e60c956e664b3301d133b6a3e5ee6dcfe6a14a",
+    "tests/test_g8.py": "5cdd5e673c285ea6a1349848cff104620d3c3325ca71b96a9368b5f0e432f2d0",
+    "tests/test_g8_cases.py": "ab63be3d34c2175701cb9b30df703cf51f8431f93deb04928231e6bb70df08d2",
+    "tests/test_g9_runner.py": "206577641df3833e5def37a11a8d50481758cfccc65173059b08f0ea57515191",
+    "tests/test_guard_g9.py": "76299180710675d0b295a1eefed2473ad00413b8dea64c6f7325299d25c548f6"
+  },
+  "normalisation": "CRLF->LF before sha256; repo-relative forward-slash paths",
+  "prereg_logs": {
+    "runs_ehg/prereg_log.jsonl": {
+      "pinned_lines": 12,
+      "sha256_of_pinned_lines": "bc2ce1a526f87f7da238fc92ba69e9ac4672a31d4fb08461d874d8421b0fa81d"
+    },
+    "runs_g4/prereg_log.jsonl": {
+      "pinned_lines": 26,
+      "sha256_of_pinned_lines": "24fc60967421a7f0e890046b153c66dff5c06ab222ee0c61e9d40b108af1f619"
+    },
+    "runs_g5/prereg_log.jsonl": {
+      "pinned_lines": 63,
+      "sha256_of_pinned_lines": "1b8895991bc641214409573acc383af009b6f09e63d6f3c45d24755c265e9c70"
+    },
+    "runs_g6/prereg_log.jsonl": {
+      "pinned_lines": 37,
+      "sha256_of_pinned_lines": "5851366a968140245f88c1d1ee243c887e6649c4a4b9c249559f77b2448df261"
+    },
+    "runs_g7/prereg_log.jsonl": {
+      "pinned_lines": 35,
+      "sha256_of_pinned_lines": "55b4b172f96b752962d9a9e6e19103228beff90585d40d5c57997f07c2ad766f"
+    },
+    "runs_g8/prereg_log.jsonl": {
+      "pinned_lines": 19,
+      "sha256_of_pinned_lines": "e95fbba79f0b3697b8edc439f342b210b07d6b6e1d0bb59fef4bf2c92a4535ba"
+    },
+    "runs_g9/prereg_log.jsonl": {
+      "pinned_lines": 8,
+      "sha256_of_pinned_lines": "e4d8152560503575bb780e320f5e8eca896b9e523eec183ad0daf4eada96942f"
+    },
+    "runs_rulefix/prereg_log.jsonl": {
+      "pinned_lines": 1,
+      "sha256_of_pinned_lines": "aea038d42c51ab94f76ac238298b2f84a29414a8b6fa22c4fe3532ae56e4fea9"
+    },
+    "runs_spike4/prereg_log.jsonl": {
+      "pinned_lines": 4,
+      "sha256_of_pinned_lines": "08aa6dade86cb837fc7f38a0ddfe2e39e7b8f6c8b5c3be53e4190584fc5d5760"
+    }
+  }
+}

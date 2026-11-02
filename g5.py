@@ -84,7 +84,7 @@ def _prereg(kind, obj, case=None, repeat=None):
 
 
 def spent_meta():
-    r = subprocess.run([sys.executable, str(llm.BS), "spend"], capture_output=True, text=True)
+    r = subprocess.run([sys.executable, str(llm.BS), "spend"], capture_output=True, text=True, check=False, timeout=30)
     return float(json.loads(r.stdout)["meta"]["spent_usd"])
 
 

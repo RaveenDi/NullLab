@@ -111,7 +111,7 @@ console.log(JSON.stringify({ n, bad }));
 def test_rendered_numbers_equal_spa_data(tmp_path, data):
     (tmp_path / "d.json").write_text(json.dumps(data), encoding="utf-8")
     (tmp_path / "h.js").write_text(HARNESS, encoding="utf-8")
-    r = subprocess.run([NODE, str(tmp_path / "h.js"), str(ASSETS / "viz.js"), str(tmp_path / "d.json")], capture_output=True, text=True, timeout=60)
+    r = subprocess.run([NODE, str(tmp_path / "h.js"), str(ASSETS / "viz.js"), str(tmp_path / "d.json")], capture_output=True, text=True, timeout=60, check=False)
     assert r.returncode == 0, r.stderr
     res = json.loads(r.stdout)
     assert res["n"] > 40 and res["bad"] == []

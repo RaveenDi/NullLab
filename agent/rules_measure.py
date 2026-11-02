@@ -11,7 +11,8 @@ from baselines import rulefix
 SEEDS, N_BOOT = (42, 43, 44), 1000
 
 
-def run_case(case_dir, seeds=SEEDS, n_boot=N_BOOT, timeout=3000):
+def run_case(case_dir: str | Path, seeds: tuple[int, ...] = SEEDS, n_boot: int = N_BOOT, timeout: int = 3000) -> dict:
+    """Run the rule-library fixes on one case in the local sandbox and return the measurement record."""
     from sandbox import executor, factorial_stats
     case_dir = Path(case_dir)
     b = rulefix.build_configs(case_dir)

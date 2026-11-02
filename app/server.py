@@ -2,6 +2,7 @@
 and can (re)run a case in MOCK mode.  uvicorn app.server:app --port 8099
 Live mode stays CLI-only (spend-gated): POST /api/run/{case}?mode=live is refused; use pipeline.py --live."""
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
@@ -11,13 +12,30 @@ import pipeline
 from report import render
 
 ROOT = Path(__file__).resolve().parent.parent
-app = FastAPI(title="NullLab")
+_INDEX_HTML: str | None = None   # the rendered demo page; rebuilt at startup and after a mock run, not on every GET
+
+
+def _render_index(force: bool = False) -> str:
+    """Render the demo once and keep the HTML in memory (render_all also rewrites the files under report/)."""
+    global _INDEX_HTML
+    if force or _INDEX_HTML is None:
+        render.render_all()
+        _INDEX_HTML = (ROOT / "report" / "index.html").read_text(encoding="utf-8")
+    return _INDEX_HTML
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    _render_index(force=True)
+    yield
+
+
+app = FastAPI(title="NullLab", lifespan=lifespan)
 
 
 @app.get("/", response_class=HTMLResponse)
 def index():
-    render.render_all()
-    return (ROOT / "report" / "index.html").read_text(encoding="utf-8")
+    return _render_index()
 
 
 @app.get("/api/demo")
@@ -78,5 +96,5 @@ def run_case(case: str):
     if case not in pipeline.cases():
         raise HTTPException(404)
     r = pipeline.run_case(case, mode="mock")  # live mode is CLI-only (spend-gated)
-    render.render_all()
+    _render_index(force=True)
     return {"case": case, "mode": r["mode"], "verdict": r["verdict"]}

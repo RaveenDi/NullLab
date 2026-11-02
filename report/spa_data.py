@@ -6,8 +6,9 @@ computed from the per-seed values in the files, and every value carries `n` and 
 Run files that are missing are skipped (the page shows an empty state)."""
 import json
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -60,7 +61,7 @@ def _trace_fx(lr, src, plan_sha=None):
         line = {"phase": ph, "text": " ".join(b for b in bits if b)}
         if viol:
             line["detail"] = viol[0][:420]
-            if ph == "Verify" or ph == "Act":
+            if ph in ("Verify", "Act"):
                 rec.append(viol[0][:420])
         lines.append(line)
     fp = lr.get("final_plan", {}) or {}
@@ -247,14 +248,14 @@ def _scalar(v):
 # ================================================================ v2 payload: every number as {k, n, src, badge}
 # k is a count (kind "count": rendered k/n) or a measured value (kind "value"); n is the denominator or the number of
 # measurements behind it; src is the file the number comes from. The page renders numbers only from these objects.
-from datetime import timedelta  # noqa: E402
+from datetime import timedelta, UTC  # noqa: E402
 
 BANNED = ("first", "beats reading", "reproduces published", "proves", "found it anyway", "combined")
 _SCRUB = ((re.compile(r"civil[ -]?war", re.I), "famous"), (re.compile(r"Muchlinski|Neunhoeffer|Sternberg|Kapoor|Narayanan"), "the authors"),
           (re.compile(r"conflict onset|war onset|onset", re.I), "event"))
 
 
-def scrub(x):
+def scrub(x: Any) -> Any:
     """The page never names the real study's topic or its authors (hackathon anti-project list). Applied to keys and values."""
     if isinstance(x, str):
         for rx, rep in _SCRUB:
@@ -267,13 +268,15 @@ def scrub(x):
     return x
 
 
-def N(k, n=None, src="", badge="REAL-PINNED", kind="count", **extra):
+def N(k: Any, n: Any = None, src: str = "", badge: str = "REAL-PINNED", kind: str = "count", **extra: Any) -> dict:
+    """A counted number with its n, source file and badge."""
     d = {"k": k, "n": n, "src": src, "badge": badge, "kind": kind}
     d.update(extra)
     return d
 
 
-def V(v, n=None, src="", badge="REAL-PINNED", **extra):
+def V(v: Any, n: Any = None, src: str = "", badge: str = "REAL-PINNED", **extra: Any) -> dict:
+    """A non-count value with its source file and badge."""
     return N(v, n, src, badge, "value", **extra)
 
 
@@ -455,6 +458,7 @@ def _clauses(g8, doc):
 
 
 def build() -> dict:
+    """Everything the demo page shows, read from the run files."""
     d5, d6, d7, d8, rf = (_j("runs_g5/score.json"), _j("runs_g6/score.json"), _j("runs_g7/score.json"),
                           _j("runs_g8/score.json"), _j("runs_rulefix/score.json"))
     truth = _j("eval/g6_truth.json") or {}
@@ -503,7 +507,7 @@ def build() -> dict:
         return N(a, b, "docs/EVAL-7.md", "SYNTHETIC")  # copied from the doc, tagged with it
 
     out = {
-        "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated_utc": datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC"),
         "pub": pub, "g7": g7, "g8": g8, "readout": readout, "rings": rings, "g9": _g9(), "recorded": _recorded(),
         "guard": g8["guard_rejects"] if g8 else None,
         "trace": tr, "factorial": _fx_compact(d5, runs5),

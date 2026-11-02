@@ -22,7 +22,7 @@ OUT = ROOT / "runs_g6"
 sys.path.insert(0, str(ROOT))
 import g4  # noqa: E402
 import g5  # noqa: E402
-from agent import factorial_g5, factorial_g6, fidelity, llm  # noqa: E402
+from agent import factorial_g6, fidelity, llm  # noqa: E402
 
 CASES = {c: ROOT / "real" / c for c in ("civilwar_apparent", "civilwar_temporal_clean", "esl_selection", "esl_selection_clean")}
 LEAKY, CLEAN = ["civilwar_apparent", "esl_selection"], ["civilwar_temporal_clean", "esl_selection_clean"]
@@ -229,8 +229,8 @@ def rule(args):
     g5._prereg("g6_source_hashes", src)
     from baselines.single_prompt import FACTORIAL_SYSTEM
     g5._prereg("g6_prompts", {"planner_system": factorial_g6.SYSTEM, "b3_system": FACTORIAL_SYSTEM})
-    for c in CASES:
-        g5._prereg("agent_view_frozen", g4._hashes(CASES[c]), c)
+    for c, d in CASES.items():
+        g5._prereg("agent_view_frozen", g4._hashes(d), c)
 
 
 def probe(args):

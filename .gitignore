@@ -34,3 +34,13 @@ real/_downloads/
 *.fvl
 *.dat
 *.hea
+
+# tooling and build output
+.ruff_cache/
+.mypy_cache/
+real/_downloads/
+runs_cache/
+out/
+*.egg-info/
+build/
+dist/

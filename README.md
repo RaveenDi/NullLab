@@ -9,7 +9,9 @@ Re-runs an ML claim's suspect step and measures how inflated it was.
 ## Try it (offline, no key, $0)
 
 ```
-python -m venv .venv && .venv\Scriptsctivate && pip install -r requirements.txt
+python -m venv .venv
+.venv\Scripts\activate  # Windows (bash/macOS/Linux: source .venv/bin/activate)
+pip install -r requirements.txt
 python -m agent.hybrid corpus/leak_prescale --out out/hy --report out/hy.md
 ```
 

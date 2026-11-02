@@ -49,7 +49,7 @@ def _env_secrets():
     return [v] if len(v) >= 8 else []
 
 
-def scan_secrets(text):
+def scan_secrets(text: str) -> list[str]:
     """-> list of matched fragments (first 12 chars of each, never the full match) for the key-looking patterns / env key value."""
     hits = []
     for p in SECRET_PATTERNS:
@@ -58,7 +58,8 @@ def scan_secrets(text):
     return hits
 
 
-def redact(text):
+def redact(text: str) -> tuple[str, int]:
+    """Replace key-looking strings and env secret values; returns (clean text, number of redactions)."""
     n = 0
     for v in _env_secrets():
         n += text.count(v)
@@ -172,7 +173,8 @@ def _traces(cand, case_name):
     return out
 
 
-def build_bundle(case_dir, out_zip, run=None, case=None, include_data=True, extra_report=None, root=ROOT):
+def build_bundle(case_dir: str | Path, out_zip: str | Path, run: str | None = None, case: str | None = None,
+                 include_data: bool = True, extra_report: str | None = None, root: str | Path = ROOT) -> dict:
     """Build the zip. Returns {"path", "files", "redactions", "manifest"}."""
     case_dir, case_name, cand = audit.locate(case_dir, case=case, run=run, root=root)
     rec, kind = cand["rec"], cand["kind"]
@@ -189,7 +191,7 @@ def build_bundle(case_dir, out_zip, run=None, case=None, include_data=True, extr
     try:
         files["patches/fix_both.patch"] = patch_export.build_patch(case_dir, rec, kind, "fix_both", run_name=Path(cand["file"]).name).encode("utf-8")
     except patch_export.PatchError as e:
-        files["patches/fix_both.patch"] = f"no patch: {e}\n".encode("utf-8")
+        files["patches/fix_both.patch"] = f"no patch: {e}\n".encode()
     hashes = {n: hashlib.sha256(Path(case_dir, n).read_bytes()).hexdigest() for n in ("train.py", "excerpt.md", "data.csv") if Path(case_dir, n).exists()}
     files["prereg/INPUT_HASHES.json"] = json.dumps({"sha256": hashes, "patch_sources_sha256": F["sources_sha256"],
                                                     "note": "hashes of the inputs as audited; recomputable with any sha256 tool"}, indent=1, sort_keys=True).encode()
@@ -247,7 +249,8 @@ def build_bundle(case_dir, out_zip, run=None, case=None, include_data=True, extr
     return {"path": str(out), "files": sorted(files), "redactions": n_red, "manifest": manifest}
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
+    """Command line: write a reproducibility bundle zip for a case."""
     ap = argparse.ArgumentParser(prog="python -m agent.bundle", description=__doc__.split("\n")[0])
     ap.add_argument("case_dir")
     ap.add_argument("--out", required=True)

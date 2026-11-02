@@ -1,5 +1,4 @@
 """eval/regress.py: zero unexplained verdict flips on saved G5/G6/G7 plans; G7 failures recover in replay. Offline, read-only."""
-import json
 import sys
 from pathlib import Path
 

@@ -51,7 +51,7 @@ def env(tmp_path, monkeypatch):
     monkeypatch.setattr(llm, "_key", lambda: "test-key-not-real")
     spent, sleeps = [], []
     monkeypatch.setattr(transport, "_spend_add", lambda model, est: spent.append(est))
-    monkeypatch.setattr(transport, "_sleep", lambda d: sleeps.append(d))
+    monkeypatch.setattr(transport, "_sleep", sleeps.append)
 
     class E:
         pass

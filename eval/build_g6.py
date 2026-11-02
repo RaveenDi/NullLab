@@ -4,7 +4,6 @@ Usage: python eval/build_g6.py <path to SambnisImp.csv downloaded from Harvard D
 The civil-war data file is verified against the md5 Dataverse publishes before anything is written.
 Ground truth (published numbers, sources) lives in eval/g6_truth.json and never enters an agent view or the sandbox."""
 import hashlib
-import json
 import shutil
 import sys
 from pathlib import Path

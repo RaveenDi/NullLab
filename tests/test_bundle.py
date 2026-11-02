@@ -125,11 +125,11 @@ def test_rerun_script_mechanics(run, tmp_path):
         os.chdir(cwd)
     exp = {"metric": "accuracy", "seeds": ["42"], "claimed": {"42": a}, "controlled": {"42": b}}
     (out / "expected.json").write_text(json.dumps(exp), encoding="utf-8")
-    p = subprocess.run([sys.executable, "-I", "rerun.py"], cwd=out, capture_output=True, text=True, timeout=600)
+    p = subprocess.run([sys.executable, "-I", "rerun.py"], cwd=out, capture_output=True, text=True, timeout=600, check=False)
     assert p.returncode == 0 and "MATCH" in p.stdout, p.stdout + p.stderr
     exp["controlled"]["42"] += 0.01
     (out / "expected.json").write_text(json.dumps(exp), encoding="utf-8")
-    p = subprocess.run([sys.executable, "-I", "rerun.py"], cwd=out, capture_output=True, text=True, timeout=600)
+    p = subprocess.run([sys.executable, "-I", "rerun.py"], cwd=out, capture_output=True, text=True, timeout=600, check=False)
     assert p.returncode == 1 and "DIFFERS" in p.stdout
 
 

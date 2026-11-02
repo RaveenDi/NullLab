@@ -20,6 +20,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.dont_write_bytecode = True
@@ -52,11 +53,12 @@ TEMPORAL_WORDS = ("forecast", "future", "later year", "later period", "prospecti
 RULE_TYPES = {"R1": "L1.1", "R3": "L3.2", "R4": "L3.1", "R5": "L1.4"}
 
 
-def sha256_file(p):
+def sha256_file(p: str | Path) -> str:
+    """sha256 hex digest of a file's bytes."""
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
 
-def case_sign(stats_by_seed):
+def case_sign(stats_by_seed: dict) -> tuple[str, list[str]]:
     """Same rule as g4.case_sign: per-seed sign of the 95% interval of the fix_both drop; case sign = category of >= 2 of 3 seeds."""
     cats = []
     for s in sorted(stats_by_seed):
@@ -74,32 +76,43 @@ def _repeat_num(path):
     return int(m.group(1)) if m else None
 
 
-def _candidates(case_name, search_dirs):
+def _read_json(f, cache):
+    """Parse a JSON file at most once per call chain: cache maps path -> parsed value (None when unreadable)."""
+    if f not in cache:
+        try:
+            cache[f] = json.loads(Path(f).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            cache[f] = None
+    return cache[f]
+
+
+def _candidates(case_name, search_dirs, cache=None):
+    cache = {} if cache is None else cache
     out = []
     for d in search_dirs:
         d = Path(d)
         if not d.is_dir():
             continue
         for f in sorted(d.glob("r[0-9]*.json")):
-            try:
-                j = json.loads(f.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
+            j = _read_json(f, cache)
+            if j is None:
                 continue
             if isinstance(j, dict) and isinstance(j.get("loop"), dict) and case_name in j["loop"]:
                 out.append({"kind": "loop", "file": f, "dir": d, "repeat": _repeat_num(f), "rec": j["loop"][case_name], "run": j})
         f = d / f"{case_name}.json"
         if f.exists():
-            try:
-                j = json.loads(f.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
+            j = _read_json(f, cache)
+            if j is None:
                 continue
             if isinstance(j, dict) and j.get("tool", "").startswith("rulefix"):
                 out.append({"kind": "rulefix", "file": f, "dir": d, "repeat": None, "rec": j, "run": j})
     return out
 
 
-def locate(path, case=None, repeat=None, run=None, root=ROOT):
+def locate(path: str | Path, case: str | None = None, repeat: int | None = None, run: str | None = None,
+           root: str | Path = ROOT) -> tuple[Path, str, dict]:
     """-> (case_dir, case_name, candidate). Raises SystemExit with a plain message when it cannot decide."""
+    cache = {}   # every runs_*/r*.json is parsed once for this call
     p = Path(path)
     if not p.is_absolute() and not p.exists():
         p = Path(root) / p
@@ -112,10 +125,9 @@ def locate(path, case=None, repeat=None, run=None, root=ROOT):
     else:                                               # a run dir
         names = set()
         for f in p.glob("r[0-9]*.json"):
-            try:
-                names |= set((json.loads(f.read_text(encoding="utf-8")).get("loop") or {}))
-            except (OSError, ValueError):
-                pass
+            j = _read_json(f, cache)
+            if isinstance(j, dict):
+                names |= set(j.get("loop") or {})
         names |= {f.stem for f in p.glob("*.json") if f.stem not in ("score", "ref", "probe", "replay", "plan", "b3", "loop")
                   and f.read_text(encoding="utf-8")[:400].find('"tool": "rulefix') >= 0}
         if case is None:
@@ -132,7 +144,7 @@ def locate(path, case=None, repeat=None, run=None, root=ROOT):
             raise SystemExit(f"audit: no case directory named {case_name} under factorial/, corpus/ or real/")
     if run:
         dirs = [Path(run).parent]
-    cands = _candidates(case_name, dirs)
+    cands = _candidates(case_name, dirs, cache)
     if run:
         cands = [c for c in cands if Path(c["file"]).resolve() == Path(run).resolve()]
     if repeat is not None:
@@ -149,7 +161,8 @@ def locate(path, case=None, repeat=None, run=None, root=ROOT):
 
 
 # ---------------- facts ----------------
-def read_claim(case_dir):
+def read_claim(case_dir: str | Path) -> dict:
+    """The claim text from the case's excerpt.md."""
     exc = (Path(case_dir) / "excerpt.md").read_text(encoding="utf-8")
     m = re.search(r"##\s*Results\s*\n(.*)", exc, re.S)
     results = (m.group(1) if m else exc).strip()
@@ -159,7 +172,7 @@ def read_claim(case_dir):
             "source_file": f"{Path(case_dir).parent.name}/{Path(case_dir).name}/excerpt.md", "source_sha256": sha256_file(Path(case_dir) / "excerpt.md")}
 
 
-def provenance(case_dir, case_name, cand, root=ROOT):
+def provenance(case_dir: Path, case_name: str, cand: dict, root: str | Path = ROOT) -> tuple[str, Any, dict]:
     """-> (badge, source citation or None, extras dict). Truth files are host-side metadata (never shown to an agent)."""
     extras = {}
     if "mock" in str(cand["dir"].name).lower() or "MOCK" in str((cand["rec"].get("final_plan") or {}).get("mode", "")).upper():
@@ -183,7 +196,8 @@ def provenance(case_dir, case_name, cand, root=ROOT):
     return "SYNTHETIC", None, extras
 
 
-def probe_status(run_dir, case_name):
+def probe_status(run_dir: str | Path, case_name: str) -> dict | None:
+    """Probe record for the case in a run directory, if any."""
     p = Path(run_dir) / "probe.json"
     if not p.exists():
         return None
@@ -196,7 +210,7 @@ def probe_status(run_dir, case_name):
     return {k: v.get("status") for k, v in j.items()}
 
 
-def prereg_info(run_dir, case_name, repeat):
+def prereg_info(run_dir: str | Path, case_name: str, repeat: int | None) -> dict:
     """Earliest preregistration record of this case-repeat plus the scoring rule record, from prereg_log.jsonl / PREREG.sha256."""
     run_dir, out = Path(run_dir), {"records": [], "rule": None, "file": None}
     log = run_dir / "prereg_log.jsonl"
@@ -223,7 +237,7 @@ def _norm_src(src):
     return ast.unparse(ast.parse(src))
 
 
-def patch_diff(case_dir, rec, cfg="fix_both"):
+def patch_diff(case_dir: str | Path, rec: dict, cfg: str = "fix_both") -> str:
     """Unified diff of the executed patch against the claim's train.py (both through ast.unparse, so formatting noise is gone)."""
     src = rec["sources"][cfg]
     orig = _norm_src((Path(case_dir) / "train.py").read_text(encoding="utf-8"))
@@ -238,7 +252,7 @@ def patch_diff(case_dir, rec, cfg="fix_both"):
     return "\n".join(d)
 
 
-def reaudit(case_dir, rec, data_header):
+def reaudit(case_dir: str | Path, rec: dict, data_header: Any) -> dict:
     """Re-run the deterministic fidelity guard on the stored plan (loop runs only). Offline."""
     out = {"stored": rec.get("fidelity"), "recomputed": None, "sources_match": None, "justification": None, "problems": []}
     plan = rec.get("final_plan") or {}
@@ -271,7 +285,7 @@ def _kw_hits(text, kws):
     return sorted({w for w in kws if re.search(r"(?<![a-z0-9])" + re.escape(w), text)})
 
 
-def classify(rec, kind, diff_text, meas):
+def classify(rec: dict, kind: str, diff_text: str, meas: dict) -> dict:
     """Map the finding to Kapoor & Narayanan leakage types (deterministic, keyword-based; the report says so).
     One entry per factor (A, B): the type with most hits in that factor's description plus its declared kind; entries are ranked by the
     factor's measured mean drop, so the primary type belongs to the factor that carries more of the effect."""
@@ -327,7 +341,8 @@ def classify(rec, kind, diff_text, meas):
 
 
 # ---------------- measurement table ----------------
-def measurement(rec):
+def measurement(rec: dict) -> dict:
+    """Normalised measurement block (drops, CIs, sign) of a loop or rulefix record."""
     st = rec["stats"]
     metric = rec.get("metric") or (st[sorted(st)[0]]["full"].get("metric")) or "accuracy"
     rows = []
@@ -353,7 +368,7 @@ def _ci(ci, metric):
     return f"[{_fmt(ci[0], metric, True)}, {_fmt(ci[1], metric, True)}]".replace(" pp", "")
 
 
-def reviewer_texts(F):
+def reviewer_texts(F: dict) -> tuple[str, str]:
     """-> (suggested note paragraphs, ~150-word copy block). Plain, hedged, and honest about the sign of the finding."""
     m, sign, metric = F["meas"], F["meas"]["sign"], F["meas"]["metric"]
     unit = "accuracy" if metric == "accuracy" else {"pr_auc": "PR-AUC", "roc_auc": "ROC-AUC"}.get(metric, metric)
@@ -408,7 +423,8 @@ def reviewer_texts(F):
     return para, short
 
 
-def untested(F):
+def untested(F: dict) -> list[str]:
+    """What this audit did NOT test (always listed in the report)."""
     L = []
     ex = F["extras"]
     if F["kind"] == "rulefix":
@@ -437,7 +453,9 @@ def untested(F):
     return L
 
 
-def build_finding(path, case=None, repeat=None, run=None, root=ROOT, remeasure=None):
+def build_finding(path: str | Path, case: str | None = None, repeat: int | None = None, run: str | None = None,
+                  root: str | Path = ROOT, remeasure: Any = None) -> dict:
+    """Assemble the finding dict that the HTML and Markdown reports are rendered from."""
     case_dir, case_name, cand = locate(path, case, repeat, run, root)
     rec, kind = cand["rec"], cand["kind"]
     claim = read_claim(case_dir)
@@ -480,7 +498,9 @@ def build_finding(path, case=None, repeat=None, run=None, root=ROOT, remeasure=N
 
 
 # ---------------- remeasure (executes the stored patches in the local sandbox; no API) ----------------
-def remeasure(path, case=None, repeat=None, run=None, root=ROOT, n_boot=1000):
+def remeasure(path: str | Path, case: str | None = None, repeat: int | None = None, run: str | None = None,
+              root: str | Path = ROOT, n_boot: int = 1000) -> dict:
+    """Re-run the stored patch in the local sandbox and compare with the recorded numbers."""
     sys.path.insert(0, str(ROOT))
     from sandbox import executor, factorial_stats
     case_dir, case_name, cand = locate(path, case, repeat, run, root)
@@ -533,7 +553,8 @@ def _meas_rows(F):
     return rows
 
 
-def render_html(F):
+def render_html(F: dict) -> str:
+    """Self-contained HTML page for a finding."""
     e, m = html.escape, F["meas"]
     metric_name = {"accuracy": "accuracy", "pr_auc": "PR-AUC", "roc_auc": "ROC-AUC"}.get(m["metric"], m["metric"])
     sign_txt = {"+": "controlled score is lower: consistent with inflation", "0": "interval spans 0: no evidence of inflation",
@@ -603,7 +624,8 @@ def render_html(F):
 """
 
 
-def render_md(F):
+def render_md(F: dict) -> str:
+    """Markdown version of the finding."""
     m = F["meas"]
     L = [f"# Audit: {F['case']}", "", f"**Provenance: {F['provenance']}** | {F['kind']} run | sign {m['sign']} | built from `{F['run_file']}` without any API call", "",
          "## 1. Claim as stated", "", "> " + F["claim"]["results"].replace("\n", "\n> "), "", f"Methods as stated: {F['claim']['methods']}", "",
@@ -634,7 +656,8 @@ def render_md(F):
     return "\n".join(L)
 
 
-def write_report(F, out):
+def write_report(F: dict, out: str | Path) -> str | Path:
+    """Write the report (.html or .md by extension)."""
     out = Path(out)
     out.parent.mkdir(parents=True, exist_ok=True)
     text = render_md(F) if out.suffix.lower() == ".md" else render_html(F)
@@ -642,7 +665,8 @@ def write_report(F, out):
     return out
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
+    """Command line: write a reviewer report for a case or run."""
     ap = argparse.ArgumentParser(prog="python -m agent.audit", description=__doc__.split("\n")[0])
     ap.add_argument("path", help="case dir or run dir")
     ap.add_argument("--case")

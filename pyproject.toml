@@ -1,0 +1,95 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nulllab"
+version = "0.1.0"
+description = "Falsification harness for ML evaluation claims: finds leakage that inflates a reported metric, with a preregistered, replayable verdict."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+dynamic = ["dependencies"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.setuptools]
+packages = ["agent", "app", "baselines", "eval", "report", "sandbox"]
+py-modules = ["g4", "g5", "g6", "pipeline", "nulllab_cli"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "slow: takes more than 60 seconds on a laptop (deselect with -m 'not slow')",
+    "live: calls the Meta Model API and spends money; never run in CI",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [
+    # case fixtures, run evidence and data are not source code
+    "corpus", "factorial", "real", "runs", "runs_*", "logs_spike4", "out", "report/assets",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "UP", "SIM", "PL"]
+ignore = [
+    "E501",     # 650 legacy long lines (prose, HTML templates); line-length 120 still drives `ruff format` for new files
+    "E741",     # short comprehension names (`l`, `O`) are the house style in parsers and report code
+    "PLR0917",  # too many positional arguments: internal helpers, signatures are stable
+    "PLR2004",  # magic numbers: thresholds and sample sizes are named in the prereg docs, not constants
+    "PLR0911",  # many returns, PLR0912, PLR0913, PLR0915: the pipeline functions are long by design
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
+    "PLC0415",  # imports inside functions are deliberate (lazy sklearn/FastAPI, sys.path set up first)
+    "PLW0603",  # module-level state (locks, caches) is intentional
+    "PLW2901",  # loop variable reassigned
+    "B905",     # zip() without strict=: lengths are equal by construction in these call sites
+    "E402",     # scripts put the repo root on sys.path before importing
+    "SIM108",   # ternary suggestions reduce readability in the report templates
+    "SIM105",   # contextlib.suppress is not clearer than try/except/pass here
+    "PLR1702",
+    "UP032",    # f-string conversion churn in report templates
+]
+
+[tool.ruff.lint.per-file-ignores]
+# FROZEN files: hash-pinned by the preregistrations (docs/FROZEN-FILES.md). Exempt from linting rather than edited.
+"agent/factorial_g9.py" = ["ALL"]
+"agent/factorial_ehg.py" = ["ALL"]
+"agent/factorial_g8.py" = ["ALL"]
+"agent/factorial_g7.py" = ["ALL"]
+"agent/factorial_g5.py" = ["ALL"]
+"agent/factorial_g6.py" = ["ALL"]
+"agent/factorial.py" = ["ALL"]
+"agent/transport.py" = ["ALL"]
+"agent/smoke.py" = ["ALL"]
+"agent/cached_exec.py" = ["ALL"]
+"agent/edit_dsl.py" = ["ALL"]
+"agent/guard_g9.py" = ["ALL"]
+"agent/contract_g9.py" = ["ALL"]
+"agent/llm.py" = ["ALL"]
+"agent/fidelity.py" = ["ALL"]
+"g4.py" = ["ALL"]
+"sandbox/executor.py" = ["ALL"]
+"sandbox/run.py" = ["ALL"]
+"sandbox/run_factorial.py" = ["ALL"]
+"sandbox/factorial_stats.py" = ["ALL"]
+"eval/build_g8_cases.py" = ["ALL"]
+"eval/build_g7.py" = ["ALL"]
+"eval/run_rulefix.py" = ["ALL"]
+"eval/regress.py" = ["ALL"]
+"baselines/rulefix.py" = ["ALL"]
+"tests/test_g7.py" = ["ALL"]
+"tests/test_g8.py" = ["ALL"]
+"tests/test_g8_cases.py" = ["ALL"]
+"tests/test_g9_runner.py" = ["ALL"]
+"tests/test_ehg_runner.py" = ["ALL"]
+"tests/test_guard_g9.py" = ["ALL"]
+"tests/test_dsl.py" = ["ALL"]

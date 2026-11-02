@@ -5,14 +5,15 @@
            both are hashed and appended to runs_spike4/prereg_log.jsonl BEFORE anything of theirs runs
   loop     runs the planner's patches in the sandbox (4 configs x seeds 42/43/44) + the G2 falsifier patch
   score    applies the BRIEF-4 acceptance + kill rule
-Usage: python spike4.py <stage>"""
+Usage: python scripts/legacy/spike4.py <stage>"""
 import hashlib
 import json
 import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(ROOT))  # repo packages (agent, sandbox, baselines) when run from scripts/legacy
 CASE_DIR = ROOT / "factorial" / "comp_visit_history"
 OUT = ROOT / "runs_spike4"
 SEEDS = (42, 43, 44)

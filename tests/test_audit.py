@@ -16,7 +16,6 @@ sys.path.insert(0, str(ROOT))
 os.environ["NULLLAB_NO_DOCKER"] = "1"
 
 from agent import audit, fidelity  # noqa: E402
-from baselines import rulefix  # noqa: E402
 from eval import g5_fixtures as fx  # noqa: E402
 
 PUMP = ROOT / "factorial" / "g4_pump_inspection"

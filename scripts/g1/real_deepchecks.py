@@ -5,7 +5,7 @@ train_test_validation (train vs test). No model is passed (the agent view has no
 flagged_any     = any check condition in either suite did not pass
 flagged_leakage = a leakage-relevant check did not pass (samples mix, feature-label correlation/PPS, identifier-label
                   correlation, feature-label correlation change, duplicates, conflicting labels)
-Usage (from nulllab/): .venv-g1\\Scripts\\python baselines\\real_deepchecks.py  -> runs_g1/deepchecks.json"""
+Usage (from nulllab/): .venv-g1\\Scripts\\python scripts\\g1\\real_deepchecks.py  -> runs_g1/deepchecks.json"""
 import json
 import re
 import sys
@@ -18,7 +18,7 @@ from deepchecks.tabular import Dataset  # noqa: E402
 from deepchecks.tabular.suites import data_integrity, train_test_validation  # noqa: E402
 from sklearn.model_selection import train_test_split  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 LEAK_CHECKS = ("Train Test Samples Mix", "Feature Label Correlation", "Identifier Label Correlation",
                "Feature Label Correlation Change", "Data Duplicates", "Conflicting Labels")
 

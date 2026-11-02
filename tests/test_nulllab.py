@@ -137,7 +137,6 @@ def test_grounding_normalised_whitespace_and_line_numbers():
 
 
 def test_new_cases_agent_view_isolated():
-    import pathlib
     for c in NEWCASES:
         d = ROOT / "corpus" / c
         assert sorted(p.name for p in d.iterdir()) == ["data.csv", "excerpt.md", "train.py"]

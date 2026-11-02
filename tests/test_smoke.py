@@ -1,5 +1,4 @@
 """Tests for agent/smoke.py (offline, $0). The sandbox runs are real subprocesses on tiny samples (a few seconds each)."""
-import json
 import time
 from pathlib import Path
 

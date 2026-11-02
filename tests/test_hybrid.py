@@ -166,9 +166,8 @@ def test_recording_proxy_refuses_real_call_without_live_and_counts(monkeypatch):
     monkeypatch.setattr(llm, "live_complete", fake)
     monkeypatch.setattr(llm, "replaying", lambda: False)
     led = hybrid.Ledger(max_spark=1)
-    with hybrid.recording_llm(led, "planner", live=False):
-        with pytest.raises(hybrid.NeedsModel):
-            llm.live_complete("s", "u")
+    with hybrid.recording_llm(led, "planner", live=False), pytest.raises(hybrid.NeedsModel):
+        llm.live_complete("s", "u")
     assert not seen
     with hybrid.recording_llm(led, "planner", live=True):
         assert llm.live_complete("sys", "usr", est_usd=0.1, tag="x") == "reply"

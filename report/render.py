@@ -144,27 +144,6 @@ light / dark</button></div>
 </div>"""
 
 
-def _ablation_table(ab) -> str:
-    if not ab:
-        return "<p class=sub>No ablation yet — run <code>python -m eval.score</code>.</p>"
-    b3 = ab.get("B3", {})
-    if "recall" in b3:
-        b3cells = f"<td>{b3['recall']}<td>{b3['false_alarms']}"
-    else:
-        b3cells = f"<td colspan=2>{html.escape(b3.get('status', 'NOT RUN'))}"
-    wins = ab.get("non_checklist_win", {})
-    win_txt = ", ".join(f"{c} ✓" for c, w in wins.items() if w) or "none yet"
-    return (f"<table class=score><tr><th>method<th>recall (leaky)<th>false alarms (clean)"
-            f"<tr><td>B0 Deepchecks-style checklist<td>{ab['B0']['recall']}<td>{ab['B0']['false_alarms']}"
-            f"<tr><td>B1 fixed GroupKFold<td>{ab['B1']['recall']}<td>{ab['B1']['false_alarms']}"
-            f"<tr><td>B3 single-prompt (no execution){b3cells}"
-            f"<tr><td>NullLab [{html.escape(ab['NullLab']['mode'])}]<td>{ab['NullLab']['recall']}<td>{ab['NullLab']['false_alarms']}</table>"
-            f"<p class=sub>Non-checklist wins (baselines miss, loop falsifies): {html.escape(win_txt)}. "
-            f"Grounding precision {ab.get('grounding_precision', '?')}. "
-            f"Real suites: deepchecks {html.escape(str(ab.get('real_suites', {}).get('deepchecks', '?')))}; "
-            f"giskard {html.escape(str(ab.get('real_suites', {}).get('giskard', '?')))}.</p>")
-
-
 def render_all() -> int:
     """Per-case verdict pages from runs/*.json (MOCK plumbing runs, labelled as such) + the demo SPA (index.html).
     The SPA is assembled by report/spa.py from report/assets/ and the data built by report/spa_data.py."""

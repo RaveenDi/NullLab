@@ -17,6 +17,7 @@ import argparse
 import os
 import sys
 from pathlib import Path
+from typing import Any
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -29,7 +30,8 @@ SKIP_DIRS = {".git", ".venv", "venv", "node_modules", "__pycache__", ".github", 
 EXIT_OK, EXIT_INFLATED, EXIT_ERROR = 0, 1, 2
 
 
-def discover_cases(path):
+def discover_cases(path: str | Path) -> list[Path]:
+    """Case folders (holding train.py) at or below path."""
     p = Path(path)
     if (p / "train.py").exists() and (p / "data.csv").exists():
         return [p]
@@ -42,7 +44,7 @@ def discover_cases(path):
     return found
 
 
-def judge(res, threshold):
+def judge(res: dict, threshold: float) -> tuple[str, str]:
     """-> (status, message). status in PASS | FAIL | NO_RULE_FIRED | UNRESOLVED | ERROR. FAIL only if the 95% interval is above 0
     (sign '+') AND the mean inflation exceeds the threshold, in the metric's own units (pp for accuracy)."""
     s, v = res.get("summary"), res.get("verdict")
@@ -62,7 +64,8 @@ def judge(res, threshold):
     return "ERROR", f"{res['case']}: {v}: {res.get('route')}"
 
 
-def check_path(path, threshold=0.05, measure=None, fresh=True, spark=False, live=False, detector=None, spark_runner=None):
+def check_path(path: str | Path, threshold: float = 0.05, measure: Any = None, fresh: bool = True, spark: bool = False,
+               live: bool = False, detector: Any = None, spark_runner: Any = None) -> dict:
     """Audit every case under path. Returns {"exit_code", "rows", "messages", "markdown"}. `measure`/`detector`/`spark_runner` are test hooks."""
     cases = discover_cases(path)
     rows, msgs = [], []
@@ -85,7 +88,7 @@ def check_path(path, threshold=0.05, measure=None, fresh=True, spark=False, live
     return {"exit_code": code, "rows": rows, "messages": msgs, "markdown": render_summary(rows, threshold, msgs, spark)}
 
 
-def render_summary(rows, threshold, msgs, spark=False):
+def render_summary(rows: list, threshold: float, msgs: list, spark: bool = False) -> str:
     """GitHub job-summary markdown."""
     total_calls = sum(r["calls"] for r in rows)
     total_usd = sum(r["est_usd"] for r in rows)
@@ -109,7 +112,8 @@ def render_summary(rows, threshold, msgs, spark=False):
     return "\n".join(L)
 
 
-def main(argv=None):
+def main(argv: list[str] | None = None) -> int:
+    """Command line entry; exit code 1 when any case is inflated above the threshold."""
     ap = argparse.ArgumentParser(prog="python -m agent.ci_check", description=__doc__.split("\n")[0])
     ap.add_argument("path", nargs="?", default=".")
     ap.add_argument("--threshold", type=float, default=0.05, help="max tolerated inflation (fraction: 0.05 = 5 pp accuracy)")

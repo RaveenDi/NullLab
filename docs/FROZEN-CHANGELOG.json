@@ -1,0 +1,4 @@
+{
+  "_comment": "Acknowledged post-freeze changes to frozen files. Each entry: path, old_sha256 (the manifest/log hash), new_sha256 (LF-normalised hash now on disk), reason, date. Empty means no frozen file has been touched.",
+  "changes": []
+}

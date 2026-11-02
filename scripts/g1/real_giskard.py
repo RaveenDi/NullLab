@@ -3,7 +3,7 @@ A blind user has data.csv + the target column named in train.py, so we fit a Ran
 (seed 42, raw data.csv columns) and run giskard.scan on the 25% test split with its built-in tabular detectors.
 flagged_any     = the scan reported any issue
 flagged_leakage = an issue from the data_leakage or spurious_correlation detectors
-Usage (from nulllab/): .venv-g1b\\Scripts\\python baselines\\real_giskard.py -> runs_g1/giskard.json"""
+Usage (from nulllab/): .venv-g1b\\Scripts\\python scripts\\g1\\real_giskard.py -> runs_g1/giskard.json"""
 import json
 import re
 import warnings
@@ -15,7 +15,7 @@ import pandas as pd  # noqa: E402
 from sklearn.ensemble import RandomForestClassifier  # noqa: E402
 from sklearn.model_selection import train_test_split  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parent.parent.parent
 LEAK_GROUPS = ("leak", "spurious")
 
 
