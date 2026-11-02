@@ -25,3 +25,6 @@ docs/MUSE-BRIEF-*.md
 .venv-g1b/
 .venv*/
 runs_g1*/
+
+# raw real data is rebuilt by eval/build_g6.py (redistribution terms not verified)
+real/*/data.csv
