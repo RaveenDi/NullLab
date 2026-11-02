@@ -1,0 +1,4 @@
+{"tag": "", "usage": {"completion_tokens": 1911, "prompt_tokens": 514, "total_tokens": 2425, "completion_tokens_details": {"reasoning_tokens": 1788}, "prompt_tokens_details": {"cached_tokens": 0}}, "finish_reason": "stop"}
+{"tag": "", "usage": {"completion_tokens": 2180, "prompt_tokens": 692, "total_tokens": 2872, "completion_tokens_details": {"reasoning_tokens": 1749}, "prompt_tokens_details": {"cached_tokens": 0}}, "finish_reason": "stop"}
+{"tag": "factorial_planner", "usage": {"completion_tokens": 3470, "prompt_tokens": 1030, "total_tokens": 4500, "completion_tokens_details": {"reasoning_tokens": 2503}, "prompt_tokens_details": {"cached_tokens": 0}}, "finish_reason": "stop"}
+{"tag": "b3_factorial", "usage": {"completion_tokens": 1339, "prompt_tokens": 897, "total_tokens": 2236, "completion_tokens_details": {"reasoning_tokens": 1183}, "prompt_tokens_details": {"cached_tokens": 0}}, "finish_reason": "stop"}

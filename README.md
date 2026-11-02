@@ -1,117 +1,97 @@
 # NullLab
 
-**Every AI can give you an answer. What if yours could discover why that answer is wrong?**
+**Reading an AI's answer is cheap. Measuring it is the work.**
 
-NullLab is an adversarial experiment engine for machine-learning claims. Given a claim ("our classifier
-achieves 96% and generalizes") plus the training script, it names the assumption the claim depends on,
-preregisters three competing hypotheses, writes and executes a controlled re-evaluation in a sandbox, and
-returns SURVIVED, FALSIFIED or INCONCLUSIVE with per-seed (unpaired) bootstrap confidence intervals over three seeds. If a claim
-holds up, it says so. Built for the Meta Global AI Developer Hackathon (Push the Frontier).
+Re-runs an ML claim's suspect step and measures how inflated it was.
 
-## Latest result: G6, a real published correction ([docs/EVAL-6.md](docs/EVAL-6.md))
+`tests: 77 passed at G6 (docs/EVAL-6.md; later phases add tests)` | `CI: agent.ci_check, exit 0/1/2 (workflow in .github/workflows, not yet run on GitHub: UNVERIFIED)` | `offline by default` | `rules-only path: $0, no key`
 
-| Case | Provenance | Published correction | NullLab loop (3 live repeats) | B3 reading only |
-|---|---|---|---|---|
-| Civil-war onset, Muchlinski et al. 2016; flaw documented by Neunhoeffer & Sternberg 2019 (Political Analysis) | **REAL-PINNED** (Dataverse doi:10.7910/DVN/KRKWK8, md5-pinned) | PR-AUC 0.43 → 0.07 (+0.36) | sign + 3/3; +0.23 / +0.20 / +0.20; within ±0.15 in **1/3** | right 3/3 |
-| Screening before CV, ESL §7.10.2 | **TEXTBOOK** | accuracy 0.97 → 0.50 (+0.47) | +0.53 / +0.55 / +0.43, 3/3 | right 3/3 |
-| Correct variants of both | same | none | **0/6** false alarms (2 INCONCLUSIVE) | 3/6 false alarms |
-
-Preregistered G6 acceptance: **FAIL** (real-case magnitude 1/3). Memorisation probe: Spark recognises both sources.
-Spend +$2.84. `python g6.py ref|replay|rule|probe|run <r>|score`; cases in `real/`, host-only truth in `eval/g6_truth.json`,
-rebuild data with `python eval/build_g6.py <SambnisImp.csv>`. Full suite: 77 passed.
-
-## Setup (5 commands)
+## Try it (offline, no key, $0)
 
 ```
-python -m venv .venv && .venv\Scripts\activate
-pip install -r requirements.txt
-python eval/build_corpus.py     # (re)builds corpus/ (9 cases) + eval/ground_truth.json (evaluator only)
-python pipeline.py              # all cases, MOCK mode -> runs/<case>.json
-python -m pytest -q             # suite (needs the corpus materialized first)
+python -m venv .venv && .venv\Scriptsctivate && pip install -r requirements.txt
+python -m agent.hybrid corpus/leak_prescale --out out/hy --report out/hy.md
 ```
 
-Then either open `report/index.html` directly, or serve it:
+Real output, recorded 2026-11-02 10:10 UTC (15:40 SLT / 05:10 ET) from exactly that command; only the temp path in the first line was shortened to `<tmp>`. Source: `report/assets/recorded/hybrid_rules.json`.
 
 ```
-python -m report.render         # writes report/index.html + report/<case>.html
-python -m uvicorn app.server:app --port 8099   # http://127.0.0.1:8099/
+leak_prescale: INFLATED [rules (no model)] model calls 0 est $0.00; record dir <tmp>/hy3; report <tmp>/hy3.md
+
+Verdict: INFLATED | produced by: rules (no model)
+Route: rules fired and the measurement confirms (consistency check passed)
+Claimed 0.8178 vs controlled 0.6444 (accuracy); inflation +17.333 pp; sign + (per seed ['+', '0', '+']);
+95% interval per seed (unpaired bootstrap): 42: [2.667, 30.667], 43: [-1.333, 25.333], 44: [10.633, 37.333].
 ```
 
-Live (real model) runs are CLI-only and spend-gated:
+(The second block is the head of `out/hy.md`; `leak_prescale` is a case we built, SYNTHETIC. The process exits 0.) Gate a pull request on it, rules only, five lines:
+
+```yaml
+- uses: actions/checkout@v4
+- uses: actions/setup-python@v5
+  with: { python-version: "3.12" }   # the version this repo was developed on
+- run: pip install -r requirements.txt && python -m agent.ci_check . --threshold 0.05 --summary $GITHUB_STEP_SUMMARY
+```
+`agent.ci_check` exits 0 (no case above the threshold), 1 (a case is INFLATED beyond it, 95% interval above 0), 2 (nothing audited or a measurement failed). A case where no rule fired is reported `NO_RULE_FIRED`, not as a pass. Full workflow: `.github/workflows/nulllab-audit.yml`.
+
+## What it found on a famous published result (source hidden)
+
+A famous published ML result reported a score that did not survive a re-check: the model was scored on rows it had trained on. We disguised its source (columns renamed, domain reworded, features rescaled; same rows) and asked NullLab to re-run it. Two preregistered runs, reported side by side at equal weight and never merged:
+
+| Run | Direction found (leaky) | False alarms (clean twin) | Inflation within 0.15 of the published +0.36 | Harness INCONCLUSIVE | Result |
+|---|---|---|---|---|---|
+| **G7** (preregistered) | **3/5** | **0/5** | **3/5** | **2/10** | bar (4/5 direction) **FAILED**; source `runs_g7/score.json` |
+| **G8** (new labelled run, scored as frozen) | **4/5** | **0/5** | **4/5** | **1/10** (target 0, **not met**) | clauses (a) to (c) **met**; harness target **missed**; source `runs_g8/score.json`, [docs/EVAL-9-G8-RESULT.md](docs/EVAL-9-G8-RESULT.md) |
+
+G8 leaky repeats that executed measured +0.340, +0.339, +0.341, +0.328 (published +0.36; a Python port of the original measures +0.299); the one that did not is a read timeout after about 500 s, counted as not met and not re-rolled. G7 measured +0.308 in each executed repeat. All five G8 clean repeats: no effect, interval spans 0 (-0.005, -0.005, -0.004, -0.015, -0.005). Reading only (one prompt, no execution) got the G7 leaky case right 4/5 and false-alarmed 5/5 on the clean twin; it was not run on G8. Caveats that matter: the guard rejected a random-split first plan in the executed repeats, so the time split comes from the guard plus the model; the fixed rules were never run on this disguised case; the disguise passed a 2-call probe, which is not proof of no memory; n = 5 per arm, counts not rates. Everything has n and a file on the demo page (`python -m report.render`, then open `report/index.html`).
+
+One-page card: [docs/RESULTS-CARD.md](docs/RESULTS-CARD.md). Synthetic hard cases (**11/12** signs right, reading only wrong **9/12**, fixed rules with no model **6/12**; SYNTHETIC, n = 12): [docs/EVAL-8-RULEBASED.md](docs/EVAL-8-RULEBASED.md).
+
+## Where Meta's models sit
 
 ```
-python pipeline.py --live       # muse-spark-1.3 as extractor + falsifier (Meta key required, $30 cap)
-python -m eval.score --live     # adds the B3 single-prompt baseline (one call per case, no execution)
+ claim + train.py + data (agent view only; the evaluator's truth files are never visible)
+        |
+        v
+ [ Muse Spark ]  names 2 suspect steps, predicts the drop, writes structured edits   <- model
+        |           (muse-wonder-1.0 can be swapped in: NULLLAB_MODEL; 8/8 schema-valid plans on a small synthetic probe)
+        v
+ [ guard ]       plain code: edit stays in its step, no feature/model/metric change,
+        |         a forecast needs a time split (SPLIT-USE-REQUIRED); reject -> one retry   <- no model
+        v
+ [ sandbox ]     original, fix A, fix B, both x seeds 42/43/44, network off, unpaired bootstrap   <- no model
+        v
+ FALSIFIED / SURVIVED / INCONCLUSIVE  +  reviewer report (python -m agent.audit)
 ```
+Spark also plays the single-prompt "reading only" baseline (B3). Muse Wonder and `muse-spark-1.3-contributor` appear only where stated in [docs/EVAL-7.md](docs/EVAL-7.md): the headline G7 runs used the contributor build; the Wonder swap was one small probe and no headline number uses it. Rules first, Spark where rules fail: a fixed five-rule library (no model, $0) is tried first; it measured 0 on the freight and pump hard cases where the loop got the sign 3/3 on both ([EVAL-8](docs/EVAL-8-RULEBASED.md); preregistered verdict MIXED).
 
-Copy `.env.example` to `.env` for local runs, or keep the key at `C:\dev\bs\.env` (never print or commit it).
-`pipeline.py --live` refuses to call the model unless `bs.py spend check` approves, and stops after the
-per-phase live-call cap (70 for G4). LIVE outputs go to `runs_live/`, MOCK outputs to `runs/`.
- Falsifier calls use `max_tokens >= 12000` with `reasoning_effort: "low"` — smaller budgets returned
-empty model output.
+## Replay in 3 commands (offline, no API key, $0)
 
-## What is real vs mock
+```
+.venv\Scripts\python -m report.render                                   # rebuild the demo page from the run files
+.venv\Scripts\python -m uvicorn app.server:app --port 8099              # open http://127.0.0.1:8099 (or open report\index.html from disk)
+.venv\Scripts\python -m agent.hybrid corpus/leak_prescale --out out/hy --report out/hy.md   # a reviewer report on a synthetic case
+```
+Setup first: `python -m venv .venv && .venv\Scripts\activate && pip install -r requirements.txt`. Replaying the recorded model replies through the whole loop (`python -m agent.factorial_g7 --replay runs_g7/traces.jsonl --out <new dir> run`, sandbox runs, several minutes) exists but was not re-run when this README was written (UNVERIFIED). Live model runs are CLI-only and spend-gated; the page makes no model call.
 
-- **MOCK mode is a scripted regex stand-in.** It exercises the plumbing (preregistration, sandbox, verdict,
-  report) and is labelled `MOCK (stub, not a model result)` in every run JSON and report page. It is never
-  evidence the model can do the task.
-- **LIVE mode calls `muse-spark-1.3`** for claim extraction (with verbatim line citations) and falsifier
-  patches (executed in the sandbox). First live run (3 cases × 3 seeds): 3/3 verdicts correct; code-line
-  citations failed verbatim (grounding 0.5) — see `docs/LIVE-RESULT-2026-11-01.md`.
-- **Baselines B0/B1 are our reimplementations** (a 4-check data checklist; a fixed GroupKFold on a guessed
-  group column), not the real Deepchecks/Giskard suites — labelled as such. B3 (single-prompt judgement,
-  no execution) runs only with `--live`. `runs/ablation.json` records whether the real suites are installed.
+## Honest limits
+- **The G7 preregistered acceptance failed** (direction 3/5, needed 4). Two repeats ended INCONCLUSIVE: a sandbox crash on the single allowed retry, and an unparseable retry reply. Counted as wrong, as preregistered. G8 is a new labelled run, not a re-score of G7: its clauses (a) to (c) were met (4/5, 0/5, 4/5) and its harness target was not (1/10 INCONCLUSIVE, a read timeout).
+- **Reading beats running on detection of the leaky case here** (4/5 vs 3/5). NullLab's advantages are specificity (0/5 vs 5/5 false alarms on the clean twin) and that it measures instead of guessing.
+- **Measured values are short of the published +0.36**: G7 +0.308, G8 +0.328 to +0.341. A Python port of the original pipeline measures +0.299 on the same rows.
+- **The disguise is not proof of no memory.** It passed a 2-call probe (the first disguise was recognised by name; the final one was not). The textbook and the undisguised real case are recognised by the model, so they cannot separate running from remembering.
+- **Hard-case and factorial results are SYNTHETIC cases we built.** Counts, not rates. n is in every cell. Not a population estimate.
+- **Rules vs loop is MIXED**, not a pass: the loop has more hard-case signs right (11/12 vs 6/12) and more clean false alarms (1/12 vs 0/12). The rule author had read every `train.py`.
+- The guard checks edits stay in their step and, since G7, that a forecast gets a time split; it cannot check direction or whether a fix is the right one.
+- The sandbox is a restricted subprocess (network cut, timeout, evaluator paths blocked), not a locked container; the `Dockerfile` path is untested.
+- Estimated Meta credits G4 to G8: about $15.35 over 200 live calls (per-call estimates; G0 to G3 not included). Test suite: 77 passed at G6 (later phases add tests).
 
-## Honest limitations
-
-- Corpus flaws are planted by the project (the hero pipeline was written for this repo; it is not an
-  independent published paper), so recall measures "finds our planted leaks", not wild ones.
-- Sandbox is a restricted subprocess (network cut, timeout, evaluator paths blocked), **not** the planned
-  locked-down container; the `Dockerfile` (`--network=none`) path is implemented but untested.
-- `requirements.txt`/`Dockerfile` pin scikit-learn 1.9.1, pandas 3.1.0, numpy 2.5.4 (the versions all runs used). Excerpt claim percentages are nominal — the
-  measured claimed-protocol numbers are in `runs/*.json`.
-- EVAL-2 (9 cases) live results are in `runs_live/` (rerun Nov 1): loop 5/6 recall, 1/3 false alarms; B3 single prompt 6/6, 0/3.
-  Live Spark is not reproducible run to run (the first EVAL-2 run had 0/3 loop false alarms).
-
-## 2x2 factorial falsification (G4, SYNTHETIC cases, `g4.py`, `docs/EVAL-4.md`)
-
-What the data supports (n = 4 new + 4 clean cases, all built by us; counts, not rates):
-- On a cancellation case, single-prompt reading (B3) and Spark's own planner both predicted the claim was inflated;
-  executing the planner's patches showed it is understated (fix-both -5.5pp, truth -10.4pp). On a benign case, B3
-  said "leak"; execution measured ~0.
-- The loop's fix-both sign was right on 4/4 new cases; B3 was wrong on 3/4 (sign, verdict or culprit).
-- **But** the loop false-alarmed on 1/4 clean cases (its "fix" removed a legitimate feature), and the preregistered
-  G4 acceptance therefore FAILED. We do not claim that reading cannot predict these effects, or that the loop is
-  reliable on clean code.
-
-## Guarded factorial with repeats (G5, same SYNTHETIC cases, `g5.py`, `docs/EVAL-5.md`)
-
-The planner now writes **structured edits** to named functions of `train.py`, and code applies them. A deterministic
-**patch-fidelity guard** (`agent/fidelity.py`) rejects any edit that changes the model, the features, the split or the
-sample size outside the declared step. A rejected edit gets one retry; if it still fails, the result is INCONCLUSIVE.
-The guard and the acceptance rule were preregistered (hashed) before any G5 live call. There were 3 independent live
-repeats.
-
-What the data supports (8 cases × 3 repeats; counts, not rates):
-- **Preregistered acceptance PASSED.** Every clause held:
-  - loop clean false alarms: 1/12;
-  - loop sign right on hard runs: 11/12 (the miss is 1 INCONCLUSIVE);
-  - B3 (reading only) wrong on hard runs: 9/12;
-  - every executed patch passed the fidelity audit.
-- Replayed offline, the guard rejects G4's failing clean_group_correct patch. Live, clean_group_correct never
-  false-alarmed in 3/3 repeats.
-- On the cancellation case, B3 said "inflated" in 3/3 repeats. The guarded loop measured "understated" in 3/3.
-- On the benign case, B3 said "leak" in 3/3 repeats. The loop measured ~0 in 2/3, and 1 was INCONCLUSIVE.
-- **Remaining failure.** One clean false alarm (clean_wine_correct, r2): a declared, guard-compliant edit dropped a
-  *named* legitimate column and used an ordered split on class-sorted rows. The guard does not judge whether a
-  declared fix is *justified*, only that it stays inside its step. B3 also false-alarmed on clean runs, 7/12.
+## What is in the repo
+- `agent/` loop, guard, auditor; `baselines/` single-prompt, checklist and rule baselines; `sandbox/` executor; `eval/` builders and host-only truth; `real/` real, disguised and textbook cases (raw data pinned by checksum, see `real/README.md`); `report/` the demo page (plain HTML/CSS/JS, no external requests); `runs_*/` every run file behind every number; `docs/` EVAL-2 to EVAL-8, audit report, results card, demo script, video storyboard.
+- Corpus rebuild: `python eval/build_corpus.py`; all cases in mock mode: `python pipeline.py` (MOCK outputs are labelled and never headline numbers). Live: `python pipeline.py --live` refuses to call the model unless `bs.py spend check` approves. Keep the key in `.env` or `C:\dev\bs\.env`; never commit it.
+- Earlier phases: [EVAL-4](docs/EVAL-4.md) (2x2 factorial, G4), [EVAL-5](docs/EVAL-5.md) (guarded edits with repeats, G5: acceptance PASSED, one clean false alarm remained), [EVAL-6](docs/EVAL-6.md) (real and textbook cases, G6: acceptance FAILED on size, 1 of 3).
 
 ## Scope and tooling
+Everything in this repository was written during the Meta Global AI Developer Hackathon (Oct 26 to Nov 4, 2026), with coding agents including Meta's Muse Code. Third-party libraries: scikit-learn, pandas, numpy, FastAPI, uvicorn, pytest. Public data used for the real cases is not ours; it is pinned and cited above.
 
-Everything in this repository was written during the Meta Global AI Developer Hackathon (Oct 26 to Nov 4,
-2026), mainly Oct 31 to Nov 1, with coding agents including Meta's Muse Code. Meta models: `muse-spark-1.3` (claim extraction, hypothesis generation,
-experiment code). Libraries: scikit-learn, pandas, numpy, FastAPI, uvicorn, pytest.
-
-## License
-
-Not yet chosen by the owner.
+## Licence
+MIT, see [LICENSE](LICENSE). The licence covers this repository's code and docs. Third-party data keeps its own terms: the EHG features come from PhysioNet TPEHGDB (Open Data Commons Attribution License 1.0), and the raw civil-war data is not redistributed here.

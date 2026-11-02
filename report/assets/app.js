@@ -1,591 +1,308 @@
-/* NullLab demo page. Plain JS, no external requests. Data: window.__NL_DATA (embedded at render time) or /api/demo. */
+/* NullLab page. Plain JS, no external requests. Data: window.__NL_DATA (embedded at render time) or /api/demo (optional fetch).
+   One animation clock (the rAF loop below). Everything else is a CSS transition on a class flip. */
 (function () {
   "use strict";
   const $ = (s, el) => (el || document).querySelector(s);
   const $$ = (s, el) => Array.from((el || document).querySelectorAll(s));
-  const esc = s => String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  const DM = window.DotMatrix;
-  const RM = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const V = window.NLV, esc = V.esc, num = V.num, badge = V.badge, IC = V.IC, fmt = V.fmt;
+  const RM = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
-  const ease = p => 1 - Math.pow(1 - p, 3);
-  const sg = (x, d) => (x == null ? "n/a" : (x >= 0 ? "+" : "") + Number(x).toFixed(d));
-  const fv = (v, unit) => v == null ? "n/a" : unit === "pct" ? (v * 100).toFixed(1) + "%" : Number(v).toFixed(3);
-  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
-                  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } } };
-
-  const IC = {
-    x: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg>',
-    check: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 5" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>',
-    q: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 5.8a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2.9-1.2 1.8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/><circle cx="8" cy="13" r="1.3" fill="currentColor"/></svg>',
-    dash: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 8h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
-    play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.5v9l7-4.5z" fill="currentColor"/></svg>',
-    pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 3.5h2.5v9H4.5zM9 3.5h2.5v9H9z" fill="currentColor"/></svg>',
-    replay: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8a4.5 4.5 0 1 0 1.4-3.3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M3 2.5v3h3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
-    skip: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3.5v9l6-4.5zM9 3.5v9l6-4.5z" fill="currentColor"/></svg>',
-    info: '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.6" fill="none"/><path d="M8 7v4.2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="4.8" r="1" fill="currentColor"/></svg>'
-  };
-  const VICON = { FALSIFIED: IC.x, SURVIVED: IC.check, INCONCLUSIVE: IC.q };
-  const vchip = (v, extra) => `<span class="vd ${esc(v)}">${VICON[v] || IC.q}${esc(v)}${extra ? " " + esc(extra) : ""}</span>`;
-  const badge = b => `<span class="badge ${esc(b)}" title="${esc(BADGE_HELP[b] || "")}">${esc(b)}</span>`;
-  const BADGE_HELP = {
-    "REAL-PINNED": "Real public data pinned by checksum or bundled with scikit-learn",
-    "TEXTBOOK": "A textbook-documented setting, not a published reanalysis of a paper",
-    "SYNTHETIC": "A case we generated with planted flaws",
-    "MOCK": "Scripted stand-in, not a model result", "LIVE": "Model calls to muse-spark-1.3"
-  };
-  const src = s => `<span class="badge SRC">source: ${esc(s)}</span>`;
-
+  const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* blocked */ } } };
   let D = null;
-  const S = { case: null, fx: "g4_assay_replicates.r1", step: null };
 
-  /* ------------------------------------------------------------------ hash state */
-  function readHash() {
-    const h = new URLSearchParams(location.hash.replace(/^#/, ""));
-    if (h.get("case")) S.case = h.get("case");
-    if (h.get("fx")) S.fx = h.get("fx");
-    if (h.get("step")) S.step = h.get("step");
+  /* ------------------------------------------------------------------ easing */
+  function bezier(x1, y1, x2, y2) {   // CSS cubic-bezier
+    const cx = 3 * x1, bx = 3 * (x2 - x1) - cx, ax = 1 - cx - bx, cy = 3 * y1, by = 3 * (y2 - y1) - cy, ay = 1 - cy - by;
+    const X = t => ((ax * t + bx) * t + cx) * t, Y = t => ((ay * t + by) * t + cy) * t;
+    return x => { let t = x; for (let i = 0; i < 8; i++) { const e = X(t) - x, d = (3 * ax * t + 2 * bx) * t + cx; if (Math.abs(e) < 1e-5 || !d) break; t -= e / d; } return Y(clamp(t, 0, 1)); };
   }
-  function writeHash() {
-    const h = new URLSearchParams();
-    if (S.case) h.set("case", S.case);
-    if (S.fx) h.set("fx", S.fx);
-    if (S.step) h.set("step", S.step);
-    try { history.replaceState(null, "", "#" + h.toString()); } catch (e) { /* file:// in some browsers */ }
-  }
+  const eSweep = bezier(.2, .7, .2, 1);
+  const eQuint = p => 1 - Math.pow(1 - p, 5);
+  const eSettle = p => { const u = p - 1; return 1 + 2 * u * u * u + u * u; };   // one overshoot of about 4 percent
 
-  /* ------------------------------------------------------------------ hero art */
-  function pill(x, y, label, fs) {
-    const w = Math.round(label.length * fs * 0.62 + fs * 1.8), h = Math.round(fs * 2);
-    return { w, svg: `<g class="pill"><rect x="${x}" y="${y - h / 2}" width="${w}" height="${h}" rx="${h / 2}"/><text x="${x + w / 2}" y="${y + fs * 0.36}" text-anchor="middle" style="font-size:${fs}px">${esc(label)}</text></g>` };
-  }
-  function mark(cx, cy, r, sw) {
-    const d = r * 0.98;
-    return `<circle class="mark" cx="${cx}" cy="${cy}" r="${r}" stroke-width="${sw}"/><path class="mark mark-s" d="M${cx - d} ${cy + d}L${cx + d} ${cy - d}" stroke-width="${sw}" stroke-linecap="round"/>`;
-  }
-  let heroWide = null;
-  function drawHero(animate) {
-    const svg = $("#heroArt"); if (!svg) return;
-    const wide = svg.parentElement.clientWidth >= 760;
-    if (wide === heroWide && !animate) return;
-    heroWide = wide;
-    let s = "";
-    if (wide) {
-      svg.setAttribute("viewBox", "0 34 1200 312");
-      const cx = 600, cy = 190;
-      s += `<path class="rail" d="M24 60H430"/><path class="rail" d="M60 320H430"/><path class="rail" d="M770 60H1176"/><path class="rail" d="M770 320H1140"/>`;
-      s += `<path class="conn" d="M430 60C472 60 486 78 512 104"/><path class="conn" d="M430 320C472 320 486 302 512 276"/>`;
-      s += `<path class="conn" d="M688 104C714 78 728 60 770 60"/><path class="conn" d="M688 276C714 302 728 320 770 320"/>`;
-      s += `<circle class="end" cx="430" cy="60" r="4.5"/><circle class="end" cx="430" cy="320" r="4.5"/><circle class="end" cx="770" cy="60" r="4.5"/><circle class="end" cx="770" cy="320" r="4.5"/>`;
-      s += `<circle class="end" cx="24" cy="60" r="3" opacity=".5"/><circle class="end" cx="1176" cy="60" r="3" opacity=".5"/>`;
-      [[110, 60, "Claim"], [250, 60, "Hypothesis"], [170, 320, "Edit"], [860, 60, "Run"], [980, 60, "Verdict"], [880, 320, "Inflation"]]
-        .forEach(([x, y, t]) => { s += pill(x, y, t, 13).svg; });
-      s += `<rect class="tile-o" x="${cx - 100}" y="${cy - 100}" width="200" height="200" rx="44"/><rect class="tile-i" x="${cx - 74}" y="${cy - 74}" width="148" height="148" rx="30"/>`;
-      s += mark(cx, cy, 34, 9);
-      const L = DM.group("DOUBT. TEST.", 0, 0, 6), R = DM.group("MEASURE.", 0, 0, 6);
-      s += `<g class="dm">${DM.group("DOUBT. TEST.", 470 - L.w, cy - L.h / 2, 6).svg}${DM.group("MEASURE.", 730, cy - R.h / 2, 6).svg}</g>`;
-    } else {
-      svg.setAttribute("viewBox", "0 0 400 340");
-      const cx = 200, cy = 174;
-      const top = DM.group("DOUBT. TEST.", 0, 0, 5), bot = DM.group("MEASURE.", 0, 0, 6);
-      const lp = [["Claim", 124], ["Hypothesis", 174], ["Edit", 224]], rp = [["Run", 124], ["Verdict", 174], ["Inflation", 224]];
-      const ty = [148, 174, 200];
-      lp.forEach(([t, y], i) => { const p = pill(6, y, t, 11); s += `<path class="conn" d="M${6 + p.w} ${y}C${118} ${y} ${110} ${ty[i]} ${cx - 72} ${ty[i]}"/>` + p.svg; });
-      rp.forEach(([t, y], i) => { const w = pill(0, y, t, 11).w; const p = pill(394 - w, y, t, 11); s += `<path class="conn" d="M${cx + 72} ${ty[i]}C${290} ${ty[i]} ${282} ${y} ${394 - w} ${y}"/>` + p.svg; });
-      s += `<rect class="tile-o" x="${cx - 72}" y="${cy - 72}" width="144" height="144" rx="32"/><rect class="tile-i" x="${cx - 52}" y="${cy - 52}" width="104" height="104" rx="22"/>`;
-      s += mark(cx, cy, 24, 7);
-      s += `<g class="dm">${DM.group("DOUBT. TEST.", (400 - top.w) / 2, 14, 5).svg}${DM.group("MEASURE.", (400 - bot.w) / 2, 290, 6).svg}</g>`;
-    }
-    svg.innerHTML = s;
-    svg.style.maxWidth = wide ? "" : "460px";
-    $$(".conn,.rail", svg).forEach(p => { try { p.style.setProperty("--len", Math.ceil(p.getTotalLength()) + 1); } catch (e) { /* old engines */ } });
-    if (animate && !RM) { svg.classList.remove("draw"); void svg.getBoundingClientRect(); svg.classList.add("draw"); }
-  }
-
-  /* ------------------------------------------------------------------ the 10-second wow (timeline) */
-  const T = { RUN0: 300, RUN1: 2700, COL: 2800, COLD: 900, STAMP: 3800, WHY: 3950, END: 4400 };
-  const TL = { t: 0, playing: false, speed: 1, last: null, raf: 0, announced: false };
-  const hero = () => D.heroes.find(h => h.id === S.case) || D.heroes[0];
-  const trace = () => (D.traces || {})[hero().id];
-
-  function renderCases() {
-    const el = $("#cases");
-    el.innerHTML = D.heroes.map((h, i) => `<button role="tab" id="tab-${esc(h.id)}" aria-controls="wowBody" aria-selected="${h.id === S.case}" tabindex="${h.id === S.case ? 0 : -1}" data-i="${i}"><span class="k ${esc(h.verdict)}"></span>${esc(h.short)}</button>`).join("");
-    $$("button", el).forEach(b => b.addEventListener("click", () => selectCase(D.heroes[+b.dataset.i].id, true)));
-  }
-
-  function pct(h, v) { return clamp(v / h.axis_max * 100, 0, 100); }
-  function renderWow() {
-    const h = hero(), tr = trace();
-    const end = h.end ? h.end.value : null;
-    const mk = (h.markers || []).filter(m => m.value != null).map((m, i) => {
-      const p = pct(h, m.value), tx = p > 82 ? "translateX(-100%)" : p < 14 ? "translateX(0)" : "translateX(-50%)";
-      return `<div class="mk ${i % 2 ? "alt" : ""}" style="left:${p}%"><span style="transform:${tx}">${esc(m.label)}: ${esc(fv(m.value, h.unit))}</span></div>`;
-    }).join("");
-    const seeds = (h.seeds || []).map(s => `<tr><td>${esc(s.seed)}</td><td>${fv(s.claimed, h.unit)}</td><td>${fv(s.controlled, h.unit)}</td><td>${sg(s.delta, 3)}</td><td>[${sg(s.ci[0], 3)}, ${sg(s.ci[1], 3)}]</td><td>${s.n != null ? s.n : "see n below"}</td></tr>`).join("");
-    const ex = (h.seeds || []).filter(s => s.ci[0] > 0 || s.ci[1] < 0).length;
-    $("#wowBody").innerHTML = `
-      <p class="claim">“${esc(h.claim_text)}”</p>
-      <div class="meta">${h.provenance.map(badge).join("")}<span class="badge LIVE">${esc(h.mode)}</span>${src(h.source)}<span class="xs muted">${esc(h.prov_note)}</span></div>
-      <div class="meter">
-        <div class="labels">
-          <div><div class="bignum" id="numA">${DM.svg(fv(h.start.value, h.unit), { pitch: 6, label: "claimed " + fv(h.start.value, h.unit) })}</div><div class="numcap">${esc(h.start.label)}</div></div>
-          <div style="text-align:right"><div class="bignum acc" id="numB" style="display:flex;justify-content:flex-end"></div><div class="numcap" style="margin-left:auto">${esc(h.end ? h.end.label : "no measured number")}${h.n_text ? " · " + esc(h.n_text) : ""}</div></div>
-        </div>
-        <div class="track" role="img" aria-label="${esc(h.metric)} bar: claimed ${esc(fv(h.start.value, h.unit))}, measured ${esc(fv(end, h.unit))}">
-          <div class="ghost" id="ghost" style="left:${pct(h, h.start.value)}%"></div>
-          <div class="fill" id="fill"></div>${mk}
-        </div>
-        <div class="axis"><span>0</span><span>${esc(h.metric)} axis, 0 to ${esc(fv(h.axis_max, h.unit))}</span><span>${esc(fv(h.axis_max, h.unit))}</span></div>
-        <div class="stamp ${esc(h.verdict)}" id="stamp" aria-hidden="true">${VICON[h.verdict]}${esc(h.verdict)}</div>
-      </div>
-      <div class="steps-mini" id="mini" aria-hidden="true">${["Plan", "Act", "Verify", "Recover"].map(p => `<span data-p="${p}">${p}</span>`).join("")}</div>
-      <div class="ticker" id="ticker" aria-hidden="true"></div>
-      <p class="why" id="why"><b>${esc(h.verdict)}.</b> ${esc(h.why)}</p>
-      ${seeds ? `<details class="more"><summary>Per-seed numbers and how sure we are</summary>
-        <div class="tw"><table class="seeds"><thead><tr><th>seed</th><th>claim's protocol</th><th>controlled</th><th>drop</th><th>95% interval of drop</th><th>n</th></tr></thead><tbody>${seeds}</tbody></table></div>
-        <p class="xs muted">How sure: each interval comes from an unpaired bootstrap of that seed's test rows; an interval that excludes 0 is a measured drop. ${ex} of ${h.seeds.length} intervals exclude 0. ${esc(h.n_text)}.</p></details>` : ""}`;
-    TL.lines = (tr && tr.lines) || [];
-    TL.lastNum = null;
-    renderSteps();
-  }
-
-  function paint() {
-    const h = hero(), t = TL.t;
-    const startP = pct(h, h.start.value), end = h.end ? h.end.value : null;
-    const pr = ease(clamp((t - T.COL) / T.COLD, 0, 1));
-    const fill = $("#fill");
-    if (!fill) return;
-    if (end == null) {
-      fill.style.width = startP + "%";
-      fill.className = "fill" + (t >= T.COL ? " hatch" : "");
-    } else {
-      fill.style.width = (startP + (pct(h, end) - startP) * pr) + "%";
-      fill.className = "fill" + (t >= T.STAMP && h.verdict === "FALSIFIED" ? " FALSIFIED" : "");
-    }
-    $("#ghost").classList.toggle("on", t >= T.COL);
-    const num = end == null ? (t >= T.COL ? "--" : fv(h.start.value, h.unit)) : fv(h.start.value + (end - h.start.value) * pr, h.unit);
-    if (num !== TL.lastNum) { $("#numB").innerHTML = DM.svg(num, { pitch: 6, label: (t >= T.STAMP ? "measured " : "") + num }); TL.lastNum = num; }
-    $("#stamp").classList.toggle("on", t >= T.STAMP);
-    $("#why").classList.toggle("on", t >= T.WHY);
-    // log lines
-    const n = TL.lines.length, idx = n ? Math.floor((t - T.RUN0) / ((T.RUN1 - T.RUN0) / n)) : -1;
-    const cur = t >= T.RUN1 ? n : clamp(idx, -1, n - 1);
-    const line = TL.lines[clamp(cur, 0, n - 1)];
-    $("#ticker").textContent = t < T.RUN0 ? "Re-running the claim under control…" : t >= T.STAMP ? "Done: " + (TL.lines.length ? TL.lines.length + " log lines, all from " + (trace() || {}).source : "") : line ? "[" + line.phase + "] " + line.text : "";
-    const phases = ["Plan", "Act", "Verify", "Recover"];
-    const curPh = cur >= 0 && cur < n ? TL.lines[cur].phase : null;
-    const seenPh = new Set(TL.lines.slice(0, clamp(cur + 1, 0, n)).map(l => l.phase));
-    $$("#mini span").forEach(sp => {
-      const p = sp.dataset.p;
-      sp.className = p === curPh ? "on" : seenPh.has(p) ? "done" : "";
-      if (p === "Recover" && t >= T.RUN1 && !seenPh.has("Recover")) sp.textContent = "Recover: not needed";
-      else sp.textContent = p;
+  /* ------------------------------------------------------------------ the clock: players share one rAF loop */
+  const clock = { raf: 0, last: null, players: [] };
+  function player(end, paint) { const p = { t: 0, end, playing: false, paint, done: null }; clock.players.push(p); return p; }
+  function tick(now) {
+    clock.raf = 0;
+    if (clock.last == null) clock.last = now;
+    const dt = Math.min(400, now - clock.last); clock.last = now;
+    let any = false;
+    clock.players.forEach(p => {
+      if (!p.playing) return;
+      p.t = Math.min(p.end, p.t + dt); p.paint(p.t);
+      if (p.t >= p.end) { p.playing = false; if (p.done) p.done(); } else any = true;
     });
-    $$("#log li").forEach((li, i) => { li.className = i === cur ? "cur" : i < cur || t >= T.RUN1 ? "seen" : ""; });
-    $$(".step").forEach(b => b.classList.toggle("live", b.dataset.p === curPh && t < T.RUN1));
-    $("#prog").style.width = (t / T.END * 100) + "%";
-    if (t >= T.STAMP && !TL.announced) {
-      TL.announced = true;
-      $("#live").textContent = `${h.verdict}: ${h.short}. Claimed ${fv(h.start.value, h.unit)}, measured ${fv(end, h.unit)}. ${h.why}`;
-    }
+    if (any) clock.raf = requestAnimationFrame(tick); else clock.last = null;
   }
+  function start(p, from) {
+    if (RM) { p.t = p.end; p.playing = false; p.paint(p.end); if (p.done) p.done(); return; }
+    p.t = from == null ? 0 : from; p.playing = true; p.paint(p.t);
+    if (!clock.raf) { clock.last = null; clock.raf = requestAnimationFrame(tick); }
+  }
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) { if (clock.raf) cancelAnimationFrame(clock.raf); clock.raf = 0; clock.last = null; }
+    else if (clock.players.some(p => p.playing) && !clock.raf) clock.raf = requestAnimationFrame(tick);
+  });
 
-  /* rAF drives the replay; a slow timer keeps it moving when the browser throttles rAF (hidden or background tab). */
-  function frame() {
-    const now = performance.now();
-    if (TL.last == null) TL.last = now;
-    const dt = Math.min(1000, now - TL.last); TL.last = now;
-    if (!TL.playing) return;
-    TL.t = Math.min(T.END, TL.t + dt * TL.speed);
-    paint();
-    if (TL.t >= T.END) { TL.playing = false; syncCtrl(); }
+  /* ------------------------------------------------------------------ hero timeline: connectors, nodes, count-down + ring, verdict */
+  const T = { CX: 0, CXD: 800, N0: 900, ND: 180, CNT: 1900, CNTD: 1100, VERD: 3050, END: 3300 };
+  const hero = player(T.END, paintHero);
+  let H = {};   // cached elements
+  function paintHero(t) {
+    if (!H.big) return;
+    const sw = 1 - eSweep(clamp((t - T.CX) / T.CXD, 0, 1));
+    H.cx.forEach(c => c.style.strokeDashoffset = sw);
+    const nN = H.nodes.length;
+    H.nodes.forEach((g, i) => {
+      const a = T.N0 + i * T.ND;
+      g.classList.toggle("on", i === nN - 1 ? t >= a : t >= a && t < a + T.ND);
+    });
+    H.cx.forEach((c, i) => c.classList.toggle("act", t >= T.N0 + (i + 1) * T.ND));
+    $$(".flow-v li").forEach((li, i) => li.style.opacity = t >= T.N0 + i * T.ND ? 1 : .55);
+    const p = eQuint(clamp((t - T.CNT) / T.CNTD, 0, 1)), a = H.claimed, b = H.measured;
+    H.big.textContent = (a + (b - a) * p).toFixed(3);
+    H.ring.setAttribute("transform", `translate(120 120) scale(${(1 + (b / a - 1) * p).toFixed(4)})`);
+    const on = t >= T.VERD;
+    H.verdict.classList.toggle("on", on);
+    if (on && !H.said) { H.said = true; $("#live").textContent = H.sentence; }
+    H.scrub.value = t;
   }
-  function loop() { TL.raf = 0; frame(); if (TL.playing) TL.raf = requestAnimationFrame(loop); }
-  function play() {
-    if (TL.t >= T.END) TL.t = 0;
-    TL.playing = true; TL.last = null;
-    if (!TL.raf) TL.raf = requestAnimationFrame(loop);
-    clearInterval(TL.iv); TL.iv = setInterval(() => { if (!TL.playing) { clearInterval(TL.iv); return; } if (performance.now() - (TL.last || 0) > 120) frame(); }, 150);
-    syncCtrl();
-  }
-  function pause() { TL.playing = false; syncCtrl(); }
+  hero.done = () => { if (H.verdict) H.verdict.classList.add("settled"); const b = $("#btnPlay"); if (b) b.textContent = "Play"; };
   function replay() {
-    TL.announced = false; $("#live").textContent = "";
-    if (RM) { TL.playing = false; TL.t = 0; paint(); setTimeout(() => { TL.t = T.END; paint(); syncCtrl(); }, 40); return; }
-    TL.t = 0; paint(); play();
+    H.said = false; $("#live").textContent = "";
+    if (H.verdict) H.verdict.classList.toggle("settled", true);
+    start(hero, 0); start(needle, 0);
   }
-  function skip() { TL.t = T.END; TL.playing = false; paint(); syncCtrl(); }
-  function syncCtrl() {
-    const b = $("#btnPause");
-    const on = TL.playing;
-    b.innerHTML = on ? IC.pause + "Pause" : IC.play + (TL.t >= T.END ? "Play again" : "Resume");
-    b.setAttribute("aria-label", on ? "Pause the replay" : "Play the replay");
-    $$("#speed button").forEach(x => x.setAttribute("aria-pressed", String(+x.dataset.s === TL.speed)));
+  function skip() { hero.playing = false; hero.t = T.END; paintHero(T.END); needle.playing = false; needle.t = needle.end; paintNeedle(needle.end); termP.playing = false; termP.t = termP.end; paintTerm(termP.end); }
+
+  /* ------------------------------------------------------------------ needle: seeds 42/43/44 light, then settle from claimed to measured */
+  const needle = player(1500, paintNeedle);
+  function paintNeedle(t) {
+    const n = $("#needle"); if (!n) return;
+    $$("#seeds circle").forEach((c, i) => c.classList.toggle("on", t >= i * 150));
+    const s = +n.dataset.s, e = +n.dataset.a, p = clamp((t - 600) / 900, 0, 1);
+    n.setAttribute("transform", `rotate(${(s + (e - s) * eSettle(p)).toFixed(2)})`);
   }
 
-  function selectCase(id, focus) {
-    if (!D.heroes.some(h => h.id === id)) id = D.heroes[0].id;
-    S.case = id; writeHash();
-    $$("#cases button").forEach(b => { const on = D.heroes[+b.dataset.i].id === id; b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; if (on && focus) b.focus({ preventScroll: true }); });
-    renderWow(); replay();
-  }
-  function stepCase(d) {
-    const i = D.heroes.findIndex(h => h.id === S.case);
-    selectCase(D.heroes[(i + d + D.heroes.length) % D.heroes.length].id, document.activeElement && document.activeElement.closest("#cases"));
-  }
-
-  /* ------------------------------------------------------------------ Plan / Act / Verify / Recover */
-  const STEP_TXT = {
-    Plan: "Name what could be wrong and commit to it, hashed, before anything runs.",
-    Act: "Write the smallest edit that fixes only the suspect step and run it in a sandbox.",
-    Verify: "A deterministic guard checks that only the named step changed, then the stats are read.",
-    Recover: "If the guard or the run fails: one retry with the error text, else INCONCLUSIVE."
-  };
-  function renderSteps() {
-    const tr = trace(), h = hero();
-    const box = $("#stepsBody");
-    if (!tr) { box.innerHTML = `<div class="empty">No trace for this case in the run files.</div>`; return; }
-    const cnt = p => tr.lines.filter(l => l.phase === p).length;
-    $("#stepsCase").innerHTML = `Trace of <b>${esc(h.short)}</b> ${h.provenance.map(badge).join(" ")} ${src(tr.source)}`;
-    box.innerHTML = `<div class="steps" role="list">${["Plan", "Act", "Verify", "Recover"].map((p, i) => `
-      <button class="step" role="listitem" data-p="${p}" aria-expanded="${S.step === p.toLowerCase()}" aria-controls="stepDetail">
-        <span class="n">0${i + 1}</span><h3>${p}</h3><p>${STEP_TXT[p]}</p>
-        <span class="state">${p === "Recover" ? (tr.recover.used ? "used" : "not needed") : cnt(p) + " log line" + (cnt(p) === 1 ? "" : "s")}</span></button>`).join("")}</div>
-      <div id="stepDetail" class="detail" aria-live="polite"></div>
-      <ol class="log" id="log" aria-label="Agent log">${tr.lines.map(l => `<li><b>${esc(l.phase)}</b> ${esc(l.text)}${l.detail ? `<span class="d">${esc(l.detail)}</span>` : ""}</li>`).join("")}</ol>`;
-    $$(".step", box).forEach(b => b.addEventListener("click", () => {
-      const p = b.dataset.p.toLowerCase(); S.step = S.step === p ? null : p; writeHash(); renderDetail();
-    }));
-    renderDetail();
-  }
-  function renderDetail() {
-    const tr = trace(), el = $("#stepDetail"); if (!el || !tr) return;
-    $$(".step").forEach(b => b.setAttribute("aria-expanded", String(b.dataset.p.toLowerCase() === S.step)));
-    if (!S.step) { el.innerHTML = `<p class="xs muted">Tap a step to see what the agent actually did in this run.</p>`; return; }
-    let h = "";
-    if (S.step === "plan") {
-      const P = tr.plan;
-      if (P.hypotheses) h += `<h4>Preregistered hypotheses</h4>` + P.hypotheses.map(x => `<div class="hyp ${x.primary ? "p" : ""}"><b>${esc(x.id)}${x.primary ? " · primary" : ""} · ${esc(x.direction)}</b><br>${esc(x.text)}</div>`).join("");
-      if (P.suspects) h += `<h4>Suspect steps named by the planner</h4>` + P.suspects.map(x => `<div class="hyp"><b>${esc(x.id)}</b> ${esc(x.text)}${x.code_line ? `<br><code class="xs">${esc(x.code_line)}</code>` : ""}</div>`).join("");
-      if (P.pred) h += `<p class="small">Predicted drops before running (pp): ${Object.entries(P.pred).map(([k, v]) => esc(k) + " " + esc(v)).join(", ")}</p>`;
-      h += `<p class="src">${esc(P.note)} · sha256 ${esc(P.sha)}</p>`;
-    } else if (S.step === "act") {
-      h += `<h4>The edit</h4>` + (tr.act.edits.length ? tr.act.edits.map(e => `<p class="xs muted" style="margin:10px 0 0">${esc(e.label)}</p><pre class="code" tabindex="0">${esc(e.code)}</pre>`).join("") : `<p class="muted small">No edit was executed.</p>`);
-      h += `<p class="src">${esc(tr.act.note)}</p>`;
-    } else if (S.step === "verify") {
-      if (tr.verify.fidelity.length) h += `<h4>Fidelity verdict</h4><ul class="fid">${tr.verify.fidelity.map(f => `<li>${IC.check}<span>${esc(f)}</span></li>`).join("")}</ul>`;
-      h += `<h4>Log</h4><ul class="fid">${tr.verify.lines.map(f => `<li>${IC.dash}<span>${esc(f)}</span></li>`).join("")}</ul>`;
-    } else {
-      h += tr.recover.used ? `<h4>Recover was used</h4><ul class="fid">${tr.recover.lines.map(f => `<li>${IC.x}<span>${esc(f)}</span></li>`).join("")}</ul><p class="small">After one retry with the violation text, the run ${tr.recover.status === "ok" ? "passed the guard and was measured." : "still failed, so it is reported as INCONCLUSIVE, never as FALSIFIED."}</p>`
-        : `<p class="small">Not needed in this run: the first patch passed every check.</p>`;
-    }
-    el.innerHTML = `<div class="panel" style="padding:16px">${h}</div>`;
+  /* ------------------------------------------------------------------ terminal: reveals the recorded run in about 1.2 s */
+  const termP = player(1200, paintTerm);
+  let TERM = { lines: [] };
+  function paintTerm(t) {
+    const body = $("#termBody"); if (!body) return;
+    const n = TERM.lines.length, k = Math.max(1, Math.ceil(n * clamp(t / 1200, 0, 1)));
+    $$(".ln", body).forEach((l, i) => l.style.visibility = i < k ? "visible" : "hidden");
+    const sk = $("#termSkip"); if (sk) sk.hidden = t >= termP.end;
   }
 
-  /* ------------------------------------------------------------------ factorial (G5, SYNTHETIC) */
-  const QUICK = [["g4_assay_replicates.r1", "Interaction"], ["g4_freight_delay.r1", "Cancellation"], ["g4_pump_inspection.r1", "Wrong culprit"],
-                 ["g4_crop_irrigation.r2", "Benign"], ["clean_group_correct.r1", "Correct pipeline"], ["clean_wine_correct.r2", "Our false alarm"],
-                 ["g4_crop_irrigation.r1", "Inconclusive"]];
-  function renderFactorialShell() {
-    const F = D.factorial || {};
-    if (!Object.keys(F).length) { $("#fxBody").innerHTML = `<div class="empty">No G5 run files found (runs_g5/). Run <code>python g5.py</code>.</div>`; return false; }
-    $("#fxQuick").innerHTML = QUICK.filter(([k]) => F[k]).map(([k, l]) => `<button data-k="${k}" aria-pressed="false">${l}</button>`).join("");
-    $$("#fxQuick button").forEach(b => b.addEventListener("click", () => selectFx(b.dataset.k)));
-    $("#fxSel").innerHTML = Object.keys(F).map(k => `<option value="${esc(k)}">${esc(F[k].case.replace(/^g4_/, ""))} · ${esc(F[k].kind)} · repeat ${F[k].repeat}</option>`).join("");
-    $("#fxSel").addEventListener("change", e => selectFx(e.target.value));
-    return true;
-  }
-  function selectFx(k) {
-    const F = D.factorial || {};
-    if (!F[k]) k = Object.keys(F)[0];
-    S.fx = k; writeHash();
-    $("#fxSel").value = k;
-    $$("#fxQuick button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
-    renderFx(); renderVs();
-  }
-  function fxVerdict(r) {
-    const s = r.loop.sign;
-    if (r.status !== "ok" || !["+", "0", "-"].includes(s)) return ["INCONCLUSIVE", ""];
-    return s === "+" ? ["FALSIFIED", "(inflated)"] : s === "-" ? ["SURVIVED", "(understated, not inflated)"] : ["SURVIVED", ""];
-  }
-  function renderFx() {
-    const r = D.factorial[S.fx], box = $("#fxBody");
-    if (r.status !== "ok") {
-      box.innerHTML = `<div class="panel"><div class="row">${vchip("INCONCLUSIVE")}<span class="small">${esc(r.case)} · repeat ${r.repeat}</span>${src(r.source)}</div>
-        <p>No measurement. The guard or the run still failed after one retry, so this counts as wrong in the score and is never reported as FALSIFIED.</p>
-        <pre class="code" tabindex="0">${esc(r.reason)}</pre></div>`;
-      return;
-    }
-    const cf = [["orig", "original", "o"], ["fix_A", "fix A only", ""], ["fix_B", "fix B only", ""], ["fix_both", "fix both", "both"]];
-    const C = r.loop.components_pp, W = 560, H = 300, x0 = 46, y0 = 24, ch = 210, bw = 78, gap = (W - x0 - 4 * bw) / 4;
-    const y = v => y0 + ch - v * ch;
-    let g = "";
-    [0, .25, .5, .75, 1].forEach(v => { g += `<line class="gl" x1="${x0}" x2="${W}" y1="${y(v)}" y2="${y(v)}"/><text class="ax" x="${x0 - 8}" y="${y(v) + 4}" text-anchor="end">${v * 100}%</text>`; });
-    cf.forEach(([k, l, c], i) => {
-      const v = r.acc[k], bx = x0 + gap / 2 + i * (bw + gap);
-      const drop = k === "orig" ? "" : `drop ${sg(k === "fix_A" ? C.A : k === "fix_B" ? C.B : C.both, 1)} pp`;
-      const seeds = Object.entries(r.acc_seed).map(([s, a]) => `seed ${s}: ${(a[k] * 100).toFixed(1)}%`).join(", ");
-      g += `<rect class="b ${c}" tabindex="0" role="img" data-tip="${esc(l)}: mean ${(v * 100).toFixed(1)}% (${esc(seeds)}); n = ${esc(r.n.join("/"))} test rows per seed" aria-label="${esc(l)}: ${(v * 100).toFixed(1)} percent accuracy, mean of 3 seeds. ${esc(drop)}" x="${bx}" y="${y(v)}" width="${bw}" height="${(v * ch).toFixed(1)}" rx="8"/>`;
-      g += `<text class="vl" x="${bx + bw / 2}" y="${y(v) - 8}" text-anchor="middle">${(v * 100).toFixed(1)}%</text>`;
-      g += `<text class="lb" x="${bx + bw / 2}" y="${y0 + ch + 22}" text-anchor="middle">${esc(l)}</text>`;
-      if (drop) g += `<text class="dl" x="${bx + bw / 2}" y="${y0 + ch + 40}" text-anchor="middle">${esc(drop)}</text>`;
+  /* ------------------------------------------------------------------ render */
+  const SEC = (id, kick, h2, inner) => `<section class="sec" id="${id}" aria-labelledby="${id}-h"><div class="wrap"><span class="cap kicker">${kick}</span><h2 id="${id}-h">${h2}</h2>${inner}</div></section>`;
+
+  function renderHero() {
+    const G = D.g8, g7 = D.g7;
+    if (!G || !G.claimed) { $("#heroBody").innerHTML = `<p class="muted">No scored run files found yet (runs_g8/).</p>`; return; }
+    const claimed = G.claimed.k, measured = G.controlled.k;
+    $("#flowBox").innerHTML = V.flow(D);
+    $("#heroBody").innerHTML = `<div class="moment">
+      <div><div class="cap">Claim's own protocol, re-run &rarr; controlled re-evaluation &middot; PR-AUC</div>
+        <div class="bignum num" id="big" aria-hidden="true">${esc(fmt(G.claimed, "v3"))}</div>
+        <p class="line">Claimed <b>${num(D, "g8.claimed", "v3")}</b>, measured <b>${num(D, "g8.controlled", "v3")}</b>. Mean of <b>${num(D, "g8.claimed", "n")}</b> executed repeats x 3 seeds ${badge(G.claimed.badge)} <span class="faint xs">${esc(G.claimed.src)}</span></p>
+        <div class="verdict" id="verdict">${V.vd("FALSIFIED")}<span class="xs muted" style="max-width:34ch">Scored on the rows it was trained on; the controlled score is time-ordered.</span></div></div>
+      <div class="rings-m"><svg viewBox="0 0 240 240" role="img" aria-label="Two rings: the outer ring is the claimed score, the inner ring the measured score, drawn to the same scale.">
+        <g transform="translate(120 120)"><circle class="rm-ax" r="112"/></g>
+        <g id="ringOuter" transform="translate(120 120) scale(1)"><circle class="rm-outer" r="108"/></g>
+        <g transform="translate(120 120)"><circle class="rm-inner" r="${(108 * measured / claimed).toFixed(2)}"/></g>
+        <text class="rm-t" x="120" y="14" text-anchor="middle" style="font-size:12px">CLAIMED</text>
+        <text class="rm-t" x="120" y="236" text-anchor="middle" style="font-size:12px">MEASURED, same scale</text></svg></div></div>
+      <div class="chips" aria-label="Two runs, equal weight">
+        <div class="chip"><span class="cap">G7 &middot; preregistered</span><p>Preregistered bar <b>FAILED</b>: direction ${num(D, "g7.direction", "kn")}, clean false alarms ${num(D, "g7.false_alarms", "kn")}.</p>${V.vd("NOTMET", "bar failed")}</div>
+        <div class="chip"><span class="cap">G8 &middot; new labelled run</span><p>Clauses (a) to (c) met: direction ${num(D, "g8.direction", "kn")}, clean false alarms ${num(D, "g8.false_alarms", "kn")}. Harness target missed: ${num(D, "g8.inconclusive", "kn")} INCONCLUSIVE.</p>${V.vd("SURVIVED", "clauses met")}</div></div>
+      <div class="scrub"><button class="pillbtn solid" id="btnReplay" type="button">Replay</button>
+        <button class="pillbtn" id="btnPlay" type="button" aria-pressed="false">Pause</button>
+        <label class="sr" for="scrub">Replay timeline</label><input id="scrub" type="range" min="0" max="${T.END}" step="10" value="0">
+        <span class="mk"><button type="button" data-t="${T.CX}">Connectors</button><button type="button" data-t="${T.N0}">Nodes</button><button type="button" data-t="${T.CNT}">Count</button><button type="button" data-t="${T.VERD}">Verdict</button></span></div>
+      <p class="legendline"><span class="badge">REAL-PINNED</span> real public data, checksum-pinned, source disguised <span class="badge">TEXTBOOK</span> textbook setting <span class="badge">SYNTHETIC</span> built by us <span>Counts with n, not a population estimate.</span></p>`;
+    H = { big: $("#big"), ring: $("#ringOuter"), verdict: $("#verdict"), scrub: $("#scrub"), cx: $$(".flow-h .cx[data-i]"), nodes: $$(".flow-h .fn"), claimed, measured,
+      sentence: `FALSIFIED. Claimed ${fmt(G.claimed, "v3")}, measured ${fmt(G.controlled, "v3")}. G7: preregistered bar failed, direction ${fmt(g7.direction, "kn")}. G8: clauses a to c met, harness target missed.` };
+    H.cx.forEach(c => { c.style.strokeDasharray = 1; c.style.strokeDashoffset = 1; });
+    $("#btnReplay").addEventListener("click", replay);
+    $("#btnPlay").addEventListener("click", () => {
+      if (hero.playing) { hero.playing = false; $("#btnPlay").textContent = "Play"; }
+      else { start(hero, hero.t >= hero.end ? 0 : hero.t); $("#btnPlay").textContent = hero.playing ? "Pause" : "Play"; }
     });
-    const I = C.AxB, Ici = Object.entries(r.loop.I_ci_pp || {});
-    const lo = Math.min(0, ...Ici.map(([, c]) => c[0])) - 2, hi = Math.max(0, ...Ici.map(([, c]) => c[1])) + 2;
-    const sx = v => 52 + (v - lo) / (hi - lo) * 190;
-    let ci = `<line class="z" x1="${sx(0)}" x2="${sx(0)}" y1="4" y2="${16 + Ici.length * 24}"/><text class="t" x="${sx(0)}" y="${28 + Ici.length * 24}" text-anchor="middle">0</text>`;
-    let excl = 0;
-    Ici.forEach(([s, c], i) => {
-      const ex = c[0] > 0 || c[1] < 0; if (ex) excl++;
-      const yy = 16 + i * 24;
-      ci += `<text class="t" x="0" y="${yy + 4}">seed ${esc(s)}</text><line class="${ex ? "w" : "wd"}" x1="${sx(c[0])}" x2="${sx(c[1])}" y1="${yy}" y2="${yy}"/><text class="t" x="356" y="${yy + 4}" text-anchor="end">[${sg(c[0], 1)}, ${sg(c[1], 1)}]</text>`;
-    });
-    const [v, extra] = fxVerdict(r);
-    const sent = `Fix A alone: drop ${sg(C.A, 1)} pp. Fix B alone: drop ${sg(C.B, 1)} pp. Both: drop ${sg(C.both, 1)} pp. ` +
-      (excl === Ici.length && Ici.length ? `The interaction (${sg(I, 1)} pp) is away from 0 on all ${Ici.length} seeds: ${I > 0 ? "the two flaws compound, so fixing either one alone undercounts the inflation." : "the flaws offset each other, so the sum of single fixes overstates the effect."}`
-        : `The interaction's interval includes 0 on ${Ici.length - excl} of ${Ici.length} seeds, so there is no clear interaction here.`);
-    box.innerHTML = `<div class="fxwrap">
-      <div class="panel chart"><div class="row" style="justify-content:space-between"><span class="eyebrow" style="margin:0">Accuracy under each fix · mean of 3 seeds</span>${badge("SYNTHETIC")}</div>
-        <svg viewBox="0 0 ${W} ${H}" role="group" aria-label="Four bars: original, fix A only, fix B only, fix both">${g}</svg>
-        <p class="small" style="margin:8px 0 0">${esc(sent)}</p><p class="xs muted">Drop = original minus fixed accuracy, in percentage points (pp); positive means the claim was inflated. Hover or tap a bar for the per-seed numbers.</p></div>
-      <div class="panel"><p class="eyebrow">Interaction I = drop(both) − drop(A) − drop(B)</p>
-        <div class="row" style="align-items:flex-end"><div class="dmI">${DM.svg(sg(I, 1), { pitch: 6, label: "interaction " + sg(I, 1) + " points" })}</div><span class="muted">pp</span>${vchip(v, extra)}</div>
-        <div class="ci" style="margin-top:14px"><svg viewBox="0 0 360 ${36 + Ici.length * 24}" role="img" aria-label="95 percent intervals of the interaction per seed">${ci}</svg></div>
-        <p class="xs muted">How sure: 95% interval per seed from an unpaired bootstrap (1,000 resamples). Orange = excludes 0 (${excl} of ${Ici.length}).</p>
-        <h4 class="small" style="margin:16px 0 4px">Fidelity guard: only the named step changed</h4>
-        <ul class="fid">${Object.entries(r.fidelity).map(([k, f]) => `<li>${IC.check}<span>${esc(f)}</span></li>`).join("")}</ul>
-        <p class="src">${esc(r.source)} · ${r.retries ? r.retries + " retry" : "no retry"} · truth from the builder's reference patches</p></div></div>`;
-    bindTips(box);
-  }
-  function bindTips(root) {
-    const tip = $("#tip");
-    const show = (el, x, yy) => { tip.textContent = el.dataset.tip; tip.classList.add("on"); const w = tip.offsetWidth; tip.style.left = clamp(x - w / 2, 8, innerWidth - w - 8) + "px"; tip.style.top = (yy - tip.offsetHeight - 12) + "px"; };
-    const hide = () => tip.classList.remove("on");
-    $$("[data-tip]", root).forEach(el => {
-      el.addEventListener("mousemove", e => show(el, e.clientX, e.clientY));
-      el.addEventListener("mouseleave", hide);
-      el.addEventListener("focus", () => { const b = el.getBoundingClientRect(); show(el, b.left + b.width / 2, b.top); });
-      el.addEventListener("blur", hide);
-      el.addEventListener("click", () => { const b = el.getBoundingClientRect(); tip.classList.contains("on") ? hide() : show(el, b.left + b.width / 2, b.top); });
-    });
+    H.scrub.addEventListener("input", () => { hero.playing = false; hero.t = +H.scrub.value; paintHero(hero.t); });
+    $$(".scrub .mk button").forEach(b => b.addEventListener("click", () => { hero.playing = false; hero.t = +b.dataset.t + 1; paintHero(hero.t); }));
+    wireFlow();
   }
 
-  /* ------------------------------------------------------------------ reading vs running */
-  function mark3(state, word) {
-    const m = { right: [IC.check, "RIGHT"], wrong: [IC.x, "WRONG"], na: [IC.dash, "NOT SCORED"] }[state];
-    return `<span class="m ${state}">${m[0]}${word || m[1]}</span>`;
-  }
-  function renderVs() {
-    const r = D.factorial[S.fx], b = r.b3, L = r.loop, tr = r.truth, box = $("#vsBody");
-    let readItems, runItems, runSay;
-    if (r.clean) {
-      const fa = b.verdict === "INFLATED";
-      readItems = `<li>${mark3(fa ? "wrong" : "right", fa ? "FALSE ALARM" : "RIGHT")}<span>Verdict: ${esc(b.verdict)} on a pipeline that is correct.</span></li>`;
-      runItems = r.status === "ok" ? `<li>${mark3(L.false_alarm ? "wrong" : "right", L.false_alarm ? "FALSE ALARM" : "RIGHT")}<span>Sign per seed ${esc((L.per_seed || []).join(" "))} → ${L.sign === "+" ? "inflated" : "not inflated"}.</span></li>` :
-        `<li>${mark3("na", "INCONCLUSIVE")}<span>No measurement (guard or run failed after one retry).</span></li>`;
-    } else {
-      readItems = `<li>${mark3(b.sign_wrong ? "wrong" : "right")}<span>Sign: predicted ${esc(b.sign)} (truth ${esc(tr.sign)}).</span></li>
-        <li>${mark3(b.verdict_wrong ? "wrong" : "right")}<span>Verdict: ${esc(b.verdict)} (truth ${esc(tr.verdict)}).</span></li>
-        <li>${tr.culprit ? mark3(b.culprit_wrong ? "wrong" : "right") : mark3("na")}<span>Ranking: top culprit ${esc(b.culprit_mapped || b.culprit_raw)}${tr.culprit ? " (truth " + esc(tr.culprit) + ")" : " (no single culprit in the truth)"}.</span></li>`;
-      runItems = r.status === "ok" ? `<li>${mark3(L.correct ? "right" : "wrong")}<span>Sign: measured ${esc(L.sign)} (seeds ${esc((L.per_seed || []).join(" "))}; truth ${esc(tr.sign)}).</span></li>
-        <li>${mark3(L.correct ? "right" : "wrong")}<span>Verdict follows the sign: ${L.sign === "+" ? "INFLATED" : "NOT INFLATED"}.</span></li>
-        <li>${mark3("na")}<span>Ranking: measured culprit ${esc(L.measured_culprit)} in the planner's own A/B labels; the rule does not score it.</span></li>`
-        : `<li>${mark3("wrong", "INCONCLUSIVE")}<span>No measurement; counted as wrong.</span></li>`;
-    }
-    runSay = r.status === "ok" ? `measured a fix-both drop of ${sg(L.components_pp.both, 1)} pp` : "could not measure this repeat";
-    const size = `<li>${mark3("na")}<span>Size: reading ${sg(b.fix_both_pp, 1)} pp, running ${r.status === "ok" ? sg(L.components_pp.both, 1) + " pp" : "n/a"}${tr.both != null ? ", truth " + sg(tr.both, 1) + " pp" : ""}. G5 does not score size.</span></li>`;
-    box.innerHTML = `<div class="vs">
-      <div class="card"><p class="eyebrow">Reading only · one prompt, no execution</p>
-        <p class="say">“Fixing it would drop accuracy by ${sg(b.fix_both_pp, 1)} pp: ${esc(b.verdict)}.”</p><ul class="chk">${readItems}${size}</ul></div>
-      <div class="card run"><p class="eyebrow">NullLab · ran the guarded fixes</p>
-        <p class="say">It ${esc(runSay)}.</p><ul class="chk">${runItems}${size}</ul></div></div>
-      <p class="xs muted" style="margin-top:12px">${badge("SYNTHETIC")} ${esc(r.case)} · repeat ${r.repeat} · ${r.clean ? "correct pipeline (truth: no inflation)" : "truth from the builder's reference patches (runs_g4/ref.json)"} · ${src("runs_g5/score.json")}</p>`;
-  }
-
-  /* ------------------------------------------------------------------ real + textbook cases (G6) */
-  function link(text) {
-    const m = String(text || "").match(/https?:\/\/[^\s;,)]+/) || String(text || "").match(/doi:(10\.[^\s;,)]+)/);
-    if (!m) return "";
-    const href = m[0].startsWith("http") ? m[0] : "https://doi.org/" + m[1];
-    return `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${esc(m[0])}</a>`;
-  }
-  function renderReal() {
-    const R = D.real, box = $("#realBody");
-    if (!R) { box.innerHTML = `<div class="empty">No G6 run files found (runs_g6/).</div>`; return; }
-    const tol = R.tol, acc = R.acceptance;
-    const card = (key) => {
-      const c = R.cases[key], P = c.published, isCW = key === "civilwar_apparent";
-      const maxX = Math.max(P.inflation + tol, ...c.reps.map(r => r.inflation || 0), ...c.reps.flatMap(r => (r.ci || []).map(x => x[1]))) + 0.05;
-      const minX = Math.min(0, ...c.reps.flatMap(r => (r.ci || []).map(x => x[0]))) - 0.02;
-      const sx = v => 60 + (v - minX) / (maxX - minX) * 300;
-      let g = `<rect x="${sx(P.inflation - tol)}" y="0" width="${sx(P.inflation + tol) - sx(P.inflation - tol)}" height="${c.reps.length * 34 + 8}" fill="var(--accent-soft)"/>`;
-      g += `<line x1="${sx(P.inflation)}" x2="${sx(P.inflation)}" y1="0" y2="${c.reps.length * 34 + 8}" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 3"/>`;
-      g += `<line x1="${sx(0)}" x2="${sx(0)}" y1="0" y2="${c.reps.length * 34 + 8}" stroke="var(--line-2)"/>`;
-      c.reps.forEach((r, i) => {
-        const yy = 20 + i * 34;
-        (r.ci || []).forEach((ci, j) => { g += `<line x1="${sx(ci[0])}" x2="${sx(ci[1])}" y1="${yy - 6 + j * 6}" y2="${yy - 6 + j * 6}" stroke="var(--faint)" stroke-width="2" stroke-linecap="round"/>`; });
-        g += r.magnitude_ok ? `<circle cx="${sx(r.inflation)}" cy="${yy}" r="7" fill="var(--ink)"/>` : `<circle cx="${sx(r.inflation)}" cy="${yy}" r="6.5" fill="var(--panel)" stroke="var(--accent)" stroke-width="3"/>`;
-        g += `<text x="0" y="${yy + 4}" fill="var(--muted)" style="font:500 12px var(--f-mono)">${esc(r.r)}</text>`;
-        g += `<text x="372" y="${yy + 4}" fill="var(--ink)" style="font:600 12px var(--f-mono)">${sg(r.inflation, 3)} ${r.magnitude_ok ? "within" : "outside"}</text>`;
+  function wireFlow() {
+    const go = el => { const t = $(el.dataset.to); if (t) { t.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" }); try { history.replaceState(null, "", el.dataset.to); } catch (e) { /* file:// */ } } };
+    const ns = $$(".flow-h .fn");
+    ns.forEach((g, i) => {
+      g.addEventListener("click", () => go(g));
+      g.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); e.stopPropagation(); go(g); }
+        else if (e.key === "ArrowRight" || e.key === "ArrowLeft") { e.preventDefault(); e.stopPropagation(); const j = clamp(i + (e.key === "ArrowRight" ? 1 : -1), 0, ns.length - 1); ns.forEach((x, k) => x.tabIndex = k === j ? 0 : -1); ns[j].focus(); }
       });
-      const H = c.reps.length * 34 + 30;
-      g += `<text x="${sx(P.inflation)}" y="${H - 4}" text-anchor="middle" fill="var(--accent-ink)" style="font:500 11px var(--f-mono)">published ${sg(P.inflation, 2)} ±${tol}</text>`;
-      const within = c.reps.filter(r => r.magnitude_ok).length, dir = c.reps.filter(r => r.sign === "+").length;
-      const b3 = c.reps.map(r => sg(r.b3_pp, 0)).join(" / "), b3n = c.reps.filter(r => r.b3_gets).length;
-      const pr = (R.probe || {})[key] || {};
-      const ex = pr.excerpt_only || {}, fu = pr.full_agent_view || {};
-      return `<article class="card">
-        <div class="row">${badge(c.provenance)}<span class="badge LIVE">LIVE muse-spark-1.3 · 3 repeats</span></div>
-        <h3>${esc(c.label)}</h3>
-        <p class="small muted" style="margin:0">${esc(c.flaw)}</p>
-        <div class="pub"><div><div class="c">${isCW ? "published apparent" : "book: wrong-way CV"}</div><div class="v">${esc(P.claimed)}</div></div>
-          <div><div class="c">${isCW ? "published corrected" : "book: true"}</div><div class="v">${esc(P.corrected)}</div></div>
-          <div><div class="c">published inflation (${esc(c.metric)})</div><div class="v" style="color:var(--accent-ink)">${sg(P.inflation, 2)}</div></div></div>
-        <p class="eyebrow" style="margin-top:8px">NullLab measured inflation per repeat (dot = mean of 3 seeds, lines = per-seed 95% intervals)</p>
-        <svg viewBox="0 0 490 ${H}" style="width:100%;height:auto" role="img" aria-label="Measured inflation per repeat against the published value ${sg(P.inflation, 2)} with a tolerance of ${tol}">${g}</svg>
-        <p class="small"><b>Direction right in ${dir}/${c.reps.length}; size within ±${tol} of published in ${within}/${c.reps.length}.</b> Reading alone (one prompt) predicted ${esc(b3)} points and matched in ${b3n}/${c.reps.length}.</p>
-        ${isCW ? `<div class="note wrong"><b>What it got wrong</b>Its fix replaced in-sample scoring with a random stratified 80/20 hold-out, not the temporal hold-out that a forecasting claim needs and that the reanalysis used. So it under-measured: ${c.reps.map(r => sg(r.inflation, 3)).join(" / ")} against the published ${sg(P.inflation, 2)}. The preregistered acceptance FAILED on this clause (${esc(acc.a_civilwar_reproduces)}). <span class="src">docs/EVAL-6.md §4–5</span></div>` : ""}
-        <div class="note"><b>Contamination</b>The model recognises this source. Asked from the excerpt alone it answered “${esc(ex.answer)}”; from the full view, “${esc(fu.answer)}”. This case cannot prove that running beats remembering. <span class="src">runs_g6/probe.json</span></div>
-        <p class="src" style="margin-top:12px">${isCW ? "Original: " + esc(c.original) + "<br>Correction: " : "Source: "}${esc(String(c.reanalysis).split(";")[0].split(" (PDF")[0])} ${link(c.reanalysis)}</p>
-      </article>`;
-    };
-    const cl = R.clean, row = (k, lab) => (cl[k] || []).map(r => `${esc(r.r)}: ${r.sign === "INCONCLUSIVE" ? "INCONCLUSIVE" : esc(r.sign) + " (" + sg(r.inflation, 3) + ")"}`).join(", ");
-    const b3c = k => (cl[k] || []).filter(r => r.b3_leak).length + "/" + (cl[k] || []).length;
-    box.innerHTML = `<div class="grid2 real">${card("civilwar_apparent")}${card("esl_selection")}</div>
-      <div class="panel" style="margin-top:16px"><p class="eyebrow">The corrected versions of both pipelines</p>
-        <div class="tw"><table class="seeds"><thead><tr><th>case</th><th>NullLab (sign per repeat)</th><th>reading only: called it leaky</th></tr></thead><tbody>
-        <tr><td>Civil war, temporal hold-out ${badge("REAL-PINNED")}</td><td>${row("civilwar_temporal_clean")}</td><td>${b3c("civilwar_temporal_clean")}</td></tr>
-        <tr><td>ESL, screening inside folds ${badge("TEXTBOOK")}</td><td>${row("esl_selection_clean")}</td><td>${b3c("esl_selection_clean")}</td></tr></tbody></table></div>
-        <p class="xs muted">Loop false alarms ${esc(acc.c_clean_false_alarms)} (${esc(acc.clean_inconclusive)} INCONCLUSIVE); reading-only false alarms ${esc(acc.b3_clean_false_alarms)}. Preregistered G6 acceptance: <b>${acc.PASS ? "PASS" : "FAIL"}</b> · rule sha256 ${esc(R.rule_sha.slice(0, 16))} · ${src(R.source)}</p></div>`;
+    });
   }
 
-  /* ------------------------------------------------------------------ stats strip + scoreboard */
-  function renderStats() {
-    const box = $("#statsBody");
-    if (!D.stats || !D.stats.length) { box.innerHTML = `<div class="empty">No measured numbers found.</div>`; return; }
-    box.innerHTML = D.stats.map((s, i) => `<div class="stat"><div class="dmN" data-v="${esc(s.value)}" id="st${i}">${DM.svg(RM ? s.value : s.value.replace(/^\d+/, "0"), { pitch: 6, label: s.value })}</div>
-      <p>${esc(s.caption)} <span class="muted">(n = ${esc(s.value.split("/")[1])})</span></p><p class="s">${esc(s.sub)}</p><div class="row" style="gap:6px">${s.badges.map(badge).join("")}</div><p class="src" style="margin-top:6px">${esc(s.src)}</p></div>`).join("");
-    if (RM) return;
-    const run = el => {
-      const v = el.dataset.v, m = v.match(/^(\d+)(.*)$/); if (!m) return;
-      const target = +m[1], t0 = performance.now();
-      const step = now => { const p = clamp((now - t0) / 900, 0, 1), cur = Math.round(target * ease(p)); el.innerHTML = DM.svg(cur + m[2], { pitch: 6, label: v }); if (p < 1) requestAnimationFrame(step); };
-      requestAnimationFrame(step);
-    };
-    const els = $$(".dmN", box);
-    if ("IntersectionObserver" in window) {
-      const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { run(e.target); io.unobserve(e.target); } }), { threshold: .4 });
-      els.forEach(e => io.observe(e));
-    } else els.forEach(run);
-  }
-  function renderScore() {
-    const sb = D.scoreboard, box = $("#scoreBody");
-    box.innerHTML = `<div class="panel"><div class="tw"><table class="sb"><thead><tr><th>evaluation</th><th>measure</th><th>NullLab loop</th><th>reading only (B3)</th><th>note</th></tr></thead><tbody>
-      ${sb.rows.map(r => `<tr><td class="e"><b>${esc(r.eval)}</b><div class="row" style="gap:4px;margin-top:6px">${r.badges.map(badge).join("")}</div></td><td data-h="measure">${esc(r.metric)}</td><td class="n" data-h="loop">${esc(r.loop)}</td><td class="n" data-h="reading">${esc(r.b3)}</td><td data-h="note"><span class="small">${esc(r.note)}</span><div class="src">${esc(r.src)}</div></td></tr>`).join("")}
-      </tbody></table></div>
-      <p class="eyebrow" style="margin-top:28px">Off-the-shelf checkers on the same 9 blind inputs (data only)</p>
-      <div class="tw"><table class="sb"><thead><tr><th>tool</th><th>flag rule</th><th>recall (6 leaky)</th><th>false alarms (3 correct)</th></tr></thead><tbody>
-      ${sb.tools.map(t => `<tr><td class="e"><b>${esc(t.tool)}</b></td><td data-h="rule">${esc(t.rule)}</td><td class="n" data-h="recall">${esc(t.recall)}</td><td class="n" data-h="false alarms">${esc(t.fa)}</td></tr>`).join("")}
-      </tbody></table></div><p class="src">${esc(sb.tools_src)}. Neither tool can see code-level leaks or estimate an interaction.</p>
-      <div class="caveat" role="note">${IC.info}<span><b>Not a population estimate.</b> These are counts on cases we built or picked (n shown in every cell), not rates you can expect in the wild. Reading only does better than the loop on the two famous real cases, and the model recognises both.</span></div></div>`;
+  function renderReadout() {
+    if (!D.readout || !D.readout.measured) { $("#readoutBody").innerHTML = `<p class="muted">No scored run files found.</p>`; return; }
+    const R = V.readout(D), M = D.readout.measured;
+    $("#readoutBody").innerHTML = `<div class="readgrid"><div class="gauge">${V.gauge(D)}
+        <div class="glegend"><div class="n"><i></i><span>measured, mean of ${num(D, "readout.measured", "n")} repeats</span><b class="num" style="font-weight:400">${num(D, "readout.measured", "s3")}</b></div>
+          <div class="h"><i></i><span>published (claim minus its own correction)</span><b class="num" style="font-weight:400">${num(D, "pub.inflation", "s2")}</b></div>
+          <div class="d"><i></i><span>offline reference, Python port</span><b class="num" style="font-weight:400">${num(D, "pub.reference", "s3")}</b></div></div>
+        <p class="xs muted" style="margin-top:12px">Gap tinted: measured against published. Dial runs 0 to 0.5 of inflation, no cropped axis. ${badge(M.badge)} <span class="faint">${esc(M.src)}</span></p></div>
+      <div>${R.tiles}</div></div>${R.clauses}`;
   }
 
-  /* ------------------------------------------------------------------ limits drawer, help, toast */
-  function renderLimits() {
-    const mock = (D.mock_cases || []).map(c => `<a href="${esc(c)}.html">${esc(c)}</a>`).join(", ");
-    $("#limitsBody").innerHTML = `
-      <h3>${badge("SYNTHETIC")} What is synthetic</h3><ul>
-        <li>The 2×2 factorial, the hard cases and the reading-vs-running cards: 8 cases we generated with planted flaws, 3 repeats each. Counts, not rates.</li>
-        <li>Repeats ran at temperature 0, so they are only weakly independent (hard-case numbers were identical across repeats).</li>
-        <li>The EVAL-2 corpus uses real UCI data in 3 cases, but every pipeline and flaw was written by us.</li></ul>
-      <h3>${badge("REAL-PINNED")} What is real, and its limits</h3><ul>
-        <li>Civil war: a Python port of the published R pipeline on the pinned Dataverse file (300 trees instead of 1,000; PR-AUC via scikit-learn average precision).</li>
-        <li>A second documented flaw in that paper (outcome-aware imputation, Kapoor &amp; Narayanan 2023) is baked into the data file and is not corrected here.</li>
-        <li>The model recognises both famous sources (memorisation probe), so they cannot separate experiment from recall.</li></ul>
-      <h3>${badge("TEXTBOOK")} Textbook case</h3><ul><li>ESL §7.10.2 is one random draw (seed 7) of the book's setting, not a reanalysis of a paper. n = 50, so intervals are wide.</li></ul>
-      <h3>UNVERIFIED</h3><ul><li>ROC-AUC values read off the reanalysis' Figure 1 (about 0.97 → 0.89).</li><li>Whether the civil-war variables the planner wanted to drop really leak: the guard blocked that experiment.</li></ul>
-      <h3>Known gaps in the guard</h3><ul><li>It checks that a fix stays inside its declared step, not that the fix is the right one. It does not require a temporal split for a forecasting claim.</li>
-        <li>One synthetic false alarm (clean_wine_correct, repeat 2) came from a declared but unjustified fix.</li></ul>
-      <h3>Engineering</h3><ul><li>The sandbox is a restricted subprocess (network cut, timeout, evaluator paths blocked), not a locked container.</li><li>No model is called by this page; it shows recorded runs.</li></ul>
-      <h3>${badge("MOCK")} Mock runs (muted on purpose)</h3><p class="mocklist">runs/*.json are produced by a scripted regex stand-in that only exercises the plumbing. They are never model results and never appear in a headline. Per-case pages: ${mock}</p>
-      <p class="src" style="margin-top:20px">Sources: docs/EVAL-5.md, docs/EVAL-6.md, docs/KILL-LOG.md, README.md</p>`;
+  function renderIntervals() { $("#intervalsBody").innerHTML = V.intervals(D); }
+  function renderRings() { const R = V.rings(D); $("#layersBody").innerHTML = `<div class="layers">${R.svg}${R.list}</div>`; }
+
+  /* ------------------------------------------------------------------ deliverable: reviewer note + recorded terminal */
+  let REC = "rules";
+  const recs = () => D.recorded || [];
+  const recIdx = () => Math.max(0, recs().findIndex(r => r.tag === REC));
+  function noteParts(r) {
+    const claim = ((r.claim_md || "").split("\n").filter(l => l.startsWith(">")).map(l => l.replace(/^>\s?/, "")).join(" ") || "").trim();
+    const step = (r.reviewer_note.match(/only ([\w, ]+?) changed/) || [])[1] || "";
+    const cant = (r.could_not_test_md || "").split("\n").filter(l => l.startsWith("- ")).map(l => l.slice(2));
+    return { claim, step, cant };
   }
+  function renderDeliv() {
+    const rs = recs();
+    if (!rs.length) { $("#delivBody").innerHTML = `<p class="muted">No recorded run found in report/assets/recorded/.</p>`; return; }
+    const i = recIdx(), r = rs[i], P = noteParts(r), b = `recorded.${i}.ba`;
+    const diff = (r.diff || "").split("\n");
+    const note = `<div class="note"><p class="xs muted" style="margin:0 0 12px">${badge("SYNTHETIC")} Example output on a case we built. <span class="faint">${esc(r.source_file)}</span></p>
+      <div class="cap">What we could not test</div><ul style="margin:6px 0 20px;padding-left:18px;font-size:14px;line-height:22px">${P.cant.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+      <dl><dt>Claim</dt><dd>${esc(P.claim)}</dd>
+        <dt>Flaw step</dt><dd>${esc(P.step || "see diff")}${r.rules_fired && r.rules_fired.length ? " (rule " + esc(r.rules_fired.join(", ")) + " fired)" : ""}</dd>
+        <dt>Diff</dt><dd><pre tabindex="0">${esc(diff.slice(0, 14).join("\n"))}${diff.length > 14 ? "\n... " + (diff.length - 14) + " more lines in the .patch" : ""}</pre></dd>
+        <dt>Before / after</dt><dd>claimed ${num(D, b + ".claimed", "pct1")} &rarr; controlled ${num(D, b + ".controlled", "pct1")} (${esc(r.summary.metric)}), drop ${num(D, b + ".inflation", "pp")} pp; n = ${num(D, b + ".n", "k")} rows scored per seed. Seed signs ${esc((r.summary.per_seed_sign || []).join(" "))}.</dd>
+        <dt>Rerun</dt><dd><code class="mono xs">${esc(r.rerun_command)}</code></dd></dl>
+      <div class="actions"><button class="pillbtn solid" id="btnCopyNote" type="button">Copy as reviewer note</button><button class="pillbtn" id="btnPatch" type="button">.patch</button><button class="pillbtn" id="btnBundle" type="button">Download bundle</button></div></div>`;
+    $("#delivBody").innerHTML = `<div class="deliv">${note}${termHtml(r)}</div>`;
+    $("#btnCopyNote").addEventListener("click", () => copy(r.reviewer_note, "Reviewer note copied"));
+    $("#btnPatch").addEventListener("click", () => save(r.diff, "nulllab-" + r.case + ".patch", "text/x-diff"));
+    $("#btnBundle").addEventListener("click", () => save(JSON.stringify({ record: r, note: r.reviewer_note, diff: r.diff }, null, 1), "nulllab-bundle-" + r.case + ".json", "application/json"));
+    $$("#termSeg button").forEach(x => x.addEventListener("click", () => { REC = x.dataset.tag; renderDeliv(); startTerm(); }));
+    $("#termCopy").addEventListener("click", () => copy(r.command, "Command copied"));
+    $("#termSkip").addEventListener("click", () => { termP.playing = false; termP.t = termP.end; paintTerm(termP.end); });
+  }
+  function termHtml(r) {
+    const lines = [{ c: "pr", t: "$ " + r.command }].concat(r.stdout.map(t => ({ c: "hl", t })), [{ c: "", t: "" }],
+      r.report_head.map(t => ({ c: "", t: t.replace(/\*\*/g, "").replace(/`/g, "") })), [{ c: "", t: "" }],
+      r.cost_lines.map(t => ({ c: "", t: t.replace(/\*\*/g, "") })), [{ c: "ok", t: "exit " + r.exit_code }]);
+    TERM = { lines };
+    const lab = { rules: "Rules only, $0.00", spark: "Spark case, recorded" };
+    return `<div class="term"><div class="tb"><span class="badge">REPLAY</span><span class="seg" id="termSeg" role="group" aria-label="Recorded run">${recs().map(x => `<button type="button" data-tag="${esc(x.tag)}" aria-pressed="${x.tag === r.tag}">${esc(lab[x.tag] || x.tag)}</button>`).join("")}</span><span class="grow"></span>
+        <button class="pillbtn" id="termCopy" type="button">Copy command</button><button class="pillbtn" id="termSkip" type="button">Skip</button></div>
+      <div class="body" id="termBody" tabindex="0" role="log" aria-label="Recorded terminal output">${lines.map(l => `<span class="ln ${l.c}">${esc(l.t) || "&nbsp;"}</span>`).join("")}</div>
+      <div class="ft">REPLAY of a real run recorded ${esc(r.recorded_utc.replace("T", " ").replace("Z", " UTC"))} (${esc(r.recorded_slt)} / ${esc(r.recorded_et)}). Source: <code>${esc(r.source_file)}</code>. ${esc(r.stdout_note)}. Model calls in this run: 0. Estimates are not billing.</div></div>`;
+  }
+  function copy(text, msg) {
+    const done = () => toast(msg);
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, () => fallbackCopy(text, done));
+    else fallbackCopy(text, done);
+  }
+  function fallbackCopy(text, done) { const t = document.createElement("textarea"); t.value = text; t.style.position = "fixed"; t.style.opacity = "0"; document.body.appendChild(t); t.select(); try { document.execCommand("copy"); done(); } catch (e) { toast("Copy blocked by the browser"); } t.remove(); }
+  function save(text, name, type) {
+    try { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type })); a.download = name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400); toast("Saved " + name); } catch (e) { toast("Save failed: " + e.message); }
+  }
+  function toast(m) { const t = $("#toast"); t.textContent = m; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2200); }
+  function startTerm() { paintTerm(0); start(termP, 0); }
+
+  /* ------------------------------------------------------------------ footer + G9 slot */
+  function renderFooter() {
+    const L = D.ledger, G9 = D.g9;
+    $("#footBody").innerHTML = `<div class="fgrid"><div><h3>Limits and provenance</h3>
+        <p><button class="pillbtn" data-open="limits" type="button">Read the limits</button></p>
+        <p><span class="badge">REAL-PINNED</span> real public data, checksum-pinned. <span class="badge">TEXTBOOK</span> a textbook-documented setting. <span class="badge">SYNTHETIC</span> a case we built.</p>
+        <p>Every headline number shows its n and its file. Counts on cases we built or picked, not rates for the wild.</p></div>
+      <div><h3>Estimated spend</h3><p>About <b class="num" data-p="ledger.total_usd" data-f="usd">$${L.total_usd.toFixed(2)}</b> in estimated Meta credits over <b class="num">${L.total_calls}</b> live calls, G4 to G8. Estimate at per-call figures, not billing. This page makes no model call.</p>
+        <p class="xs">${L.phases.map(p => `${esc(p.name)} $${p.usd.toFixed(2)}`).join(" &middot; ")}</p></div>
+      <div>${G9 ? `<div class="g9"><h3>G9 &middot; scored, as the file states</h3><dl>${G9.rows.map(r => `<dt>${esc(r.key)}</dt><dd class="num">${esc(r.val)}</dd>`).join("")}</dl><p class="xs" style="margin-top:8px">${badge(G9.badge)} ${esc(G9.src)}. No pass or fail is added by this page.</p></div>`
+        : `<h3>Build</h3><p>NullLab, Meta Global AI Developer Hackathon. Recorded runs on muse-spark-1.3 and muse-spark-1.3-contributor.</p>`}
+        <p class="xs">Test suite: ${esc(D.tests_doc.value)} (${esc(D.tests_doc.src)}). Data generated ${esc(D.generated_utc)}.</p></div></div>`;
+    $$("[data-open]", $("#footBody")).forEach(b => b.addEventListener("click", () => openDrawer(b.dataset.open)));
+  }
+
+  /* ------------------------------------------------------------------ drawers */
+  const sg = (x, d) => (x == null ? "n/a" : (x >= 0 ? "+" : "-") + Math.abs(Number(x)).toFixed(d));
+  const DR = {
+    steps: ["Step log and diff", () => {
+      const t = D.trace; if (!t) return `<p class="muted">No trace found.</p>`;
+      const edits = (t.act.edits || []).map(e => `<h4>${esc(e.label)}</h4><pre tabindex="0">${esc(e.code)}</pre>`).join("");
+      return `<p class="xs muted">${badge("REAL-PINNED")} one executed G8 repeat. <span class="faint">${esc(t.source)}</span></p><h4>Log</h4><ol style="padding-left:20px">${t.lines.map(l => `<li><b>${esc(l.phase)}</b> ${esc(l.text)}${l.detail ? `<br><span class="xs muted">${esc(l.detail)}</span>` : ""}</li>`).join("")}</ol>${edits}`;
+    }],
+    factorial: ["2x2 factorial", () => {
+      const f = D.factorial; if (!f) return `<p class="muted">No factorial run found.</p>`;
+      const names = { orig: "original", fix_A: "fix A only", fix_B: "fix B only", fix_both: "fix both" };
+      return `<p>${badge("SYNTHETIC")} A synthetic case with two planted flaws that interact. Fixing either alone barely helps; only fixing both removes the inflation. <span class="faint xs">${esc(f.src)}</span></p>
+        <table><thead><tr><th>config</th><th>accuracy (mean of 3 seeds)</th></tr></thead><tbody>${Object.keys(f.acc).map(k => `<tr><td>${esc(names[k] || k)}</td><td>${num(D, "factorial.acc." + k, "pct1")} <span class="faint">n = ${num(D, "factorial.acc." + k, "n")}</span></td></tr>`).join("")}</tbody></table>
+        <h4>Drop in points</h4><table><tbody>${Object.keys(f.components).map(k => `<tr><td>${esc(k)}</td><td>${num(D, "factorial.components." + k, "pp")} pp</td></tr>`).join("")}</tbody></table>`;
+    }],
+    score: ["Scoreboard", () => {
+      const sb = D.scoreboard;
+      return `<div class="tw"><table><thead><tr><th>evaluation</th><th>loop</th><th>reading only</th></tr></thead><tbody>${sb.rows.map(r => `<tr><td>${esc(r.eval)}<br><span class="faint">${r.badges.map(esc).join(", ")} &middot; ${esc(r.metric)}</span><br><span class="faint">${esc(r.note)}</span></td><td>${esc(r.loop)}</td><td>${esc(r.b3)}</td></tr>`).join("")}</tbody></table></div>
+        <h4>Off-the-shelf checkers, 9 blind inputs</h4><table><thead><tr><th>tool</th><th>recall</th><th>false alarms</th></tr></thead><tbody>${sb.tools.map(t => `<tr><td>${esc(t.tool)}<br><span class="faint">${esc(t.rule)}</span></td><td>${esc(t.recall)}</td><td>${esc(t.fa)}</td></tr>`).join("")}</tbody></table>
+        <p class="xs muted">${esc(sb.tools_src)}. Counts, not a population estimate.</p>`;
+    }],
+    wonder: ["Wonder swap", () => { const w = D.wonder; return `<p>${badge("SYNTHETIC")} Swapping the planner to muse-wonder-1.0: schema-valid plans <b>${num(D, "wonder.plans", "kn")}</b>, hard-case sign <b>${num(D, "wonder.hard_sign", "kn")}</b>, clean false alarms <b>${num(D, "wonder.clean_fa", "kn")}</b>.</p><p class="xs muted">${esc(w.note)} <span class="faint">${esc(w.plans.src)}</span></p>`; }],
+    ci: ["CI and bundle commands", () => `<h4>CI check (rules only, $0, no key)</h4><pre tabindex="0">python -m agent.ci_check . --threshold 0.05 --summary $GITHUB_STEP_SUMMARY</pre><p class="xs muted">Exit 0: no case above the threshold. 1: at least one case INFLATED. 2: nothing audited or a measurement failed. A case where no rule fired is reported as NO_RULE_FIRED, not as a pass.</p>
+      <h4>Reviewer bundle</h4><pre tabindex="0">python -m agent.bundle --help</pre><p class="xs muted">Run it for the options. The page's own bundle button saves the recorded record, diff and note as one JSON file.</p>`],
+    sandbox: ["Sandbox limits", () => `<ul><li>A restricted subprocess: network cut, timeout, evaluator paths blocked. Not a locked container.</li><li>The guard checks that an edit stays inside its declared step and that a forecast gets a time split. It cannot check direction, or whether a fix is the right one.</li><li>Repeats at temperature 0.7 are weakly independent.</li></ul>`],
+    flaw: ["The untouched second flaw", () => `<p>The real data file carries a second documented flaw: imputation that used the outcome. It is baked into the file and no method on this page corrects it. Measured numbers are for the flaw named in the claim only.</p>`],
+    limits: ["Limits", () => {
+      const g7 = D.g7, g8 = D.g8;
+      return `<h4>${badge("SYNTHETIC")} Synthetic</h4><ul><li>The hard cases, the 2x2 factorial and the rules comparison are cases we generated with planted flaws. Counts, not rates. Repeats are weakly independent.</li></ul>
+      <h4>${badge("REAL-PINNED")} Real, and its limits</h4><ul>
+        <li>The headline case is real public data from a published 2016 ML study, with columns renamed, the domain reworded and features rescaled. Same rows, same numbers. The study's topic is not shown on this page.</li>
+        <li>G7 (preregistered): bar FAILED, direction ${num(D, "g7.direction", "kn")}, ${num(D, "g7.inconclusive", "kn")} INCONCLUSIVE overall. G8 (a new labelled run, scored exactly as frozen): clauses (a) to (c) met, harness target not met (${num(D, "g8.inconclusive", "kn")}). Both stand. Neither is merged with or re-scored by the other.</li>
+        <li>Measured ${num(D, "readout.measured", "s3")} against the published ${num(D, "pub.inflation", "s2")}; a Python port of the original pipeline measures ${num(D, "pub.reference", "s3")} on the same rows.</li>
+        <li>The guard rejected a random-split plan in ${num(D, "guard", "k")} of ${num(D, "guard", "n")} executed repeats; the time split comes from the guard plus the model, not from the model alone.</li>
+        <li>The fixed-rules baseline was never run on the disguised case. Rules matched or beat the loop on the undisguised case.</li>
+        <li>The model's refusal to name the source in two probe calls shows it did not name it, not that it has no memory of it. The undisguised and textbook sources are recognised.</li>
+        <li>One harness failure (read timeout) is in the denominator and listed; it was not re-rolled. n = 5 per arm, unpaired bootstrap intervals.</li></ul>
+      <h4>UNVERIFIED</h4><ul><li>Whether the variables the planner wanted to drop really leak: the guard blocked that experiment.</li><li>Real per-token pricing: spend figures are per-call estimates.</li><li>A rerun of the whole loop from recorded replies was not repeated for this page.</li></ul>
+      <h4>${badge("MOCK").replace('class="badge"', 'class="badge mock"')} Mock runs</h4><p class="xs muted">runs/*.json come from a scripted stand-in that exercises the plumbing. They are never model results and never in a headline.</p>`;
+    }]
+  };
   let lastFocus = null;
-  function openLimits() { lastFocus = document.activeElement; $("#scrim").classList.add("on"); const d = $("#limits"); d.classList.add("on"); d.removeAttribute("inert"); d.setAttribute("aria-hidden", "false"); $("#closeLimits").focus(); }
-  function closeLimits() { $("#scrim").classList.remove("on"); const d = $("#limits"); d.classList.remove("on"); d.setAttribute("inert", ""); d.setAttribute("aria-hidden", "true"); if (lastFocus) lastFocus.focus(); }
-  function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2400); }
-
-  /* ------------------------------------------------------------------ copy summary, download report */
-  function summary() {
-    const h = hero(), lines = [];
-    lines.push(`NullLab: ${h.short} [${h.provenance.join(", ")}] ${h.verdict}. Claimed ${fv(h.start.value, h.unit)} (${h.start.label}); measured ${fv(h.end ? h.end.value : null, h.unit)}${h.n_text ? " (" + h.n_text + ")" : ""}. Source: ${h.source}.`);
-    if (D.g5) { const a = D.g5.acceptance; lines.push(`G5 [SYNTHETIC, 8 cases x 3 repeats]: loop direction right on hard runs ${a.ii_hard_sign_correct} (reading only wrong ${a.iii_b3_wrong_hard}); false alarms on correct pipelines ${a.i_clean_false_alarms} (reading only ${a.b3_clean_false_alarms}). runs_g5/score.json`); }
-    if (D.real) {
-      const cw = D.real.cases.civilwar_apparent, es = D.real.cases.esl_selection, a = D.real.acceptance;
-      lines.push(`Civil war [REAL-PINNED]: direction right ${cw.reps.filter(r => r.sign === "+").length}/${cw.reps.length}; inflation ${cw.reps.map(r => sg(r.inflation, 3)).join(" / ")} vs published ${sg(cw.published.inflation, 2)}; within +-${D.real.tol} in ${a.a_civilwar_reproduces}. Preregistered acceptance FAILED on this clause.`);
-      lines.push(`ESL 7.10.2 [TEXTBOOK]: ${es.reps.map(r => sg(r.inflation, 3)).join(" / ")} vs published ${sg(es.published.inflation, 2)}, ${a.b_esl_reproduces}. Corrected pipelines: loop false alarms ${a.c_clean_false_alarms}, reading only ${a.b3_clean_false_alarms}.`);
-      lines.push("Contamination: the model recognises both sources, so these cases cannot show that running beats remembering. Counts on cases we built or picked; not a population estimate.");
-    }
-    lines.push(location.href);
-    return lines.join("\n");
+  function openDrawer(id) {
+    const d = DR[id]; if (!d) return;
+    lastFocus = document.activeElement;
+    $("#drawerTitle").textContent = d[0]; $("#drawerBody").innerHTML = d[1]();
+    $("#scrim").classList.add("on"); const el = $("#drawer"); el.removeAttribute("inert"); el.setAttribute("aria-hidden", "false"); el.classList.add("on"); $("#closeDrawer").focus();
   }
-  function copySummary() {
-    const txt = summary();
-    const fallback = () => { const ta = document.createElement("textarea"); ta.value = txt; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select(); let ok = false; try { ok = document.execCommand("copy"); } catch (e) { ok = false; } ta.remove(); toast(ok ? "Summary copied" : "Copy blocked by the browser"); };
-    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(() => toast("Summary copied"), fallback); else fallback();
-  }
-  function reportHtml() {
-    const td = s => `<td>${esc(s)}</td>`;
-    const heroes = D.heroes.map(h => `<tr>${td(h.label)}${td(h.provenance.join(", "))}${td(fv(h.start.value, h.unit) + " (" + h.start.label + ")")}${td(fv(h.end ? h.end.value : null, h.unit))}${td(h.verdict)}${td(h.n_text)}${td(h.source)}</tr>`).join("");
-    const stats = (D.stats || []).map(s => `<tr>${td(s.value)}${td(s.caption)}${td(s.sub)}${td(s.badges.join(", "))}${td(s.src)}</tr>`).join("");
-    const score = D.scoreboard.rows.map(r => `<tr>${td(r.eval)}${td(r.badges.join(", "))}${td(r.metric)}${td(r.loop)}${td(r.b3)}${td(r.note)}${td(r.src)}</tr>`).join("");
-    const tools = D.scoreboard.tools.map(t => `<tr>${td(t.tool)}${td(t.rule)}${td(t.recall)}${td(t.fa)}</tr>`).join("");
-    let real = "";
-    if (D.real) real = Object.values(D.real.cases).map(c => `<h3>${esc(c.label)} [${esc(c.provenance)}]</h3><p>Published ${esc(c.published.claimed)} → ${esc(c.published.corrected)} (inflation ${sg(c.published.inflation, 2)} ${esc(c.metric)}). Source: ${esc(c.reanalysis)}</p><table><tr><th>repeat</th><th>sign</th><th>measured inflation</th><th>within ±${D.real.tol}</th><th>reading only (points)</th></tr>${c.reps.map(r => `<tr>${td(r.r)}${td(r.sign)}${td(sg(r.inflation, 3))}${td(r.magnitude_ok ? "yes" : "no")}${td(sg(r.b3_pp, 0))}</tr>`).join("")}</table>`).join("");
-    const css = "body{font:15px/1.5 system-ui,sans-serif;max-width:960px;margin:32px auto;padding:0 16px;color:#111;background:#fff}h1{font-weight:400}table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0 20px}td,th{border-bottom:1px solid #ddd;padding:6px 8px;text-align:left;vertical-align:top}th{color:#666;font-weight:500}.n{border:1px solid #E8501F;border-radius:12px;padding:10px 14px;background:#FCE9E1}";
-    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NullLab report</title><style>${css}</style></head><body>
-      <h1>NullLab report</h1><p>Reading an AI's answer is cheap. Measuring it is the work. Generated from the run files ${esc(D.generated_utc)}; exported ${esc(new Date().toISOString().slice(0, 16).replace("T", " "))} UTC.</p>
-      <h2>Claims re-evaluated</h2><table><tr><th>case</th><th>provenance</th><th>claimed</th><th>measured</th><th>verdict</th><th>n</th><th>source</th></tr>${heroes}</table>
-      <h2>Measured counts</h2><table><tr><th>value</th><th>what</th><th>alongside</th><th>provenance</th><th>source</th></tr>${stats}</table>
-      <h2>Real and textbook cases</h2>${real}
-      <p class="n"><b>Contamination.</b> The language model recognises both sources (runs_g6/probe.json). These two cases cannot prove that running beats remembering. NullLab does not claim to reproduce published corrections.</p>
-      <h2>Scoreboard (counts, not a population estimate)</h2><table><tr><th>evaluation</th><th>provenance</th><th>measure</th><th>loop</th><th>reading only</th><th>note</th><th>source</th></tr>${score}</table>
-      <table><tr><th>tool</th><th>rule</th><th>recall</th><th>false alarms</th></tr>${tools}</table><p>${esc(D.scoreboard.tools_src)}</p>
-      <h2>Limits</h2>${$("#limitsBody").innerHTML.replace(/<span class="badge[^>]*>([^<]*)<\/span>/g, "[$1]")}
-      <p>Test suite: ${esc(D.tests_doc.value)} (${esc(D.tests_doc.src)}).</p></body></html>`;
-  }
-  function download() {
-    try {
-      const blob = new Blob([reportHtml()], { type: "text/html" });
-      const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "nulllab-report.html";
-      document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
-      toast("Report downloaded (one self-contained HTML file)");
-    } catch (e) { toast("Download failed: " + e.message); }
+  function closeDrawer() {
+    $("#scrim").classList.remove("on"); const el = $("#drawer"); el.classList.remove("on"); el.setAttribute("inert", ""); el.setAttribute("aria-hidden", "true");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
-  /* ------------------------------------------------------------------ theme, keyboard, nav */
+  /* ------------------------------------------------------------------ theme, keyboard, nav, data */
   function curTheme() { const t = document.documentElement.dataset.theme; if (t) return t; return window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; }
-  function syncTheme() { const t = curTheme(), b = $("#btnTheme"); b.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme"); b.innerHTML = t === "dark" ? '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.2" fill="currentColor"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M3 13l1.4-1.4M11.6 4.4L13 3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>' : '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 9.5A5.5 5.5 0 0 1 6.5 3a5.5 5.5 0 1 0 6.5 6.5z" fill="currentColor"/></svg>'; }
+  function syncTheme() { const t = curTheme(), b = $("#btnTheme"); b.setAttribute("aria-label", t === "dark" ? "Switch to light theme" : "Switch to dark theme"); b.textContent = t === "dark" ? "Light" : "Dark"; }
   function toggleTheme() { const n = curTheme() === "dark" ? "light" : "dark"; document.documentElement.dataset.theme = n; store.set("nl-theme", n); syncTheme(); }
-
   function keys(e) {
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.altKey) return;
     const tag = (e.target.tagName || "").toLowerCase();
     if (["input", "select", "textarea"].includes(tag)) return;
-    const dlg = $("#help");
-    if (e.key === "Escape") { if ($("#limits").classList.contains("on")) closeLimits(); return; }
-    if (dlg.open) return;
-    if (e.key === "ArrowRight" || e.key === "ArrowLeft") { if (e.target.closest && (e.target.closest("pre") || e.target.closest(".tw"))) return; e.preventDefault(); stepCase(e.key === "ArrowRight" ? 1 : -1); }
-    else if (e.key === " " && !["button", "summary", "a"].includes(tag)) { e.preventDefault(); TL.playing ? pause() : play(); }
-    else if (e.key === "?") { e.preventDefault(); dlg.showModal ? dlg.showModal() : dlg.setAttribute("open", ""); }
+    if (e.key === "Escape") { if ($("#drawer").classList.contains("on")) closeDrawer(); return; }
+    if ($("#help").open) return;
+    if (e.key === " " && !["button", "summary", "a"].includes(tag) && !e.target.closest(".fn")) { e.preventDefault(); $("#btnPlay") && $("#btnPlay").click(); }
+    else if (e.key === "?") { e.preventDefault(); $("#help").showModal ? $("#help").showModal() : $("#help").setAttribute("open", ""); }
     else if (e.key === "r" || e.key === "R") replay();
     else if (e.key === "s" || e.key === "S") skip();
     else if (e.key === "t" || e.key === "T") toggleTheme();
-    else if (e.key === "l" || e.key === "L") openLimits();
+    else if (e.key === "l" || e.key === "L") openDrawer("limits");
   }
-  function trapLimits(e) {
-    if (e.key !== "Tab" || !$("#limits").classList.contains("on")) return;
-    const f = $$("#limits a, #limits button").filter(x => x.offsetParent !== null);
+  function trap(e) {
+    if (e.key !== "Tab" || !$("#drawer").classList.contains("on")) return;
+    const f = $$("#drawer a, #drawer button, #drawer pre").filter(x => x.offsetParent !== null);
     if (!f.length) return;
     if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
     else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
@@ -596,64 +313,54 @@
     const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + e.target.id))); }), { rootMargin: "-40% 0px -55% 0px" });
     $$("main section[id]").forEach(s => io.observe(s));
   }
-
-  /* ------------------------------------------------------------------ data loading */
-  function setStatus(kind, html) { const s = $("#dataStatus"); s.className = "status " + kind; s.innerHTML = `<i></i><span>${html}</span>`; }
+  function setStatus(html) { const s = $("#dataStatus"); if (s) s.textContent = html; }
   async function load() {
     const EMB = window.__NL_DATA || null;
     if (/^https?:$/.test(location.protocol)) {
       try {
-        const ctl = "AbortController" in window ? new AbortController() : null;
-        const to = setTimeout(() => ctl && ctl.abort(), 2500);
-        const r = await fetch("/api/demo", { cache: "no-store", signal: ctl ? ctl.signal : undefined });
-        clearTimeout(to);
+        const ctl = "AbortController" in window ? new AbortController() : null, to = setTimeout(() => ctl && ctl.abort(), 2500);
+        const r = await fetch("/api/demo", { cache: "no-store", signal: ctl ? ctl.signal : undefined }); clearTimeout(to);
         if (!r.ok) throw new Error("HTTP " + r.status);
-        const d = await r.json();
-        setStatus("live", `Live API: read from the run files just now (${esc(d.generated_utc)})`);
-        return d;
-      } catch (e) {
-        if (EMB) { setStatus("err", `API offline: showing the run data embedded at build time (${esc(EMB.generated_utc)})`); return EMB; }
-        throw e;
-      }
+        const d = await r.json(); setStatus("Read from the run files just now, " + d.generated_utc); return d;
+      } catch (e) { if (EMB) { setStatus("API offline: run data embedded at build time, " + EMB.generated_utc); return EMB; } throw e; }
     }
-    if (EMB) { setStatus("", `Opened as a file: showing the run data embedded at build time (${esc(EMB.generated_utc)})`); return EMB; }
+    if (EMB) { setStatus("Opened as a file: run data embedded at build time, " + EMB.generated_utc); return EMB; }
     throw new Error("no embedded data");
+  }
+  /* number-vs-data check: every [data-p] equals the same path of a freshly built payload (needs the API) */
+  window.NLcheck = async function () {
+    const fresh = await (await fetch("/api/demo", { cache: "no-store" })).json(), bad = [];
+    const els = $$("[data-p]");
+    els.forEach(el => { if (el.dataset.f === "usd") return; const want = V.fmt(V.get(fresh, el.dataset.p), el.dataset.f); if (want !== el.textContent.trim()) bad.push({ p: el.dataset.p, shown: el.textContent, want }); });
+    return { checked: els.length, mismatches: bad };
+  };
+
+  function once(el, fn) {
+    if (!el) return;
+    if (!("IntersectionObserver" in window)) { fn(); return; }
+    const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { fn(); io.unobserve(e.target); } }), { threshold: .35 });
+    io.observe(el);
   }
 
   function wire() {
-    $("#btnReplay").addEventListener("click", replay);
-    $("#btnPause").addEventListener("click", () => TL.playing ? pause() : play());
-    $("#btnSkip").addEventListener("click", skip);
-    $$("#speed button").forEach(b => b.addEventListener("click", () => { TL.speed = +b.dataset.s; syncCtrl(); }));
-    $("#btnCopy").addEventListener("click", copySummary);
-    $("#btnDownload").addEventListener("click", download);
     $("#btnTheme").addEventListener("click", toggleTheme);
-    $$("[data-open-limits]").forEach(b => b.addEventListener("click", openLimits));
-    $("#closeLimits").addEventListener("click", closeLimits);
-    $("#scrim").addEventListener("click", closeLimits);
+    $$("[data-open]").forEach(b => b.addEventListener("click", () => openDrawer(b.dataset.open)));
+    $("#closeDrawer").addEventListener("click", closeDrawer); $("#scrim").addEventListener("click", closeDrawer);
     $("#btnHelp").addEventListener("click", () => { const d = $("#help"); d.showModal ? d.showModal() : d.setAttribute("open", ""); });
     $("#closeHelp").addEventListener("click", () => { const d = $("#help"); d.close ? d.close() : d.removeAttribute("open"); });
-    document.addEventListener("keydown", keys);
-    document.addEventListener("keydown", trapLimits);
-    let rt; window.addEventListener("resize", () => { clearTimeout(rt); rt = setTimeout(() => drawHero(false), 120); });
-    if (window.matchMedia) { const mq = matchMedia("(prefers-color-scheme: dark)"); (mq.addEventListener ? mq.addEventListener.bind(mq, "change") : mq.addListener.bind(mq))(syncTheme); }
+    document.addEventListener("keydown", keys); document.addEventListener("keydown", trap);
   }
 
   async function init() {
-    drawHero(true); syncTheme(); wire(); readHash();
-    try { D = await load(); }
-    catch (e) {
-      setStatus("err", "Could not load run data: " + esc(e.message));
-      $("#wowBody").innerHTML = `<div class="empty">No run data available. Run <code>python -m report.render</code> to embed it, or start the API with <code>uvicorn app.server:app</code>.</div>`;
-      return;
-    }
-    if (!D.heroes || !D.heroes.length) { $("#wowBody").innerHTML = `<div class="empty">No claims found in the run files.</div>`; return; }
-    if (!D.heroes.some(h => h.id === S.case)) S.case = D.heroes[0].id;
-    renderCases(); renderWow(); renderStats(); renderLimits();
-    if (renderFactorialShell()) selectFx(S.fx);
-    renderReal(); renderScore(); navSpy(); writeHash(); syncCtrl();
-    if (S.step) { /* deep link to a step */ renderDetail(); }
-    setTimeout(replay, RM ? 0 : 250);
+    syncTheme(); wire();
+    try { D = await load(); } catch (e) { setStatus("Could not load run data: " + e.message); $("#heroBody").innerHTML = `<p class="muted">No run data available. Run <code>python -m report.render</code> to embed it, or start the API with <code>uvicorn app.server:app</code>.</p>`; return; }
+    renderHero(); renderReadout(); renderIntervals(); renderRings(); renderDeliv(); renderFooter(); navSpy();
+    $("#delivIntro") && ($("#delivIntro").hidden = false);
+    // initial states, then the page-load run: hero sequence now; needle and terminal when they scroll into view (once each)
+    paintNeedle(RM ? needle.end : 0);
+    if (RM) { paintHero(T.END); hero.t = T.END; H.verdict && H.verdict.classList.add("settled"); } else { paintHero(0); setTimeout(() => start(hero, 0), 250); }
+    once($(".gauge"), () => start(needle, 0));
+    if (RM) start(termP); else { paintTerm(0); once($("#termBody"), () => start(termP, 0)); }
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init); else init();
 })();

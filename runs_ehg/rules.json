@@ -1,0 +1,154 @@
+{
+ "label": "OFFLINE rule baseline (baselines/rulefix.py, no LLM, $0, no live call) on the disguised EHG pair; run BEFORE any live call",
+ "spec_sha256": "8be1b7e5f7137c2778361217df0e7599095fed5c1cdf8a3bb4c3b8b939c40385",
+ "rulefix_sha256_lf": "5b9c687586e9d995ba80fd3f8c5d1668d2bff6ae10d8e555b0b2a685f31f537e",
+ "cases": {
+  "ehg_disguised": {
+   "fired": {},
+   "not_applied": [],
+   "status": "ok",
+   "row": {
+    "status": "ok",
+    "sign": "0",
+    "per_seed": [
+     "0",
+     "0",
+     "0"
+    ],
+    "verdict": "NOT INFLATED",
+    "unit": "PR-AUC",
+    "inflation": 0.0,
+    "A": 0.0,
+    "B": 0.0,
+    "I": 0.0,
+    "ci_per_seed": {
+     "42": [
+      -0.016,
+      0.016
+     ],
+     "43": [
+      -0.017,
+      0.019
+     ],
+     "44": [
+      -0.016,
+      0.017
+     ]
+    },
+    "n_orig": {
+     "42": 524,
+     "43": 524,
+     "44": 524
+    },
+    "n_fix_both": {
+     "42": 524,
+     "43": 524,
+     "44": 524
+    },
+    "acc_orig": {
+     "42": 0.9701,
+     "43": 0.9665,
+     "44": 0.9711
+    },
+    "acc_fix_both": {
+     "42": 0.9701,
+     "43": 0.9665,
+     "44": 0.9711
+    },
+    "fired": [],
+    "not_applied": [],
+    "rules_applied_both": [],
+    "steps_changed": []
+   },
+   "elapsed_s": 54.4,
+   "configs": {
+    "fix_A": {
+     "rules_applied": [],
+     "src_sha256": "0082eedd0d7256d01914ae1e349eac2aff38fc0575518f8168da8aac09316a82"
+    },
+    "fix_B": {
+     "rules_applied": [],
+     "src_sha256": "0082eedd0d7256d01914ae1e349eac2aff38fc0575518f8168da8aac09316a82"
+    },
+    "fix_both": {
+     "rules_applied": [],
+     "src_sha256": "0082eedd0d7256d01914ae1e349eac2aff38fc0575518f8168da8aac09316a82"
+    }
+   }
+  },
+  "ehg_disguised_clean": {
+   "fired": {},
+   "not_applied": [],
+   "status": "ok",
+   "row": {
+    "status": "ok",
+    "sign": "0",
+    "per_seed": [
+     "0",
+     "0",
+     "0"
+    ],
+    "verdict": "NOT INFLATED",
+    "unit": "PR-AUC",
+    "inflation": 0.0,
+    "A": 0.0,
+    "B": 0.0,
+    "I": 0.0,
+    "ci_per_seed": {
+     "42": [
+      -0.12,
+      0.113
+     ],
+     "43": [
+      -0.129,
+      0.116
+     ],
+     "44": [
+      -0.125,
+      0.132
+     ]
+    },
+    "n_orig": {
+     "42": 300,
+     "43": 300,
+     "44": 300
+    },
+    "n_fix_both": {
+     "42": 300,
+     "43": 300,
+     "44": 300
+    },
+    "acc_orig": {
+     "42": 0.5541,
+     "43": 0.5219,
+     "44": 0.559
+    },
+    "acc_fix_both": {
+     "42": 0.5541,
+     "43": 0.5219,
+     "44": 0.559
+    },
+    "fired": [],
+    "not_applied": [],
+    "rules_applied_both": [],
+    "steps_changed": []
+   },
+   "elapsed_s": 51.7,
+   "configs": {
+    "fix_A": {
+     "rules_applied": [],
+     "src_sha256": "2dc9d075d4e4099d90ecfe4e2caa2730634b73a717ec723a9cf4eab222669b5f"
+    },
+    "fix_B": {
+     "rules_applied": [],
+     "src_sha256": "2dc9d075d4e4099d90ecfe4e2caa2730634b73a717ec723a9cf4eab222669b5f"
+    },
+    "fix_both": {
+     "rules_applied": [],
+     "src_sha256": "2dc9d075d4e4099d90ecfe4e2caa2730634b73a717ec723a9cf4eab222669b5f"
+    }
+   }
+  }
+ },
+ "rules_fire_on_pair": false
+}

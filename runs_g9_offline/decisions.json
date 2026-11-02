@@ -1,0 +1,6284 @@
+[
+ {
+  "id": "g5/r1/g4_freight_delay/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "g4_freight_delay",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "impute: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/g4_pump_inspection/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "g4_pump_inspection",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "add_lag: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "group",
+       "col": "c_24a94d"
+      }
+     ],
+     "reasons": [
+      "split_idx: group hold-out -> replace_split(group)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "group",
+      "col": "c_24a94d"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "UNVERIFIABLE",
+   "problems": [
+    "fix_all: UNVERIFIABLE: replace_split(group): row ids were rebuilt inside the pipeline (reset_index / reordering / row drop), so column 'c_24a94d' cannot be mapped to the scored rows"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "SelectKBest": 750
+     },
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "SelectKBest": 750
+     },
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "RandomForestClassifier": {
+      "bootstrap": "True",
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "'sqrt'",
+      "max_leaf_nodes": "None",
+      "max_samples": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "2",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "n_estimators": "200",
+      "n_jobs": "1",
+      "oob_score": "False",
+      "random_state": "42",
+      "verbose": "0",
+      "warm_start": "False"
+     }
+    },
+    "split_group": {
+     "before": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g5/r1/g4_crop_irrigation/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "g4_crop_irrigation",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: FEATURES changed: the feature-list step differs but no declared step has kind 'feature'",
+   "fix_A: FEATURES changed: column filters differ {'removed': [], 'added': ['[c for c in df.columns if c != TARGET]']} but no declared step has kind 'feature'",
+   "fix_both: FEATURES changed: the feature-list step differs but no declared step has kind 'feature'",
+   "fix_both: FEATURES changed: column filters differ {'removed': [], 'added': ['[c for c in df.columns if c != TARGET]']} but no declared step has kind 'feature'"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/g4_crop_irrigation/final",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "g4_crop_irrigation",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/g4_assay_replicates/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "g4_assay_replicates",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "group",
+       "col": "c_2cd377"
+      }
+     ],
+     "reasons": [
+      "split_idx: group hold-out -> replace_split(group)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "impute: free-form rewrite not expressible with the frozen ops",
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "group",
+      "col": "c_2cd377"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "RandomForestClassifier": {
+      "bootstrap": "True",
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "'sqrt'",
+      "max_leaf_nodes": "None",
+      "max_samples": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "n_estimators": "300",
+      "n_jobs": "1",
+      "oob_score": "False",
+      "random_state": "42",
+      "verbose": "0",
+      "warm_start": "False"
+     }
+    },
+    "split_group": {
+     "before": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 1,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g5/r1/clean_control/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "clean_control",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: FEATURES changed: column filters differ {'removed': [], 'added': ['[c for c in df.columns if c != TARGET]']} but no declared step has kind 'feature'",
+   "fix_both: FEATURES changed: column filters differ {'removed': [], 'added': ['[c for c in df.columns if c != TARGET]']} but no declared step has kind 'feature'"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_idx: group split: the grouping column is not identifiable from the plan"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "fit_predict: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/clean_control/final",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "clean_control",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_idx: group split: the grouping column is not identifiable from the plan"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "fit_predict: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/clean_group_correct/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "clean_group_correct",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix B names column(s) ['c_c95911'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/clean_wine_correct/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "clean_wine_correct",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_idx: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['c_55565a'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: NOT_APPLICABLE: single-split shuffle splitters are not replaced by CV splitters in v1"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r1/g4_visit_history_clean/first",
+  "gen": "g5",
+  "file": "r1.json",
+  "case": "g4_visit_history_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/g4_freight_delay/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "g4_freight_delay",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "impute: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/g4_pump_inspection/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "g4_pump_inspection",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "add_lag: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/g4_crop_irrigation/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "g4_crop_irrigation",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/g4_assay_replicates/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "g4_assay_replicates",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "group",
+       "col": "c_2cd377"
+      }
+     ],
+     "reasons": [
+      "split_idx: group hold-out -> replace_split(group)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "impute: free-form rewrite not expressible with the frozen ops",
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "group",
+      "col": "c_2cd377"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "RandomForestClassifier": {
+      "bootstrap": "True",
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "'sqrt'",
+      "max_leaf_nodes": "None",
+      "max_samples": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "n_estimators": "300",
+      "n_jobs": "1",
+      "oob_score": "False",
+      "random_state": "42",
+      "verbose": "0",
+      "warm_start": "False"
+     }
+    },
+    "split_group": {
+     "before": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 1,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g5/r2/clean_control/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "clean_control",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix B names column(s) ['c_4a669f'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/clean_group_correct/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "clean_group_correct",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['c_c95911'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/clean_wine_correct/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "clean_wine_correct",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_idx: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['c_55565a'] that its cited line does not mention (a column seen only in the data head cannot be justified)",
+    "plan: SPLIT-USE: fix B introduces an ordered hold-out (['random splitter replaced by a deterministic hold-out']) but the excerpt states no temporal intended use"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/g4_visit_history_clean/first",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "g4_visit_history_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: SPLIT changed: evaluation splitter calls differ (removed ['KFold(5, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+  ],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "add_history",
+       "kind": "group",
+       "col": "c_286b8d"
+      }
+     ],
+     "reasons": [
+      "add_history: group hold-out -> replace_split(group)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "group",
+       "col": "c_286b8d"
+      }
+     ],
+     "reasons": [
+      "split_idx: group hold-out -> replace_split(group)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "add_history",
+      "kind": "group",
+      "col": "c_286b8d"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "group",
+      "col": "c_286b8d"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: SPLIT changed: evaluation splitter calls differ (removed ['KFold(5, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: NOT_APPLICABLE: group splitting inside 'add_history' needs a `groups` parameter to pass to .split(); none exists",
+    "fix_B: NOT_APPLICABLE: single-split shuffle splitters are not replaced by CV splitters in v1",
+    "fix_all: NOT_APPLICABLE: group splitting inside 'add_history' needs a `groups` parameter to pass to .split(); none exists"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r2/g4_visit_history_clean/final",
+  "gen": "g5",
+  "file": "r2.json",
+  "case": "g4_visit_history_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "add_history",
+       "kind": "group",
+       "col": "c_286b8d"
+      }
+     ],
+     "reasons": [
+      "add_history: group hold-out -> replace_split(group)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "group",
+       "col": "c_286b8d"
+      }
+     ],
+     "reasons": [
+      "split_idx: group hold-out -> replace_split(group)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "add_history",
+      "kind": "group",
+      "col": "c_286b8d"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "group",
+      "col": "c_286b8d"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: NOT_APPLICABLE: group splitting inside 'add_history' needs a `groups` parameter to pass to .split(); none exists",
+    "fix_B: NOT_APPLICABLE: single-split shuffle splitters are not replaced by CV splitters in v1",
+    "fix_all: NOT_APPLICABLE: group splitting inside 'add_history' needs a `groups` parameter to pass to .split(); none exists"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/g4_freight_delay/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "g4_freight_delay",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "impute: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/g4_pump_inspection/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "g4_pump_inspection",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "add_lag: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/g4_crop_irrigation/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "g4_crop_irrigation",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/g4_assay_replicates/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "g4_assay_replicates",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_idx",
+       "kind": "group",
+       "col": "c_2cd377"
+      }
+     ],
+     "reasons": [
+      "split_idx: group hold-out -> replace_split(group)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "impute: free-form rewrite not expressible with the frozen ops",
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_idx",
+      "kind": "group",
+      "col": "c_2cd377"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "RandomForestClassifier": {
+      "bootstrap": "True",
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "'sqrt'",
+      "max_leaf_nodes": "None",
+      "max_samples": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "n_estimators": "300",
+      "n_jobs": "1",
+      "oob_score": "False",
+      "random_state": "42",
+      "verbose": "0",
+      "warm_start": "False"
+     }
+    },
+    "split_group": {
+     "before": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 1,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g5/r3/clean_control/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "clean_control",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    },
+    "B": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix B names column(s) ['c_4a669f'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/clean_group_correct/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "clean_group_correct",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['c_c95911'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/clean_wine_correct/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "clean_wine_correct",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_idx: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['c_f20066'] that its cited line does not mention (a column seen only in the data head cannot be justified)",
+    "plan: SPLIT-USE: fix B introduces an ordered hold-out (['positional slice', 'random splitter replaced by a deterministic hold-out']) but the excerpt states no temporal intended use"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/g4_visit_history_clean/first",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "g4_visit_history_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: SPLIT changed: evaluation splitter calls differ (removed ['KFold(5, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "add_history",
+       "kind": "group",
+       "col": "c_286b8d"
+      }
+     ],
+     "reasons": [
+      "add_history: group hold-out -> replace_split(group)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "add_history",
+      "kind": "group",
+      "col": "c_286b8d"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: SPLIT changed: evaluation splitter calls differ (removed ['KFold(5, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: NOT_APPLICABLE: group splitting inside 'add_history' needs a `groups` parameter to pass to .split(); none exists"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g5/r3/g4_visit_history_clean/final",
+  "gen": "g5",
+  "file": "r3.json",
+  "case": "g4_visit_history_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "add_history",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "add_history: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "add_history",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: NOOP: the fit/score structure is identical to the original; this fix changes which rows are fit or scored by nothing",
+    "fix_all: POST replace_split(random): 1 of 1 train/test pairs still violate the random relation"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 573,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 573,
+     "ctx": {},
+     "n_eval_events": 1,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "RandomForestClassifier": {
+      "bootstrap": "True",
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "'sqrt'",
+      "max_leaf_nodes": "None",
+      "max_samples": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "2",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "n_estimators": "200",
+      "n_jobs": "1",
+      "oob_score": "False",
+      "random_state": "42",
+      "verbose": "0",
+      "warm_start": "False"
+     }
+    },
+    "split_random": {
+     "before": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 1,
+      "total": 1,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g6/r1/civilwar_apparent/first",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "civilwar_apparent",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_B: SPLIT changed: evaluation splitter calls differ (removed ['StratifiedKFold(n_splits=k, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_B: SPLIT changed: evaluation splitter calls differ (removed ['StratifiedKFold(n_splits=k, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'",
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r1/civilwar_apparent/final",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "civilwar_apparent",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: split edit that is not a recognised random/group/temporal replacement"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r1/civilwar_temporal_clean/first",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "civilwar_temporal_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: FEATURE-REASON: fix A names column(s) ['army85', 'autch98', 'polch98'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: temporal edit but the time column is not identifiable from the plan"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['army85', 'autch98', 'polch98'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r1/civilwar_temporal_clean/final",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "civilwar_temporal_clean",
+  "which": "final",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: FEATURE-REASON: fix A names column(s) ['army85', 'autch98', 'demch98', 'polch98'] but its cited line is not verbatim in train.py or the excerpt"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: temporal edit but the time column is not identifiable from the plan"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['army85', 'autch98', 'demch98', 'polch98'] but its cited line is not verbatim in train.py or the excerpt"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r1/esl_selection/first",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "esl_selection",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE: fix B introduces an ordered hold-out (['shuffle=False']) but the excerpt states no temporal intended use"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "move_into_fold",
+       "step": "claimed_eval",
+       "call": "screen"
+      }
+     ],
+     "reasons": [
+      "claimed_eval: 'screen' ran before the split and its learners now run inside the fold loop -> move_into_fold"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "move_into_fold",
+      "step": "claimed_eval",
+      "call": "screen"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE: fix B introduces an ordered hold-out (['shuffle=False']) but the excerpt states no temporal intended use"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "screen": 50,
+      "SelectKBest": 50
+     },
+     "n_eval_events": 5,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "screen": 0
+     },
+     "n_eval_events": 5,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "KNeighborsClassifier": {
+      "algorithm": "'auto'",
+      "leaf_size": "30",
+      "metric": "'minkowski'",
+      "metric_params": "None",
+      "n_jobs": "None",
+      "n_neighbors": "1",
+      "p": "2",
+      "weights": "'uniform'"
+     }
+    },
+    "screen_overlap": {
+     "before": 50,
+     "after": 0
+    }
+   }
+  }
+ },
+ {
+  "id": "g6/r1/esl_selection/final",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "esl_selection",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "move_into_fold",
+       "step": "claimed_eval",
+       "call": "screen"
+      }
+     ],
+     "reasons": [
+      "claimed_eval: 'screen' ran before the split and its learners now run inside the fold loop -> move_into_fold"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "move_into_fold",
+      "step": "claimed_eval",
+      "call": "screen"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "screen": 50,
+      "SelectKBest": 50
+     },
+     "n_eval_events": 5,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "screen": 0
+     },
+     "n_eval_events": 5,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "KNeighborsClassifier": {
+      "algorithm": "'auto'",
+      "leaf_size": "30",
+      "metric": "'minkowski'",
+      "metric_params": "None",
+      "n_jobs": "None",
+      "n_neighbors": "1",
+      "p": "2",
+      "weights": "'uniform'"
+     }
+    },
+    "screen_overlap": {
+     "before": 50,
+     "after": 0
+    }
+   }
+  }
+ },
+ {
+  "id": "g6/r1/esl_selection_clean/first",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "esl_selection_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+   "fix_B: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+   "fix_both: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+    "fix_B: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+    "fix_both: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r1/esl_selection_clean/final",
+  "gen": "g6",
+  "file": "r1.json",
+  "case": "esl_selection_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r2/civilwar_apparent/first",
+  "gen": "g6",
+  "file": "r2.json",
+  "case": "civilwar_apparent",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r2/civilwar_temporal_clean/first",
+  "gen": "g6",
+  "file": "r2.json",
+  "case": "civilwar_temporal_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: FEATURE-REASON: fix A names column(s) ['demch98', 'polch98'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: temporal edit but the time column is not identifiable from the plan"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['demch98', 'polch98'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r2/civilwar_temporal_clean/final",
+  "gen": "g6",
+  "file": "r2.json",
+  "case": "civilwar_temporal_clean",
+  "which": "final",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: FEATURE-REASON: fix A names column(s) ['autch98', 'demch98', 'polch98'] but its cited line is not verbatim in train.py or the excerpt"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "feature",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "feats: feature edit: the frozen op list has no feature op (illegitimate-feature leakage is out of scope)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: temporal edit but the time column is not identifiable from the plan"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: FEATURE-REASON: fix A names column(s) ['autch98', 'demch98', 'polch98'] but its cited line is not verbatim in train.py or the excerpt"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r2/esl_selection/first",
+  "gen": "g6",
+  "file": "r2.json",
+  "case": "esl_selection",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "move_into_fold",
+       "step": "claimed_eval",
+       "call": "cv_predict"
+      }
+     ],
+     "reasons": [
+      "claimed_eval: 'cv_predict' ran before the split and its learners now run inside the fold loop -> move_into_fold"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "move_into_fold",
+      "step": "claimed_eval",
+      "call": "cv_predict"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: NOT_APPLICABLE: move_into_fold: statement shape not supported for 'cv_predict' (supported: `X, y = call(X, y, ...)`, `k = call(X, y, ...)` used as X[:, k], `V = Cls(...).fit_transform(X)`)"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r2/esl_selection_clean/first",
+  "gen": "g6",
+  "file": "r2.json",
+  "case": "esl_selection_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+   "fix_B: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+   "fix_both: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+    "fix_B: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)",
+    "fix_both: LOCALITY: declared step(s) ['cv_predict'] are unchanged (a fix must change its step)"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r2/esl_selection_clean/final",
+  "gen": "g6",
+  "file": "r2.json",
+  "case": "esl_selection_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r3/civilwar_apparent/first",
+  "gen": "g6",
+  "file": "r3.json",
+  "case": "civilwar_apparent",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r3/civilwar_temporal_clean/first",
+  "gen": "g6",
+  "file": "r3.json",
+  "case": "civilwar_temporal_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "year"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "year"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g6/r3/esl_selection/first",
+  "gen": "g6",
+  "file": "r3.json",
+  "case": "esl_selection",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "move_into_fold",
+       "step": "claimed_eval",
+       "call": "cv_predict"
+      }
+     ],
+     "reasons": [
+      "claimed_eval: 'cv_predict' ran before the split and its learners now run inside the fold loop -> move_into_fold"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: free-form rewrite not expressible with the frozen ops"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "move_into_fold",
+      "step": "claimed_eval",
+      "call": "cv_predict"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: NOT_APPLICABLE: move_into_fold: statement shape not supported for 'cv_predict' (supported: `X, y = call(X, y, ...)`, `k = call(X, y, ...)` used as X[:, k], `V = Cls(...).fit_transform(X)`)"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g6/r3/esl_selection_clean/first",
+  "gen": "g6",
+  "file": "r3.json",
+  "case": "esl_selection_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "cv_predict: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r1/civilwar_disguised/first",
+  "gen": "g7",
+  "file": "r1.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r1/civilwar_disguised/final",
+  "gen": "g7",
+  "file": "r1.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r1/civilwar_disguised_clean/first",
+  "gen": "g7",
+  "file": "r1.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_B: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)",
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r2/civilwar_disguised/first",
+  "gen": "g7",
+  "file": "r2.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r2/civilwar_disguised/final",
+  "gen": "g7",
+  "file": "r2.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r2/civilwar_disguised_clean/first",
+  "gen": "g7",
+  "file": "r2.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 4)",
+   "fix_both: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 4)"
+  ],
+  "translation": {
+   "coverage": "none",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_rows: unparseable legacy step (SyntaxError)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": null
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 4)",
+    "fix_both: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 4)"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "NOT_EXPRESSIBLE",
+   "problems": [],
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r2/civilwar_disguised_clean/final",
+  "gen": "g7",
+  "file": "r2.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r3/civilwar_disguised/first",
+  "gen": "g7",
+  "file": "r3.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_B: SPLIT changed: evaluation splitter calls differ (removed [], added ['StratifiedShuffleSplit(n_splits=1, random_state=seed, test_size=0.5)']) but no declared step has kind 'split'",
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_B: SPLIT changed: evaluation splitter calls differ (removed [], added ['StratifiedShuffleSplit(n_splits=1, random_state=seed, test_size=0.5)']) but no declared step has kind 'split'",
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r3/civilwar_disguised/final",
+  "gen": "g7",
+  "file": "r3.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r3/civilwar_disguised_clean/first",
+  "gen": "g7",
+  "file": "r3.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_rows: group split: the grouping column is not identifiable from the plan"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 180,
+      "total": 180,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 180,
+      "total": 180,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r3/civilwar_disguised_clean/final",
+  "gen": "g7",
+  "file": "r3.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_B: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)",
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r4/civilwar_disguised/first",
+  "gen": "g7",
+  "file": "r4.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r4/civilwar_disguised_clean/first",
+  "gen": "g7",
+  "file": "r4.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r5/civilwar_disguised/first",
+  "gen": "g7",
+  "file": "r5.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g7/r5/civilwar_disguised/final",
+  "gen": "g7",
+  "file": "r5.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r5/civilwar_disguised_clean/first",
+  "gen": "g7",
+  "file": "r5.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_A: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 5)",
+   "fix_both: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 5)"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "split_rows: unparseable legacy step (SyntaxError)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 5)",
+    "fix_both: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 5)"
+   ]
+  },
+  "old_rightly_rejected": true,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 180,
+      "total": 180,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 180,
+      "total": 180,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g7/r5/civilwar_disguised_clean/final",
+  "gen": "g7",
+  "file": "r5.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)",
+    "fix_B: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)",
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 180,
+      "total": 180,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 180,
+      "total": 180,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r1/civilwar_disguised/first",
+  "gen": "g8",
+  "file": "r1.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_B: SPLIT changed: evaluation splitter calls differ (removed [], added ['StratifiedShuffleSplit(n_splits=1, random_state=int(seed) + 101, test_size=0.25)']) but no declared step has kind 'split'",
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_B: SPLIT changed: evaluation splitter calls differ (removed [], added ['StratifiedShuffleSplit(n_splits=1, random_state=int(seed) + 101, test_size=0.25)']) but no declared step has kind 'split'",
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g8/r1/civilwar_disguised/final",
+  "gen": "g8",
+  "file": "r1.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "fix_B: SPLIT changed: evaluation splitter calls differ (removed [], added ['StratifiedShuffleSplit(n_splits=1, random_state=int(seed) + 101, test_size=0.25)']) but no declared step has kind 'split'",
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_B: SPLIT changed: evaluation splitter calls differ (removed [], added ['StratifiedShuffleSplit(n_splits=1, random_state=int(seed) + 101, test_size=0.25)']) but no declared step has kind 'split'",
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g8/r1/civilwar_disguised_clean/first",
+  "gen": "g8",
+  "file": "r1.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r1/civilwar_disguised_clean/final",
+  "gen": "g8",
+  "file": "r1.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r2/civilwar_disguised/first",
+  "gen": "g8",
+  "file": "r2.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g8/r2/civilwar_disguised/final",
+  "gen": "g8",
+  "file": "r2.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r2/civilwar_disguised_clean/first",
+  "gen": "g8",
+  "file": "r2.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r2/civilwar_disguised_clean/final",
+  "gen": "g8",
+  "file": "r2.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r3/civilwar_disguised/first",
+  "gen": "g8",
+  "file": "r3.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g8/r3/civilwar_disguised/final",
+  "gen": "g8",
+  "file": "r3.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r3/civilwar_disguised_clean/first",
+  "gen": "g8",
+  "file": "r3.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r3/civilwar_disguised_clean/final",
+  "gen": "g8",
+  "file": "r3.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r4/civilwar_disguised/first",
+  "gen": "g8",
+  "file": "r4.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g8/r4/civilwar_disguised/final",
+  "gen": "g8",
+  "file": "r4.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r4/civilwar_disguised_clean/first",
+  "gen": "g8",
+  "file": "r4.json",
+  "case": "civilwar_disguised_clean",
+  "which": "first",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_B: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)",
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r4/civilwar_disguised_clean/final",
+  "gen": "g8",
+  "file": "r4.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "full",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "tune_mtry",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "tune_mtry: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "tune_mtry",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ],
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_A: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_B: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)",
+    "fix_all: POST replace_split(temporal): 180 of 180 train/test pairs still violate the temporal relation (training rows must all be strictly earlier than the scored rows)",
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r5/civilwar_disguised/first",
+  "gen": "g8",
+  "file": "r5.json",
+  "case": "civilwar_disguised",
+  "which": "first",
+  "stored_verdict": "REJECT",
+  "stored_violations": [
+   "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+  ],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "random",
+       "col": null
+      }
+     ],
+     "reasons": [
+      "split_rows: random hold-out -> replace_split(random) (stratification is dropped)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "random",
+      "col": null
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "REJECT",
+   "problems": [
+    "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ]
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "R-USE-REQUIRED: the excerpt states a forecasting use ('forecast') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['split_rows'])"
+   ],
+   "stage": "static",
+   "crash": false
+  }
+ },
+ {
+  "id": "g8/r5/civilwar_disguised/final",
+  "gen": "g8",
+  "file": "r5.json",
+  "case": "civilwar_disguised",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "fit_scope",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "claimed_eval: rewrite of a step that has no statement the DSL could move (already fold-scoped or structural rewrite)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": false,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "ACCEPT",
+   "problems": [],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 554,
+     "ctx": {
+      "DecisionTreeClassifier": 621
+     },
+     "n_eval_events": 186,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 186,
+      "total": 186,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ },
+ {
+  "id": "g8/r5/civilwar_disguised_clean/final",
+  "gen": "g8",
+  "file": "r5.json",
+  "case": "civilwar_disguised_clean",
+  "which": "final",
+  "stored_verdict": "ACCEPT",
+  "stored_violations": [],
+  "translation": {
+   "coverage": "partial",
+   "per_edit": {
+    "A": {
+     "kind": "split",
+     "expressible": true,
+     "ops": [
+      {
+       "op": "replace_split",
+       "step": "split_rows",
+       "kind": "temporal",
+       "col": "epoch"
+      }
+     ],
+     "reasons": [
+      "split_rows: temporal hold-out/CV -> replace_split(temporal)"
+     ]
+    },
+    "B": {
+     "kind": "split",
+     "expressible": false,
+     "ops": [],
+     "reasons": [
+      "tune_mtry: contiguous (unshuffled) folds/hold-out: the DSL has no such kind (only random, group, temporal)"
+     ]
+    }
+   },
+   "dsl_ops": [
+    [
+     {
+      "op": "replace_split",
+      "step": "split_rows",
+      "kind": "temporal",
+      "col": "epoch"
+     }
+    ]
+   ]
+  },
+  "clean_case": true,
+  "old_today": {
+   "decision": "ACCEPT",
+   "problems": []
+  },
+  "old_rightly_rejected": false,
+  "new": {
+   "decision": "REJECT",
+   "problems": [
+    "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+   ],
+   "stage": "runtime",
+   "crash": false,
+   "internal": false,
+   "facts": {
+    "orig_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "fix_contam": {
+     "self": 0,
+     "ctx": {
+      "DecisionTreeClassifier": 0
+     },
+     "n_eval_events": 6,
+     "untracked": 0
+    },
+    "E_synth_orig": 0,
+    "E_synth_fix": 0,
+    "model": {
+     "DecisionTreeClassifier": {
+      "ccp_alpha": "0.0",
+      "class_weight": "None",
+      "criterion": "'gini'",
+      "max_depth": "None",
+      "max_features": "46",
+      "max_leaf_nodes": "None",
+      "min_impurity_decrease": "0.0",
+      "min_samples_leaf": "1",
+      "min_samples_split": "2",
+      "min_weight_fraction_leaf": "0.0",
+      "monotonic_cst": "None",
+      "random_state": "944062962",
+      "splitter": "'best'"
+     }
+    },
+    "split_temporal": {
+     "before": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     },
+     "after": {
+      "bad": 0,
+      "total": 6,
+      "untracked": 0
+     }
+    }
+   }
+  }
+ }
+]

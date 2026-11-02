@@ -1,0 +1,284 @@
+{
+ "case": "clean_group_correct",
+ "tool": "rulefix (no LLM)",
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "n_boot": 1000,
+ "bootstrap": "unpaired",
+ "fired": {},
+ "not_applied": [],
+ "split_fn": "split_idx",
+ "configs": {
+  "fix_A": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "9c2d38824c4167a468965c168690875396eef713c4957b99b67a38786bfc2bb4"
+  },
+  "fix_B": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "9c2d38824c4167a468965c168690875396eef713c4957b99b67a38786bfc2bb4"
+  },
+  "fix_both": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "9c2d38824c4167a468965c168690875396eef713c4957b99b67a38786bfc2bb4"
+  }
+ },
+ "sources": {
+  "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_0f6b5b'\nSITE = 'c_9a104c'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, np.asarray(df[SITE]) if groups is None else np.asarray(groups))\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_0f6b5b'\nSITE = 'c_9a104c'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, np.asarray(df[SITE]) if groups is None else np.asarray(groups))\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_0f6b5b'\nSITE = 'c_9a104c'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c not in (TARGET, SITE)]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, np.asarray(df[SITE]) if groups is None else np.asarray(groups))\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+ },
+ "status": "ok",
+ "elapsed_s": 19.4,
+ "stats": {
+  "42": {
+   "full": {
+    "acc": {
+     "orig": 0.78,
+     "fix_A": 0.78,
+     "fix_B": 0.78,
+     "fix_both": 0.78
+    },
+    "n": {
+     "orig": 200,
+     "fix_A": 200,
+     "fix_B": 200,
+     "fix_both": 200
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.08500000000000008,
+      0.07499999999999996
+     ],
+     "fix_B": [
+      -0.07500000000000007,
+      0.07500000000000007
+     ],
+     "fix_both": [
+      -0.07999999999999996,
+      0.08500000000000008
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.10999999999999999,
+     0.11499999999999999
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.78,
+     "fix_A": 0.78,
+     "fix_B": 0.78,
+     "fix_both": 0.78
+    },
+    "n": {
+     "orig": 200,
+     "fix_A": 200,
+     "fix_B": 200,
+     "fix_both": 200
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.08499999999999996,
+      0.08499999999999996
+     ],
+     "fix_B": [
+      -0.08499999999999996,
+      0.07999999999999996
+     ],
+     "fix_both": [
+      -0.08012500000000006,
+      0.07999999999999996
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.11499999999999988,
+     0.10999999999999999
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "43": {
+   "full": {
+    "acc": {
+     "orig": 0.755,
+     "fix_A": 0.755,
+     "fix_B": 0.755,
+     "fix_both": 0.755
+    },
+    "n": {
+     "orig": 200,
+     "fix_A": 200,
+     "fix_B": 200,
+     "fix_both": 200
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.08999999999999997,
+      0.08500000000000008
+     ],
+     "fix_B": [
+      -0.08500000000000008,
+      0.07500000000000007
+     ],
+     "fix_both": [
+      -0.08512500000000006,
+      0.08012499999999996
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.125,
+     0.120125
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.755,
+     "fix_A": 0.755,
+     "fix_B": 0.755,
+     "fix_both": 0.755
+    },
+    "n": {
+     "orig": 200,
+     "fix_A": 200,
+     "fix_B": 200,
+     "fix_both": 200
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.08500000000000008,
+      0.08012499999999996
+     ],
+     "fix_B": [
+      -0.08499999999999996,
+      0.09000000000000008
+     ],
+     "fix_both": [
+      -0.08000000000000007,
+      0.08500000000000008
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.11512500000000009,
+     0.125
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "44": {
+   "full": {
+    "acc": {
+     "orig": 0.78,
+     "fix_A": 0.78,
+     "fix_B": 0.78,
+     "fix_both": 0.78
+    },
+    "n": {
+     "orig": 200,
+     "fix_A": 200,
+     "fix_B": 200,
+     "fix_both": 200
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.07999999999999996,
+      0.07999999999999996
+     ],
+     "fix_B": [
+      -0.08499999999999996,
+      0.08499999999999996
+     ],
+     "fix_both": [
+      -0.08000000000000007,
+      0.07999999999999996
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.11512499999999998,
+     0.11512499999999999
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.78,
+     "fix_A": 0.78,
+     "fix_B": 0.78,
+     "fix_both": 0.78
+    },
+    "n": {
+     "orig": 200,
+     "fix_A": 200,
+     "fix_B": 200,
+     "fix_both": 200
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.07999999999999996,
+      0.08499999999999996
+     ],
+     "fix_B": [
+      -0.07500000000000007,
+      0.07999999999999996
+     ],
+     "fix_both": [
+      -0.08499999999999996,
+      0.07512499999999996
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.12012500000000009,
+     0.11012499999999997
+    ],
+    "I_excludes_0": false
+   }
+  }
+ },
+ "metric": "accuracy"
+}

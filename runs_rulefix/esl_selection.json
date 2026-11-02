@@ -1,0 +1,305 @@
+{
+ "case": "esl_selection",
+ "tool": "rulefix (no LLM)",
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "n_boot": 1000,
+ "bootstrap": "unpaired",
+ "fired": {
+  "R2": {
+   "mode": "hoist",
+   "functions": [
+    "screen"
+   ],
+   "loop_function": "cv_predict",
+   "transformers": [
+    "SelectKBest"
+   ]
+  }
+ },
+ "not_applied": [],
+ "split_fn": null,
+ "configs": {
+  "fix_A": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "bc13425018178e02eb6190641e2e5dd9e72048a288808a8c495802ce31a3c23f"
+  },
+  "fix_B": {
+   "rules_applied": [
+    "R2"
+   ],
+   "steps": [
+    "claimed_eval",
+    "cv_predict"
+   ],
+   "notes": [],
+   "src_sha256": "d7a41a937742ac9a1e4dd20b09a37284286707e4c02c30f83301ac55adcc309f"
+  },
+  "fix_both": {
+   "rules_applied": [
+    "R2"
+   ],
+   "steps": [
+    "claimed_eval",
+    "cv_predict"
+   ],
+   "notes": [],
+   "src_sha256": "d7a41a937742ac9a1e4dd20b09a37284286707e4c02c30f83301ac55adcc309f"
+  }
+ },
+ "sources": {
+  "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.feature_selection import SelectKBest, f_classif\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.neighbors import KNeighborsClassifier\nTARGET = 'label'\nK_SELECT = 100\nN_FOLDS = 5\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef screen(X, y):\n    \"\"\"Step 1: keep the K_SELECT predictors with the strongest univariate association with the class labels.\"\"\"\n    return SelectKBest(f_classif, k=K_SELECT).fit(X, y).get_support()\n\ndef cv_predict(X, y, seed):\n    \"\"\"Steps 2-3: 1-nearest-neighbour classifier, cross-validated prediction for every sample.\"\"\"\n    pred = np.empty_like(y)\n    for tr, te in StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=seed).split(X, y):\n        pred[te] = KNeighborsClassifier(n_neighbors=1).fit(X[tr], y[tr]).predict(X[te])\n    return pred\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    keep = screen(X, y)\n    return (y, cv_predict(X[:, keep], y, seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.feature_selection import SelectKBest, f_classif\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.neighbors import KNeighborsClassifier\nTARGET = 'label'\nK_SELECT = 100\nN_FOLDS = 5\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef screen(X, y):\n    \"\"\"Step 1: keep the K_SELECT predictors with the strongest univariate association with the class labels.\"\"\"\n    return SelectKBest(f_classif, k=K_SELECT).fit(X, y).get_support()\n\ndef cv_predict(X, y, seed):\n    \"\"\"Steps 2-3: 1-nearest-neighbour classifier, cross-validated prediction for every sample.\"\"\"\n    pred = np.empty_like(y)\n    for tr, te in StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=seed).split(X, y):\n        _rf_keep = screen(X[tr], y[tr])\n        pred[te] = KNeighborsClassifier(n_neighbors=1).fit(X[tr][:, _rf_keep], y[tr]).predict(X[te][:, _rf_keep])\n    return pred\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    return (y, cv_predict(X, y, seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.feature_selection import SelectKBest, f_classif\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.neighbors import KNeighborsClassifier\nTARGET = 'label'\nK_SELECT = 100\nN_FOLDS = 5\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef screen(X, y):\n    \"\"\"Step 1: keep the K_SELECT predictors with the strongest univariate association with the class labels.\"\"\"\n    return SelectKBest(f_classif, k=K_SELECT).fit(X, y).get_support()\n\ndef cv_predict(X, y, seed):\n    \"\"\"Steps 2-3: 1-nearest-neighbour classifier, cross-validated prediction for every sample.\"\"\"\n    pred = np.empty_like(y)\n    for tr, te in StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=seed).split(X, y):\n        _rf_keep = screen(X[tr], y[tr])\n        pred[te] = KNeighborsClassifier(n_neighbors=1).fit(X[tr][:, _rf_keep], y[tr]).predict(X[te][:, _rf_keep])\n    return pred\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    return (y, cv_predict(X, y, seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+ },
+ "status": "ok",
+ "elapsed_s": 13.4,
+ "stats": {
+  "42": {
+   "full": {
+    "acc": {
+     "orig": 1.0,
+     "fix_A": 1.0,
+     "fix_B": 0.54,
+     "fix_both": 0.54
+    },
+    "n": {
+     "orig": 50,
+     "fix_A": 50,
+     "fix_B": 50,
+     "fix_both": 50
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.45999999999999996,
+     "fix_both": 0.45999999999999996
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.0,
+      0.0
+     ],
+     "fix_B": [
+      0.31999999999999995,
+      0.5800000000000001
+     ],
+     "fix_both": [
+      0.31999999999999995,
+      0.6
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.20000000000000007,
+     0.19999999999999996
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 1.0,
+     "fix_A": 1.0,
+     "fix_B": 0.54,
+     "fix_both": 0.54
+    },
+    "n": {
+     "orig": 50,
+     "fix_A": 50,
+     "fix_B": 50,
+     "fix_both": 50
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.45999999999999996,
+     "fix_both": 0.45999999999999996
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.0,
+      0.0
+     ],
+     "fix_B": [
+      0.31999999999999995,
+      0.5800000000000001
+     ],
+     "fix_both": [
+      0.3395,
+      0.6
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.18000000000000005,
+     0.20000000000000007
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "43": {
+   "full": {
+    "acc": {
+     "orig": 0.98,
+     "fix_A": 0.98,
+     "fix_B": 0.58,
+     "fix_both": 0.58
+    },
+    "n": {
+     "orig": 50,
+     "fix_A": 50,
+     "fix_B": 50,
+     "fix_both": 50
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.4,
+     "fix_both": 0.4
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06000000000000005,
+      0.06000000000000005
+     ],
+     "fix_B": [
+      0.26,
+      0.56
+     ],
+     "fix_both": [
+      0.26,
+      0.54
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.20000000000000007,
+     0.20049999999999962
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.98,
+     "fix_A": 0.98,
+     "fix_B": 0.58,
+     "fix_both": 0.58
+    },
+    "n": {
+     "orig": 50,
+     "fix_A": 50,
+     "fix_B": 50,
+     "fix_both": 50
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.4,
+     "fix_both": 0.4
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06000000000000005,
+      0.06000000000000005
+     ],
+     "fix_B": [
+      0.25949999999999995,
+      0.54
+     ],
+     "fix_both": [
+      0.26,
+      0.54
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.19999999999999996,
+     0.20000000000000007
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "44": {
+   "full": {
+    "acc": {
+     "orig": 1.0,
+     "fix_A": 1.0,
+     "fix_B": 0.56,
+     "fix_both": 0.56
+    },
+    "n": {
+     "orig": 50,
+     "fix_A": 50,
+     "fix_B": 50,
+     "fix_both": 50
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.43999999999999995,
+     "fix_both": 0.43999999999999995
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.0,
+      0.0
+     ],
+     "fix_B": [
+      0.30000000000000004,
+      0.5800000000000001
+     ],
+     "fix_both": [
+      0.30000000000000004,
+      0.5800000000000001
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.18050000000000002,
+     0.19999999999999996
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 1.0,
+     "fix_A": 1.0,
+     "fix_B": 0.56,
+     "fix_both": 0.56
+    },
+    "n": {
+     "orig": 50,
+     "fix_A": 50,
+     "fix_B": 50,
+     "fix_both": 50
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.43999999999999995,
+     "fix_both": 0.43999999999999995
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.0,
+      0.0
+     ],
+     "fix_B": [
+      0.30000000000000004,
+      0.5800000000000001
+     ],
+     "fix_both": [
+      0.31999999999999995,
+      0.5800000000000001
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.18000000000000005,
+     0.18000000000000005
+    ],
+    "I_excludes_0": false
+   }
+  }
+ },
+ "metric": "accuracy"
+}

@@ -1,0 +1,75 @@
+{
+ "tag": "rules",
+ "case": "leak_prescale",
+ "command": "python -m agent.hybrid corpus/leak_prescale --out out/hy --report out/hy.md",
+ "exit_code": 0,
+ "recorded_utc": "2026-11-02T10:10:50Z",
+ "stdout": [
+  "leak_prescale: INFLATED [rules (no model)] model calls 0 est $0.00; record dir <tmp>/hy3; report <tmp>/hy3.md"
+ ],
+ "stdout_note": "the temp record-directory path in the opening line was shortened to <tmp>; nothing else was edited",
+ "verdict": "INFLATED",
+ "produced_by": "rules (no model)",
+ "route": "rules fired and the measurement confirms (consistency check passed)",
+ "rules_fired": [
+  "R2"
+ ],
+ "summary": {
+  "metric": "accuracy",
+  "unit": "pp",
+  "sign": "+",
+  "per_seed_sign": [
+   "+",
+   "0",
+   "+"
+  ],
+  "claimed": 0.8178,
+  "controlled": 0.6444,
+  "inflation": 17.333,
+  "inflation_raw": 0.17333333333333334,
+  "ci_per_seed": {
+   "42": [
+    2.667,
+    30.667
+   ],
+   "43": [
+    -1.333,
+    25.333
+   ],
+   "44": [
+    10.633,
+    37.333
+   ]
+  },
+  "seeds": [
+   "42",
+   "43",
+   "44"
+  ],
+  "n_controlled": [
+   75,
+   75,
+   75
+  ]
+ },
+ "diff": "--- train.py (claim)\n+++ fix_both (executed)\n@@ -36,2 +36,41 @@\n     tr, te = split_idx(df, seed, groups)\n     return (df[TARGET].to_numpy()[te], fit_predict(Xs[tr], df[TARGET].to_numpy()[tr], Xs[te], seed))\n+_RF = {'seed': 0, 'rows': None, 'n': -1}\n+\n+def _rf_take(obj, rows):\n+    return obj.iloc[rows] if hasattr(obj, 'iloc') else obj[rows]\n+\n+def _rf_scoped(cls):\n+\n+    class _Scoped(cls):\n+\n+        def fit(self, X, y=None, **kw):\n+            rows = _RF['rows']\n+            if rows is not None and len(X) == _RF['n']:\n+                X = _rf_take(X, rows)\n+                y = None if y is None else _rf_take(y, rows)\n+            return cls.fit(self, X, y, **kw)\n+\n+        def fit_transform(self, X, y=None, **kw):\n+            return self.fit(X, y, **kw).transform(X)\n+    _Scoped.__name__ = cls.__name__\n+    return _Scoped\n+\n+def _rf_wrap(fn, split_name):\n+\n+    def wrapped(*a, **k):\n+        d0 = a[0]\n+        _RF['rows'], _RF['n'] = (np.asarray(globals()[split_name](d0, _RF['seed'])[0]), len(d0))\n+        try:\n+            return fn(*a, **k)\n+        finally:\n+            _RF['rows'] = None\n+    wrapped.__name__ = fn.__name__\n+    return wrapped\n+SelectKBest = _rf_scoped(SelectKBest)\n+StandardScaler = _rf_scoped(StandardScaler)\n+prep_full = _rf_wrap(prep_full, 'split_idx')\n+\n+def controlled_eval(df, seed):\n+    _RF['seed'] = seed\n+    return claimed_eval(df, seed)",
+ "report_head": [
+  "**Verdict: INFLATED** | produced by: **rules (no model)**",
+  "Route: rules fired and the measurement confirms (consistency check passed)",
+  "Claimed 0.8178 vs controlled 0.6444 (accuracy); inflation +17.333 pp; sign `+` (per seed ['+', '0', '+']); 95% interval per seed (unpaired bootstrap): 42: [2.667, 30.667], 43: [-1.333, 25.333], 44: [10.633, 37.333]."
+ ],
+ "who_did_what_md": "| step | produced by | detail |\n|---|---|---|\n| detect leakage patterns | rules (no model) | rules fired: R2 |\n| measure the rule fix (4 configs x seeds 42/43/44, unpaired bootstrap) | sandbox (no model) | stored measurement (runs_rulefix, patch hash identical); sign + |\n| verdict | rules (no model) | INFLATED |",
+ "cost_lines": [
+  "Model calls: **0** live, 0 replayed. Estimated USD: **0.00**. Estimated tokens: 0 in / 0 out.",
+  "No model was called: the rule path and the local sandbox cost $0."
+ ],
+ "claim_md": "> Our classifier achieves 92% accuracy and the selected features are biologically relevant.\n\nMethods as stated: We predict a binary label from 406 numeric measurements with a linear model.\nAll features were standardized and the 20 most predictive ones selected before the split.\nRecords were randomly divided into 75% training and 25% test with a fixed random seed.\n\nSource of the claim text: `corpus/leak_prescale/excerpt.md` (sha256 `f9cf52a0f3de7add`). Provenance: Synthetic case built by NullLab; no external source.",
+ "claimed_vs_controlled_md": "Drop = claimed minus controlled. Interval: 95%, unpaired bootstrap over test rows.\n\n| seed | claimed | controlled | drop | 95% interval of drop | n claimed | n controlled |\n|---|---|---|---|---|---|---|\n| 42 | 80.0% | 64.0% | +16.0 pp | [+2.7, +30.7] | 75 | 75 |\n| 43 | 82.7% | 70.7% | +12.0 pp | [-1.3, +25.3] | 75 | 75 |\n| 44 | 82.7% | 58.7% | +24.0 pp | [+10.6, +37.3] | 75 | 75 |\n| mean | 81.8% | 64.4% | +17.3 pp | | | |\n\nFactors (mean drop): A alone +0.0 pp, B alone +17.3 pp, interaction +0.0 pp.",
+ "could_not_test_md": "- This record comes from a fixed rule library with no model: it applies standard remedies to code idioms it recognises and cannot reason about the claim.\n- We re-ran the evaluation code in the case folder, not the authors' original pipeline, raw data or software versions.\n- Only two evaluation steps (factors A and B) were varied per run. Other leakage types were not examined, and the model, metric and features are held fixed by construction.\n- Intervals come from an unpaired bootstrap over test rows for 3 seeds (42/43/44). They do not cover variation across training sets, model initialisations or a fresh draw of the data.\n- The case is synthetic (built by NullLab). A real study can differ in ways that matter.\n- Small scored sample (75 rows after the change): intervals are wide.",
+ "reviewer_note": "The reported result (92%) may be inflated: feature selection sees the rows that are later scored. With only prep_full changed, the same model scores 64.4% instead of 81.8% accuracy (+17.3 pp, mean of seeds 42/43/44). The 95% unpaired-bootstrap interval for the drop excludes zero on 2 of 3 seeds (seed 42 [+2.7, +30.7]; seed 43 [-1.3, +25.3]; seed 44 [+10.6, +37.3]); 75 rows scored by the claim, 75 after the change. Separately, step A alone moves the score by +0.0 pp, step B alone by +17.3 pp, and their interaction by +0.0 pp. Pattern: Feature selection jointly on training and test data (L1.3, Kapoor and Narayanan). Please report the score under repeating feature selection inside each training fold only, or justify the current protocol. Caveat: we re-ran the evaluation code supplied, not the authors' full pipeline; 6 limits are listed in the audit report.",
+ "rerun_command": "python -m agent.hybrid corpus/leak_prescale --out out/hy --report out/hy.md",
+ "source_file": "report/assets/recorded/hybrid_rules.json",
+ "source_runs": [
+  "runs_rulefix/ (stored rule measurement)"
+ ]
+}

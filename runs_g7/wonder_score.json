@@ -1,0 +1,192 @@
+{
+ "wonder_model": "muse-wonder-1.0",
+ "wonder": {
+  "n_plans": 8,
+  "schema_valid": 8,
+  "guard_accepted_first_plan": 6,
+  "retries": 2,
+  "hard_n": 4,
+  "hard_sign_correct": 4,
+  "hard_inconclusive": 0,
+  "clean_n": 4,
+  "clean_false_alarms": 0,
+  "clean_inconclusive": 0
+ },
+ "spark_g5_r1_r3": {
+  "n_plans": 24,
+  "schema_valid": 24,
+  "guard_accepted_first_plan": 20,
+  "retries": 4,
+  "hard_n": 12,
+  "hard_sign_correct": 11,
+  "hard_inconclusive": 1,
+  "clean_n": 12,
+  "clean_false_alarms": 1,
+  "clean_inconclusive": 0
+ },
+ "verdict_keys_identical_to_spark": "8/8",
+ "sign_equals_spark_r1": "7/8",
+ "per_case_wonder": {
+  "g4_freight_delay": {
+   "case": "g4_freight_delay",
+   "schema_valid": true,
+   "guard_accept_first_plan": true,
+   "sign": "-",
+   "truth": "-",
+   "retries": 0,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "g4_pump_inspection": {
+   "case": "g4_pump_inspection",
+   "schema_valid": true,
+   "guard_accept_first_plan": true,
+   "sign": "+",
+   "truth": "+",
+   "retries": 0,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "g4_crop_irrigation": {
+   "case": "g4_crop_irrigation",
+   "schema_valid": true,
+   "guard_accept_first_plan": false,
+   "sign": "0",
+   "truth": "0",
+   "retries": 1,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "g4_assay_replicates": {
+   "case": "g4_assay_replicates",
+   "schema_valid": true,
+   "guard_accept_first_plan": true,
+   "sign": "+",
+   "truth": "+",
+   "retries": 0,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "clean_control": {
+   "case": "clean_control",
+   "schema_valid": true,
+   "guard_accept_first_plan": true,
+   "sign": "0",
+   "truth": "0",
+   "retries": 0,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "clean_group_correct": {
+   "case": "clean_group_correct",
+   "schema_valid": true,
+   "guard_accept_first_plan": true,
+   "sign": "0",
+   "truth": "0",
+   "retries": 0,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "clean_wine_correct": {
+   "case": "clean_wine_correct",
+   "schema_valid": true,
+   "guard_accept_first_plan": true,
+   "sign": "0",
+   "truth": "0",
+   "retries": 0,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  },
+  "g4_visit_history_clean": {
+   "case": "g4_visit_history_clean",
+   "schema_valid": true,
+   "guard_accept_first_plan": false,
+   "sign": "0",
+   "truth": "0",
+   "retries": 1,
+   "keys": [
+    "A",
+    "A_code_line",
+    "B",
+    "B_code_line",
+    "culprit_ranking",
+    "edits",
+    "mode",
+    "predicted_drop_pp",
+    "prereg_sha256",
+    "reason"
+   ]
+  }
+ },
+ "note": "'verdict keys identical' = the plan JSON has the key set that spark's plans have, ignoring the optional 'both_overrides'; spark side = runs_g5 r1..r3 (3 repeats x 8 cases); wonder = 1 repeat x 8 cases (n=8)."
+}

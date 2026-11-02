@@ -1,0 +1,242 @@
+{
+ "rule": "SPLIT-USE-REQUIRED (agent/factorial_g7.check_split_required) only; G5/G6 guards unchanged",
+ "g6": {
+  "r1/civilwar_apparent": {
+   "executed": true,
+   "verdict": "REJECT",
+   "violations": [
+    "SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ],
+   "kinds": {
+    "A": "split",
+    "B": "split"
+   },
+   "forecast_words": [
+    "forecast"
+   ],
+   "g6_inflation_mean": 0.231
+  },
+  "r1/civilwar_temporal_clean": {
+   "executed": false,
+   "status": "INCONCLUSIVE"
+  },
+  "r1/esl_selection": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "fit_scope",
+    "B": "split"
+   },
+   "forecast_words": [],
+   "g6_inflation_mean": 0.527
+  },
+  "r1/esl_selection_clean": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "fit_scope",
+    "B": "split"
+   },
+   "forecast_words": [],
+   "g6_inflation_mean": 0.0
+  },
+  "r2/civilwar_apparent": {
+   "executed": true,
+   "verdict": "REJECT",
+   "violations": [
+    "SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ],
+   "kinds": {
+    "A": "split",
+    "B": "split"
+   },
+   "forecast_words": [
+    "forecast"
+   ],
+   "g6_inflation_mean": 0.203
+  },
+  "r2/civilwar_temporal_clean": {
+   "executed": false,
+   "status": "INCONCLUSIVE"
+  },
+  "r2/esl_selection": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "fit_scope",
+    "B": "split"
+   },
+   "forecast_words": [],
+   "g6_inflation_mean": 0.549
+  },
+  "r2/esl_selection_clean": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "fit_scope",
+    "B": "split"
+   },
+   "forecast_words": [],
+   "g6_inflation_mean": -0.06
+  },
+  "r3/civilwar_apparent": {
+   "executed": true,
+   "verdict": "REJECT",
+   "violations": [
+    "SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['year', 'ptime']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+   ],
+   "kinds": {
+    "A": "split",
+    "B": "split"
+   },
+   "forecast_words": [
+    "forecast"
+   ],
+   "g6_inflation_mean": 0.203
+  },
+  "r3/civilwar_temporal_clean": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "split",
+    "B": "split"
+   },
+   "forecast_words": [
+    "forecast",
+    "later year"
+   ],
+   "g6_inflation_mean": 0.003
+  },
+  "r3/esl_selection": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "fit_scope",
+    "B": "split"
+   },
+   "forecast_words": [],
+   "g6_inflation_mean": 0.433
+  },
+  "r3/esl_selection_clean": {
+   "executed": true,
+   "verdict": "ACCEPT",
+   "violations": [],
+   "kinds": {
+    "A": "fit_scope",
+    "B": "split"
+   },
+   "forecast_words": [],
+   "g6_inflation_mean": 0.047
+  }
+ },
+ "g5": {
+  "r1/g4_freight_delay": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r1/g4_pump_inspection": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r1/g4_assay_replicates": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r1/clean_control": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r1/clean_group_correct": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r1/clean_wine_correct": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r1/g4_visit_history_clean": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/g4_freight_delay": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/g4_pump_inspection": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/g4_crop_irrigation": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/g4_assay_replicates": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/clean_control": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/clean_group_correct": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/clean_wine_correct": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r2/g4_visit_history_clean": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/g4_freight_delay": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/g4_pump_inspection": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/g4_crop_irrigation": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/g4_assay_replicates": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/clean_control": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/clean_group_correct": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/clean_wine_correct": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  },
+  "r3/g4_visit_history_clean": {
+   "verdict": "ACCEPT",
+   "forecast_words": []
+  }
+ },
+ "summary": {
+  "g6_executed_plans": 10,
+  "g6_would_reject": [
+   "r1/civilwar_apparent",
+   "r2/civilwar_apparent",
+   "r3/civilwar_apparent"
+  ],
+  "g5_executed_plans": 23,
+  "g5_would_reject": []
+ }
+}

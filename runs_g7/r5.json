@@ -1,0 +1,892 @@
+{
+ "repeat": "g7-r5",
+ "model": "muse-spark-1.3-contributor",
+ "temperature": 0.7,
+ "b3": {
+  "civilwar_disguised": {
+   "ans": {
+    "leak": true,
+    "A": "resubstitution: split_rows returns idx,idx so final forest is fit and scored on identical rows",
+    "B": "row-wise shuffled StratifiedKFold for mtry tuning instead of group-by-line-shift / forward-in-time split, leaking same shift across folds",
+    "predicted_drop_pp": {
+     "fix_A": 35,
+     "fix_B": 5,
+     "fix_both": 40
+    },
+    "culprit_ranking": [
+     "A",
+     "B"
+    ],
+    "confidence": 0.85,
+    "reason": "Scoring on training data with fully grown trees guarantees near-perfect ROC-AUC while row-wise CV adds only small extra optimism."
+   },
+   "raw": "{\"leak\": true, \"A\": \"resubstitution: split_rows returns idx,idx so final forest is fit and scored on identical rows\", \"B\": \"row-wise shuffled StratifiedKFold for mtry tuning instead of group-by-line-shift / forward-in-time split, leaking same shift across folds\", \"predicted_drop_pp\": {\"fix_A\": 35, \"fix_B\": 5, \"fix_both\": 40}, \"culprit_ranking\": [\"A\", \"B\"], \"confidence\": 0.85, \"reason\": \"Scoring on training data with fully grown trees guarantees near-perfect ROC-AUC while row-wise CV adds only small extra optimism.\"}",
+   "prereg_sha256": "cc6403b0c7e311b5eff3bf8b60f689dc45fd7427e56f964671972d6efed9dcf3"
+  },
+  "civilwar_disguised_clean": {
+   "ans": {
+    "leak": true,
+    "A": "StratifiedKFold shuffles rows with no grouping by line-shift and no temporal ordering, so same line-shift/epochs appear in train and test folds",
+    "B": "tuning mtry by max CV ROC-AUC and reporting that tuned CV ROC-AUC (~0.9) instead of nested holdout PR-AUC on future epochs 46-56 at ~1:100 prevalence",
+    "predicted_drop_pp": {
+     "fix_A": 28,
+     "fix_B": 12,
+     "fix_both": 38
+    },
+    "culprit_ranking": [
+     "AxB",
+     "A",
+     "B"
+    ],
+    "confidence": 0.72,
+    "reason": "random CV leaks shift identity while reporting tuned ROC hides poor future PR, neither fix alone removes both effects."
+   },
+   "raw": "{\"leak\": true, \"A\": \"StratifiedKFold shuffles rows with no grouping by line-shift and no temporal ordering, so same line-shift/epochs appear in train and test folds\", \"B\": \"tuning mtry by max CV ROC-AUC and reporting that tuned CV ROC-AUC (~0.9) instead of nested holdout PR-AUC on future epochs 46-56 at ~1:100 prevalence\", \"predicted_drop_pp\": {\"fix_A\": 28, \"fix_B\": 12, \"fix_both\": 38}, \"culprit_ranking\": [\"AxB\", \"A\", \"B\"], \"confidence\": 0.72, \"reason\": \"random CV leaks shift identity while reporting tuned ROC hides poor future PR, neither fix alone removes both effects.\"}",
+   "prereg_sha256": "5bff17ba50ecd04f78490ce4f3a5757cf8167048b22e384f8f909a6aa666d498"
+  }
+ },
+ "plan": {
+  "civilwar_disguised": {
+   "plan": {
+    "A": "train-test identity (resubstitution)",
+    "A_code_line": "    return idx, idx",
+    "B": "shuffled random CV for tuning despite forecast temporal use",
+    "B_code_line": "    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "split_rows": "def split_rows(df, seed):\n    import numpy as np\n    from sklearn.model_selection import StratifiedShuffleSplit\n    y = df[TARGET].to_numpy().astype(int)\n    idx = np.arange(len(df))\n    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=seed)\n    tr, te = next(sss.split(idx, y))\n    return tr, te"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "tune_mtry": "def tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import StratifiedKFold\n    from sklearn.metrics import roc_auc_score\n    cv = StratifiedKFold(n_splits=k, shuffle=False)\n    best, best_auc = MTRY_GRID[0], -1.0\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = m, float(np.mean(aucs))\n    return best"
+      }
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 35.0,
+     "fix_B": 3.0,
+     "fix_both": 37.0
+    },
+    "culprit_ranking": [
+     "A",
+     "AxB",
+     "B"
+    ],
+    "reason": "split_rows scores on training rows so PR-AUC is resubstitution; fixing to held-out line-shifts removes most inflation. Shuffled 10-fold tuning ignores epoch order/forecast use and adds small optimism; combination is dominated by holdout fix.",
+    "mode": "LIVE muse-spark-1.3-contributor",
+    "prereg_sha256": "8df112eb8308c9c54d8e914eebbe01c5a085383e3ea3f59f997b256a30b6aff6"
+   },
+   "raw": "{\"A\": \"train-test identity (resubstitution)\", \"A_code_line\": \"    return idx, idx\", \"B\": \"shuffled random CV for tuning despite forecast temporal use\", \"B_code_line\": \"    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\", \"edits\": {\"A\": {\"kind\": \"split\", \"steps\": {\"split_rows\": \"def split_rows(df, seed):\\n    import numpy as np\\n    from sklearn.model_selection import StratifiedShuffleSplit\\n    y = df[TARGET].to_numpy().astype(int)\\n    idx = np.arange(len(df))\\n    sss = StratifiedShuffleSplit(n_splits=1, test_size=0.3, random_state=seed)\\n    tr, te = next(sss.split(idx, y))\\n    return tr, te\"}}, \"B\": {\"kind\": \"split\", \"steps\": {\"tune_mtry\": \"def tune_mtry(X, y, seed, k=10):\\n    import numpy as np\\n    from sklearn.model_selection import StratifiedKFold\\n    from sklearn.metrics import roc_auc_score\\n    cv = StratifiedKFold(n_splits=k, shuffle=False)\\n    best, best_auc = MTRY_GRID[0], -1.0\\n    for m in MTRY_GRID:\\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\\n        if np.mean(aucs) > best_auc:\\n            best, best_auc = m, float(np.mean(aucs))\\n    return best\"}}}, \"predicted_drop_pp\": {\"fix_A\": 35.0, \"fix_B\": 3.0, \"fix_both\": 37.0}, \"culprit_ranking\": [\"A\", \"AxB\", \"B\"], \"reason\": \"split_rows scores on training rows so PR-AUC is resubstitution; fixing to held-out line-shifts removes most inflation. Shuffled 10-fold tuning ignores epoch order/forecast use and adds small optimism; combination is dominated by holdout fix.\"}",
+   "schema": {
+    "schema_valid_first": true,
+    "schema_retry": false
+   },
+   "prereg_sha256": "21eb072caf34d639bc18d80446be20d9ba36c65ff204eb7022dea3e809cb4bd6"
+  },
+  "civilwar_disguised_clean": {
+   "plan": {
+    "A": "Temporal holdout without embargo: training on epochs 1-45 and testing on epochs 46-56 from the same continuing records lets autocorrelation / slow-moving conditions leak across the boundary, inflating future-forecast performance.",
+    "A_code_line": "    return idx[df[\"epoch\"].to_numpy() < 46], idx[df[\"epoch\"].to_numpy() >= 46]",
+    "B": "Shuffled 10-fold CV for tuning: tuning mtry with shuffled StratifiedKFold trains on future epochs to predict past epochs, selecting an overfit mtry and overstating forecast skill.",
+    "B_code_line": "    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "split_rows": "def split_rows(df, seed):\n    import numpy as np\n    idx = np.arange(len(df))\n    ep = df[\"epoch\"].to_numpy()\n    return idx[ep < 36], idx[ep >= 46)"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "tune_mtry": "def tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import TimeSeriesSplit\n    from sklearn.metrics import roc_auc_score\n    cv = TimeSeriesSplit(n_splits=k)\n    best, best_auc = MTRY_GRID[0], -1.0\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = m, float(np.mean(aucs))\n    return best"
+      }
+     }
+    },
+    "both_overrides": {},
+    "predicted_drop_pp": {
+     "fix_A": 12.0,
+     "fix_B": 7.0,
+     "fix_both": 18.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Both steps leak future/near-future information into training/tuning for a forecasting use; the train-test boundary without a gap carries most of the inflation, shuffled CV tuning adds a second smaller optimistic bias, and fixing both removes both leaks.",
+    "mode": "LIVE muse-spark-1.3-contributor",
+    "prereg_sha256": "b68025e514c923296f5b2af3d06d7acdd66e568606771c9154135438a60b7646"
+   },
+   "raw": "{\"A\": \"Temporal holdout without embargo: training on epochs 1-45 and testing on epochs 46-56 from the same continuing records lets autocorrelation / slow-moving conditions leak across the boundary, inflating future-forecast performance.\", \"A_code_line\": \"    return idx[df[\\\"epoch\\\"].to_numpy() < 46], idx[df[\\\"epoch\\\"].to_numpy() >= 46]\", \"B\": \"Shuffled 10-fold CV for tuning: tuning mtry with shuffled StratifiedKFold trains on future epochs to predict past epochs, selecting an overfit mtry and overstating forecast skill.\", \"B_code_line\": \"    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\", \"edits\": {\"A\": {\"kind\": \"split\", \"steps\": {\"split_rows\": \"def split_rows(df, seed):\\n    import numpy as np\\n    idx = np.arange(len(df))\\n    ep = df[\\\"epoch\\\"].to_numpy()\\n    return idx[ep < 36], idx[ep >= 46)\"}}, \"B\": {\"kind\": \"split\", \"steps\": {\"tune_mtry\": \"def tune_mtry(X, y, seed, k=10):\\n    import numpy as np\\n    from sklearn.model_selection import TimeSeriesSplit\\n    from sklearn.metrics import roc_auc_score\\n    cv = TimeSeriesSplit(n_splits=k)\\n    best, best_auc = MTRY_GRID[0], -1.0\\n    for m in MTRY_GRID:\\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\\n        if np.mean(aucs) > best_auc:\\n            best, best_auc = m, float(np.mean(aucs))\\n    return best\"}}}, \"both_overrides\": {}, \"predicted_drop_pp\": {\"fix_A\": 12.0, \"fix_B\": 7.0, \"fix_both\": 18.0}, \"culprit_ranking\": [\"A\", \"B\", \"AxB\"], \"reason\": \"Both steps leak future/near-future information into training/tuning for a forecasting use; the train-test boundary without a gap carries most of the inflation, shuffled CV tuning adds a second smaller optimistic bias, and fixing both removes both leaks.\"}",
+   "schema": {
+    "schema_valid_first": true,
+    "schema_retry": false
+   },
+   "prereg_sha256": "9fc82c508afe51349df945ef88c5c4799f5ec406880f5c84f6e04b0b937b568b"
+  }
+ },
+ "loop": {
+  "civilwar_disguised": {
+   "retries": 1,
+   "status": "ok",
+   "metric": "pr_auc",
+   "stats": {
+    "42": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.39502994156238547,
+       "fix_A": 0.0675587679459627,
+       "fix_B": 0.39502994156238547,
+       "fix_both": 0.07621061075564566
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1992,
+       "fix_B": 7140,
+       "fix_both": 1992
+      },
+      "drop": {
+       "fix_A": 0.32747117361642275,
+       "fix_B": 0.0,
+       "fix_both": 0.3188193308067398
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.23165057654434942,
+        0.41664904661178437
+       ],
+       "fix_B": [
+        -0.11951341987520256,
+        0.12025319069206956
+       ],
+       "fix_both": [
+        0.22341559644386205,
+        0.4092908383638197
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.008651842809682952,
+      "I_ci": [
+       -0.13864338921296135,
+       0.11735440206363708
+      ],
+      "I_excludes_0": false
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.9714844670489357,
+       "fix_A": 0.8731821270812096,
+       "fix_B": 0.9714844670489357,
+       "fix_both": 0.8940027183146448
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1992,
+       "fix_B": 7140,
+       "fix_both": 1992
+      },
+      "drop": {
+       "fix_A": 0.09830233996772608,
+       "fix_B": 0.0,
+       "fix_both": 0.07748174873429081
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.06120671845404273,
+        0.1387145777982592
+       ],
+       "fix_B": [
+        -0.010557202219125646,
+        0.00975570113616926
+       ],
+       "fix_both": [
+        0.04716992501688439,
+        0.11248644808886436
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.02082059123343527,
+      "I_ci": [
+       -0.0703850901129321,
+       0.02931045521270399
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.38433557574065996,
+       "fix_A": 0.06592043163649176,
+       "fix_B": 0.38433557574065996,
+       "fix_both": 0.0797444138582579
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1992,
+       "fix_B": 7140,
+       "fix_both": 1992
+      },
+      "drop": {
+       "fix_A": 0.3184151441041682,
+       "fix_B": 0.0,
+       "fix_both": 0.3045911618824021
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.22674723280404488,
+        0.40361871875430916
+       ],
+       "fix_B": [
+        -0.12234283729458015,
+        0.12820275783538398
+       ],
+       "fix_both": [
+        0.1915392569210141,
+        0.39329156386697967
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.013823982221766118,
+      "I_ci": [
+       -0.15762578675416727,
+       0.12563469069004674
+      ],
+      "I_excludes_0": false
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.9712482081140523,
+       "fix_A": 0.8739041794087665,
+       "fix_B": 0.9712482081140523,
+       "fix_both": 0.891717635066259
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1992,
+       "fix_B": 7140,
+       "fix_both": 1992
+      },
+      "drop": {
+       "fix_A": 0.0973440287052858,
+       "fix_B": 0.0,
+       "fix_both": 0.07953057304779332
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.05962526322377603,
+        0.13592480629688428
+       ],
+       "fix_B": [
+        -0.009462958806367439,
+        0.009698299572791306
+       ],
+       "fix_both": [
+        0.047619191601641325,
+        0.11442223489849875
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.017813455657492483,
+      "I_ci": [
+       -0.06704649159829541,
+       0.03362476030812458
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.37324573159548613,
+       "fix_A": 0.0642347596644342,
+       "fix_B": 0.37324573159548613,
+       "fix_both": 0.07164833095654027
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1992,
+       "fix_B": 7140,
+       "fix_both": 1992
+      },
+      "drop": {
+       "fix_A": 0.3090109719310519,
+       "fix_B": 0.0,
+       "fix_both": 0.30159740063894586
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.2146230359914626,
+        0.39730544690649905
+       ],
+       "fix_B": [
+        -0.12923581398191317,
+        0.11868784600102664
+       ],
+       "fix_both": [
+        0.2017066124172446,
+        0.3897007312896116
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.007413571292106069,
+      "I_ci": [
+       -0.13939275174238525,
+       0.11791411015161367
+      ],
+      "I_excludes_0": false
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.9680283363443563,
+       "fix_A": 0.8702429493713898,
+       "fix_B": 0.9680283363443563,
+       "fix_both": 0.8800628610261638
+      },
+      "n": {
+       "orig": 7140,
+       "fix_A": 1992,
+       "fix_B": 7140,
+       "fix_both": 1992
+      },
+      "drop": {
+       "fix_A": 0.09778538697296646,
+       "fix_B": 0.0,
+       "fix_both": 0.08796547531819243
+      },
+      "drop_ci": {
+       "fix_A": [
+        0.06048517333892613,
+        0.1374682156437639
+       ],
+       "fix_B": [
+        -0.010298660237457588,
+        0.011059555858839758
+       ],
+       "fix_both": [
+        0.052544464192628954,
+        0.1264167332614414
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.009819911654774027,
+      "I_ci": [
+       -0.06338661963055935,
+       0.04166639307614612
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "train-test identity (resubstitution)",
+    "A_code_line": "    return idx, idx",
+    "B": "shuffled random CV for tuning despite forecast temporal use",
+    "B_code_line": "    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "split_rows": "def split_rows(df, seed):\n    import numpy as np\n    epochs = df[\"epoch\"].to_numpy()\n    cutoff = float(np.quantile(epochs, 0.7))\n    tr = np.flatnonzero(epochs <= cutoff)\n    te = np.flatnonzero(epochs > cutoff)\n    return tr, te"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "tune_mtry": "def tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import StratifiedKFold\n    from sklearn.metrics import roc_auc_score\n    cv = StratifiedKFold(n_splits=k, shuffle=False)\n    best, best_auc = MTRY_GRID[0], -1.0\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = m, float(np.mean(aucs))\n    return best"
+      }
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 35.0,
+     "fix_B": 3.0,
+     "fix_both": 37.0
+    },
+    "culprit_ranking": [
+     "A",
+     "AxB",
+     "B"
+    ],
+    "reason": "split_rows scores on training rows so PR-AUC is resubstitution; fixing to later-epoch line-shifts (forecast use) removes most inflation. Shuffled 10-fold tuning ignores epoch order/forecast use and adds small optimism; combination is dominated by holdout fix.",
+    "mode": "LIVE muse-spark-1.3-contributor (retry)",
+    "prereg_sha256": "9653765cf7ce262c50c7593d0e4e5137d39d457d8e18ab98247254a374424629"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "03:16:47Z",
+     "prereg_sha256": "8df112eb8308c9c54d8e914eebbe01c5a085383e3ea3f59f997b256a30b6aff6"
+    },
+    {
+     "phase": "Verify (static fidelity + rules justification+split_required)",
+     "verdict": "REJECT",
+     "violations": [
+      "plan: SPLIT-USE-REQUIRED: the excerpt states a forecasting use ('forecast') but fix A's edit of the hold-out step 'split_rows' does not hold rows out by time. The control for a forecasting claim must train on EARLIER values of the time column (['epoch']) and test on LATER ones (e.g. a comparison on the time column or TimeSeriesSplit); a random, group or positional hold-out is not accepted"
+     ],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "split_rows"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "split_rows",
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Recover (one retry with the violation text)",
+     "prereg_sha256": "0b1d38bd139ca0e047ce613c95429e0dba96b231ac41afc2e8c3477da15c3f44",
+     "retry_raw_len": 1486
+    },
+    {
+     "phase": "Verify (static fidelity + rules justification+split_required)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "split_rows"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "split_rows",
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) split_rows changed (split)",
+    "fix_B": "only step(s) tune_mtry changed (split)",
+    "fix_both": "only step(s) split_rows, tune_mtry changed (split/split)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    \"\"\"Grid-search tuning: 10-fold CV ROC-AUC for each mtry in the grid; returns the best mtry.\"\"\"\n    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    import numpy as np\n    epochs = df['epoch'].to_numpy()\n    cutoff = float(np.quantile(epochs, 0.7))\n    tr = np.flatnonzero(epochs <= cutoff)\n    te = np.flatnonzero(epochs > cutoff)\n    return (tr, te)\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import StratifiedKFold\n    from sklearn.metrics import roc_auc_score\n    cv = StratifiedKFold(n_splits=k, shuffle=False)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    \"\"\"Rows used to fit the final model, and rows it is scored on.\"\"\"\n    idx = np.arange(len(df))\n    return (idx, idx)\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import StratifiedKFold\n    from sklearn.metrics import roc_auc_score\n    cv = StratifiedKFold(n_splits=k, shuffle=False)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    import numpy as np\n    epochs = df['epoch'].to_numpy()\n    cutoff = float(np.quantile(epochs, 0.7))\n    tr = np.flatnonzero(epochs <= cutoff)\n    te = np.flatnonzero(epochs > cutoff)\n    return (tr, te)\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  },
+  "civilwar_disguised_clean": {
+   "retries": 1,
+   "status": "ok",
+   "metric": "pr_auc",
+   "stats": {
+    "42": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.09254235270300495,
+       "fix_A": 0.09035707178880775,
+       "fix_B": 0.08775995010195398,
+       "fix_both": 0.09079799545200555
+      },
+      "n": {
+       "orig": 1841,
+       "fix_A": 1841,
+       "fix_B": 1841,
+       "fix_both": 1841
+      },
+      "drop": {
+       "fix_A": 0.002185280914197202,
+       "fix_B": 0.004782402601050978,
+       "fix_both": 0.0017443572509994038
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.08240724186405396,
+        0.08959124929057015
+       ],
+       "fix_B": [
+        -0.06068273703248294,
+        0.0935137129187131
+       ],
+       "fix_both": [
+        -0.05629259057663854,
+        0.08485708758158828
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.005223326264248776,
+      "I_ci": [
+       -0.10678669756415267,
+       0.10048157907475327
+      ],
+      "I_excludes_0": false
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.8962158222362304,
+       "fix_A": 0.9037014419667481,
+       "fix_B": 0.9110196202032936,
+       "fix_both": 0.9198644708848791
+      },
+      "n": {
+       "orig": 1841,
+       "fix_A": 1841,
+       "fix_B": 1841,
+       "fix_both": 1841
+      },
+      "drop": {
+       "fix_A": -0.007485619730517645,
+       "fix_B": -0.014803797967063215,
+       "fix_both": -0.023648648648648685
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.05802411796124813,
+        0.049308104831491485
+       ],
+       "fix_B": [
+        -0.06371829786724117,
+        0.03349755899214521
+       ],
+       "fix_both": [
+        -0.06810440245443403,
+        0.02223502927263779
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.0013592309510678247,
+      "I_ci": [
+       -0.06905071372421193,
+       0.06352218631884515
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "43": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.0817316345452962,
+       "fix_A": 0.0867593674919122,
+       "fix_B": 0.08680924640766588,
+       "fix_both": 0.08117578823638724
+      },
+      "n": {
+       "orig": 1841,
+       "fix_A": 1841,
+       "fix_B": 1841,
+       "fix_both": 1841
+      },
+      "drop": {
+       "fix_A": -0.005027732946616001,
+       "fix_B": -0.005077611862369685,
+       "fix_both": 0.0005558463089089527
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.06261045446524155,
+        0.05870000322310983
+       ],
+       "fix_B": [
+        -0.06217079643930756,
+        0.05115750821676488
+       ],
+       "fix_both": [
+        -0.04861388459646421,
+        0.058647849060650695
+       ]
+      },
+      "boot_dropped": 0,
+      "I": 0.010661191117894639,
+      "I_ci": [
+       -0.06726264091449746,
+       0.08907782306770012
+      ],
+      "I_excludes_0": false
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.8986781971475849,
+       "fix_A": 0.9063706563706564,
+       "fix_B": 0.9167815774958632,
+       "fix_both": 0.907562445827752
+      },
+      "n": {
+       "orig": 1841,
+       "fix_A": 1841,
+       "fix_B": 1841,
+       "fix_both": 1841
+      },
+      "drop": {
+       "fix_A": -0.0076924592230714905,
+       "fix_B": -0.018103380348278297,
+       "fix_both": -0.008884248680167128
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.05843838240529121,
+        0.04033073211901896
+       ],
+       "fix_B": [
+        -0.06081365836521068,
+        0.020931906758347874
+       ],
+       "fix_both": [
+        -0.0545229380095404,
+        0.030599123510504943
+       ]
+      },
+      "boot_dropped": 0,
+      "I": 0.01691159089118266,
+      "I_ci": [
+       -0.03992700388049009,
+       0.07595387431190453
+      ],
+      "I_excludes_0": false
+     }
+    },
+    "44": {
+     "full": {
+      "metric": "pr_auc",
+      "acc": {
+       "orig": 0.08011394369384515,
+       "fix_A": 0.08959015073986894,
+       "fix_B": 0.08011394369384515,
+       "fix_both": 0.08652963652204412
+      },
+      "n": {
+       "orig": 1841,
+       "fix_A": 1841,
+       "fix_B": 1841,
+       "fix_both": 1841
+      },
+      "drop": {
+       "fix_A": -0.009476207046023782,
+       "fix_B": 0.0,
+       "fix_both": -0.006415692828198968
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.08159225993131648,
+        0.05386821219367275
+       ],
+       "fix_B": [
+        -0.05529618592858563,
+        0.05846467075606504
+       ],
+       "fix_both": [
+        -0.06579811378229063,
+        0.05405563041076527
+       ]
+      },
+      "boot_dropped": 0,
+      "I": 0.003060514217824814,
+      "I_ci": [
+       -0.0789167117852884,
+       0.09564374416191568
+      ],
+      "I_excludes_0": false
+     },
+     "roc_auc": {
+      "metric": "roc_auc",
+      "acc": {
+       "orig": 0.8984615081553857,
+       "fix_A": 0.9070108738476086,
+       "fix_B": 0.8984615081553857,
+       "fix_both": 0.9125068946497519
+      },
+      "n": {
+       "orig": 1841,
+       "fix_A": 1841,
+       "fix_B": 1841,
+       "fix_both": 1841
+      },
+      "drop": {
+       "fix_A": -0.008549365692222866,
+       "fix_B": 0.0,
+       "fix_both": -0.014045386494366152
+      },
+      "drop_ci": {
+       "fix_A": [
+        -0.05324190098408081,
+        0.04018527348217502
+       ],
+       "fix_B": [
+        -0.040688778332161925,
+        0.04588027056291243
+       ],
+       "fix_both": [
+        -0.05563887943617203,
+        0.0289497437227967
+       ]
+      },
+      "boot_dropped": 0,
+      "I": -0.005496020802143287,
+      "I_ci": [
+       -0.06675478253883474,
+       0.05297630138437248
+      ],
+      "I_excludes_0": false
+     }
+    }
+   },
+   "final_plan": {
+    "A": "Temporal holdout without embargo: training on epochs 1-45 and testing on epochs 46-56 from the same continuing records lets autocorrelation / slow-moving conditions leak across the boundary, inflating future-forecast performance.",
+    "A_code_line": "    return idx[df[\"epoch\"].to_numpy() < 46], idx[df[\"epoch\"].to_numpy() >= 46]",
+    "B": "Shuffled 10-fold CV for tuning: tuning mtry with shuffled StratifiedKFold trains on future epochs to predict past epochs, selecting an overfit mtry and overstating forecast skill.",
+    "B_code_line": "    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)",
+    "edits": {
+     "A": {
+      "kind": "split",
+      "steps": {
+       "split_rows": "def split_rows(df, seed):\n    import numpy as np\n    idx = np.arange(len(df))\n    ep = df[\"epoch\"].to_numpy()\n    return idx[ep < 36], idx[ep >= 46]"
+      }
+     },
+     "B": {
+      "kind": "split",
+      "steps": {
+       "tune_mtry": "def tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import TimeSeriesSplit\n    from sklearn.metrics import roc_auc_score\n    cv = TimeSeriesSplit(n_splits=k)\n    best, best_auc = MTRY_GRID[0], -1.0\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = m, float(np.mean(aucs))\n    return best"
+      }
+     }
+    },
+    "predicted_drop_pp": {
+     "fix_A": 12.0,
+     "fix_B": 7.0,
+     "fix_both": 18.0
+    },
+    "culprit_ranking": [
+     "A",
+     "B",
+     "AxB"
+    ],
+    "reason": "Both steps leak future/near-future information into training/tuning for a forecasting use; the train-test boundary without a gap carries most of the inflation, shuffled CV tuning adds a second smaller optimistic bias, and fixing both removes both leaks.",
+    "mode": "LIVE muse-spark-1.3-contributor (retry)",
+    "prereg_sha256": "804eaf616649c97907090cdb1856be144e81e26e3c8642cc32c893051e8344c1"
+   },
+   "log": [
+    {
+     "phase": "Plan",
+     "utc": "03:20:00Z",
+     "prereg_sha256": "b68025e514c923296f5b2af3d06d7acdd66e568606771c9154135438a60b7646"
+    },
+    {
+     "phase": "Verify (static fidelity + rules justification+split_required)",
+     "verdict": "REJECT",
+     "violations": [
+      "fix_A: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 5)",
+      "fix_both: STRUCTURE: replacement for step 'split_rows' does not parse: closing parenthesis ')' does not match opening parenthesis '[' (<unknown>, line 5)"
+     ],
+     "changed": {
+      "fix_B": {
+       "changed": [
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Recover (one retry with the violation text)",
+     "prereg_sha256": "38522532bd85468c59e05c4443eaad6c980d793d792e32dc7c90eeb37ac3dc92",
+     "retry_raw_len": 1757
+    },
+    {
+     "phase": "Verify (static fidelity + rules justification+split_required)",
+     "verdict": "ACCEPT",
+     "violations": [],
+     "changed": {
+      "fix_A": {
+       "changed": [
+        "split_rows"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_B": {
+       "changed": [
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split"
+       ]
+      },
+      "fix_both": {
+       "changed": [
+        "split_rows",
+        "tune_mtry"
+       ],
+       "kinds": [
+        "split",
+        "split"
+       ]
+      }
+     }
+    },
+    {
+     "phase": "Act (sandbox, 4 configs x 3 seeds)",
+     "status": "ok",
+     "runtime_violations": []
+    }
+   ],
+   "fidelity": {
+    "fix_A": "only step(s) split_rows changed (split)",
+    "fix_B": "only step(s) tune_mtry changed (split)",
+    "fix_both": "only step(s) split_rows, tune_mtry changed (split/split)"
+   },
+   "sources": {
+    "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    \"\"\"Grid-search tuning: 10-fold CV ROC-AUC for each mtry in the grid; returns the best mtry.\"\"\"\n    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    import numpy as np\n    idx = np.arange(len(df))\n    ep = df['epoch'].to_numpy()\n    return (idx[ep < 36], idx[ep >= 46])\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import TimeSeriesSplit\n    from sklearn.metrics import roc_auc_score\n    cv = TimeSeriesSplit(n_splits=k)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    \"\"\"Rows used to fit the final model (epochs 1-45), and rows it is scored on (epochs 46-56).\"\"\"\n    idx = np.arange(len(df))\n    return (idx[df['epoch'].to_numpy() < 46], idx[df['epoch'].to_numpy() >= 46])\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+    "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'target'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['f01', 'f02', 'f03', 'f04', 'f05', 'f06', 'f07', 'f08', 'f09', 'f10', 'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f20', 'f21', 'f22', 'f23', 'f24', 'f25', 'f26', 'f27', 'f28', 'f29', 'f30', 'f31', 'f32', 'f33', 'f34', 'f35', 'f36', 'f37', 'f38', 'f39', 'f40', 'f41', 'f42', 'f43', 'f44', 'f45', 'f46', 'f47', 'f48', 'f49', 'f50', 'f51', 'f52', 'f53', 'f54', 'f55', 'f56', 'f57', 'f58', 'f59', 'f60', 'f61', 'f62', 'f63', 'f64', 'f65', 'f66', 'f67', 'f68', 'f69', 'f70', 'f71', 'f72', 'f73', 'f74', 'f75', 'f76', 'f77', 'f78', 'f79', 'f80', 'f81', 'f82', 'f83', 'f84', 'f85', 'f86', 'f87', 'f88', 'f89', 'f90']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (running, stoppage) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    import numpy as np\n    from sklearn.model_selection import TimeSeriesSplit\n    from sklearn.metrics import roc_auc_score\n    cv = TimeSeriesSplit(n_splits=k)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    import numpy as np\n    idx = np.arange(len(df))\n    ep = df['epoch'].to_numpy()\n    return (idx[ep < 36], idx[ep >= 46])\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+   }
+  }
+ }
+}

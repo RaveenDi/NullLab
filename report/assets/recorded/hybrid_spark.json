@@ -1,0 +1,76 @@
+{
+ "tag": "spark",
+ "case": "g4_pump_inspection",
+ "command": "python -m agent.hybrid factorial/g4_pump_inspection --out out/hy --report out/hy.md",
+ "exit_code": 0,
+ "recorded_utc": "2026-11-02T10:10:39Z",
+ "stdout": [
+  "g4_pump_inspection: INFLATED [Spark (recorded run, no new call)] model calls 0 est $0.00; record dir <tmp>/hy2; report <tmp>/hy2.md"
+ ],
+ "stdout_note": "the temp record-directory path in the opening line was shortened to <tmp>; nothing else was edited",
+ "verdict": "INFLATED",
+ "produced_by": "Spark (recorded run, no new call)",
+ "route": "rules fired but the measured drop is not clearly positive (sign 0); model consulted (rules had said sign 0)",
+ "rules_fired": [
+  "R2",
+  "R3"
+ ],
+ "summary": {
+  "metric": "accuracy",
+  "unit": "pp",
+  "sign": "+",
+  "per_seed_sign": [
+   "+",
+   "+",
+   "+"
+  ],
+  "claimed": 0.8884,
+  "controlled": 0.7347,
+  "inflation": 15.378,
+  "inflation_raw": 0.1537777777777778,
+  "ci_per_seed": {
+   "42": [
+    12.13,
+    19.733
+   ],
+   "43": [
+    10.8,
+    18.27
+   ],
+   "44": [
+    11.597,
+    19.6
+   ]
+  },
+  "seeds": [
+   "42",
+   "43",
+   "44"
+  ],
+  "n_controlled": [
+   750,
+   750,
+   750
+  ]
+ },
+ "diff": "--- train.py (claim)\n+++ fix_both (executed)\n@@ -14,6 +14,7 @@\n \n def add_lag(df):\n+    import pandas as pd\n     df = df.sort_values([PUMP, ORDER]).copy()\n-    df['prev_load'] = df.groupby(PUMP)[LOAD].shift(-1)\n+    df['prev_load'] = df.groupby(PUMP)[LOAD].shift(1)\n     return df.dropna(subset=['prev_load']).reset_index(drop=True)\n \n@@ -30,5 +31,9 @@\n \n def split_idx(df, seed, test_size=0.25):\n-    return train_test_split(np.arange(len(df)), test_size=test_size, random_state=seed)\n+    import numpy as np\n+    from sklearn.model_selection import GroupShuffleSplit\n+    gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n+    tr, te = next(gss.split(np.arange(len(df)), groups=df[PUMP].to_numpy()))\n+    return (tr, te)\n \n def claimed_eval(df, seed):",
+ "report_head": [
+  "**Verdict: INFLATED** | produced by: **Spark (recorded run, no new call)**",
+  "Route: rules fired but the measured drop is not clearly positive (sign 0); model consulted (rules had said sign 0)",
+  "Claimed 0.8884 vs controlled 0.7347 (accuracy); inflation +15.378 pp; sign `+` (per seed ['+', '+', '+']); 95% interval per seed (unpaired bootstrap): 42: [12.13, 19.733], 43: [10.8, 18.27], 44: [11.597, 19.6]."
+ ],
+ "who_did_what_md": "| step | produced by | detail |\n|---|---|---|\n| detect leakage patterns | rules (no model) | rules fired: R2, R3 |\n| measure the rule fix (4 configs x seeds 42/43/44, unpaired bootstrap) | sandbox (no model) | stored measurement (runs_rulefix, patch hash identical); sign 0 |\n| consistency check | rules (no model) | DISAGREE: rules fired but the measured drop is not clearly positive (sign 0) -> model consulted |\n| plan and fix | Spark (recorded run, no new call) | served from runs_g5/r1.json; no call made |\n| verdict | Spark (recorded run, no new call) | INFLATED |",
+ "cost_lines": [
+  "Model calls: **0** live, 0 replayed. Estimated USD: **0.00**. Estimated tokens: 0 in / 0 out.",
+  "No model was called: the rule path and the local sandbox cost $0."
+ ],
+ "claim_md": "> Our model achieves 89% accuracy on held-out inspections and is intended to schedule maintenance across the existing fleet.\n\nMethods as stated: We predict whether a pump faults at its next inspection from ten sensor readings plus the pump's load at the previous inspection.\nThe six most informative sensors were selected with an ANOVA F-test; inspections were randomly divided into 75% training and 25% test with a fixed random seed.\n\nSource of the claim text: `factorial/g4_pump_inspection/excerpt.md` (sha256 `613fc304823ccee3`). Provenance: Synthetic case built by NullLab; no external source.",
+ "claimed_vs_controlled_md": "Drop = claimed minus controlled. Interval: 95%, unpaired bootstrap over test rows.\n\n| seed | claimed | controlled | drop | 95% interval of drop | n claimed | n controlled |\n|---|---|---|---|---|---|---|\n| 42 | 88.7% | 72.9% | +15.7 pp | [+12.1, +19.7] | 750 | 750 |\n| 43 | 88.9% | 74.4% | +14.5 pp | [+10.8, +18.3] | 750 | 750 |\n| 44 | 88.9% | 73.1% | +15.9 pp | [+11.6, +19.6] | 750 | 750 |\n| mean | 88.8% | 73.5% | +15.4 pp | | | |\n\nFactors (mean drop): A alone +16.0 pp, B alone +0.2 pp, interaction -0.8 pp.",
+ "could_not_test_md": "- We re-ran the evaluation code in the case folder, not the authors' original pipeline, raw data or software versions.\n- Only two evaluation steps (factors A and B) were varied per run. Other leakage types were not examined, and the model, metric and features are held fixed by construction.\n- Intervals come from an unpaired bootstrap over test rows for 3 seeds (42/43/44). They do not cover variation across training sets, model initialisations or a fresh draw of the data.\n- The case is synthetic (built by NullLab). A real study can differ in ways that matter.",
+ "reviewer_note": "The reported result (89%) may be inflated: an input that may not be available at prediction time is used. With only add_lag, split_idx changed, the same model scores 73.5% instead of 88.8% accuracy (+15.4 pp, mean of seeds 42/43/44). The 95% unpaired-bootstrap interval for the drop excludes zero on 3 of 3 seeds (seed 42 [+12.1, +19.7]; seed 43 [+10.8, +18.3]; seed 44 [+11.6, +19.6]); 750 rows scored by the claim, 750 after the change. Separately, step A alone moves the score by +16.0 pp, step B alone by +0.2 pp, and their interaction by -0.8 pp. Pattern: Illegitimate features (L2, Kapoor and Narayanan). Please report the score under a justification that every input is available at prediction time, or removal of the offending input, or justify the current protocol. Caveat: we re-ran the evaluation code supplied, not the authors' full pipeline; 4 limits are listed in the audit report.",
+ "rerun_command": "python -m agent.hybrid factorial/g4_pump_inspection --out out/hy --report out/hy.md",
+ "source_file": "report/assets/recorded/hybrid_spark.json",
+ "source_runs": [
+  "runs_g5/r1.json (recorded Spark run, no new call)"
+ ]
+}

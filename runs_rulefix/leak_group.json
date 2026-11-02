@@ -1,0 +1,284 @@
+{
+ "case": "leak_group",
+ "tool": "rulefix (no LLM)",
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "n_boot": 1000,
+ "bootstrap": "unpaired",
+ "fired": {},
+ "not_applied": [],
+ "split_fn": "split_idx",
+ "configs": {
+  "fix_A": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "3cbc7e91749bf10e304c3877bd9f03e28ad7c05621a5a14ce1da09293d6e445a"
+  },
+  "fix_B": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "3cbc7e91749bf10e304c3877bd9f03e28ad7c05621a5a14ce1da09293d6e445a"
+  },
+  "fix_both": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "3cbc7e91749bf10e304c3877bd9f03e28ad7c05621a5a14ce1da09293d6e445a"
+  }
+ },
+ "sources": {
+  "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_8e1eb2'\nSITE = 'c_8d423f'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_8e1eb2'\nSITE = 'c_8d423f'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import train_test_split, GroupShuffleSplit\nfrom sklearn.ensemble import RandomForestClassifier\nTARGET = 'c_8e1eb2'\nSITE = 'c_8d423f'\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in df.columns if c != TARGET]\n\ndef fit_predict(Xtr, ytr, Xte, seed):\n    m = RandomForestClassifier(n_estimators=200, random_state=seed, n_jobs=1)\n    return m.fit(Xtr, ytr).predict(Xte)\n\ndef split_idx(df, seed, groups=None, test_size=0.25):\n    idx = np.arange(len(df))\n    if groups is not None:\n        gss = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)\n        return next(gss.split(idx, groups=np.asarray(groups)))\n    return train_test_split(idx, test_size=test_size, random_state=seed)\n\ndef claimed_eval(df, seed, groups=None):\n    tr, te = split_idx(df, seed, groups)\n    f = feats(df)\n    return (df[TARGET].to_numpy()[te], fit_predict(df[f].to_numpy()[tr], df[TARGET].to_numpy()[tr], df[f].to_numpy()[te], seed))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+ },
+ "status": "ok",
+ "elapsed_s": 14.7,
+ "stats": {
+  "42": {
+   "full": {
+    "acc": {
+     "orig": 0.7233333333333334,
+     "fix_A": 0.7233333333333334,
+     "fix_B": 0.7233333333333334,
+     "fix_both": 0.7233333333333334
+    },
+    "n": {
+     "orig": 300,
+     "fix_A": 300,
+     "fix_B": 300,
+     "fix_both": 300
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.07333333333333325,
+      0.07333333333333325
+     ],
+     "fix_B": [
+      -0.07333333333333336,
+      0.06999999999999995
+     ],
+     "fix_both": [
+      -0.07000000000000006,
+      0.06999999999999995
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.09333333333333327,
+     0.10008333333333334
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.7233333333333334,
+     "fix_A": 0.7233333333333334,
+     "fix_B": 0.7233333333333334,
+     "fix_both": 0.7233333333333334
+    },
+    "n": {
+     "orig": 300,
+     "fix_A": 300,
+     "fix_B": 300,
+     "fix_both": 300
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06666666666666665,
+      0.07333333333333325
+     ],
+     "fix_B": [
+      -0.07000000000000006,
+      0.07008333333333332
+     ],
+     "fix_both": [
+      -0.07341666666666657,
+      0.06675000000000002
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.10333333333333339,
+     0.09666666666666668
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "43": {
+   "full": {
+    "acc": {
+     "orig": 0.8033333333333333,
+     "fix_A": 0.8033333333333333,
+     "fix_B": 0.8033333333333333,
+     "fix_both": 0.8033333333333333
+    },
+    "n": {
+     "orig": 300,
+     "fix_A": 300,
+     "fix_B": 300,
+     "fix_both": 300
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06333333333333335,
+      0.06333333333333324
+     ],
+     "fix_B": [
+      -0.06333333333333335,
+      0.06333333333333324
+     ],
+     "fix_both": [
+      -0.06000000000000005,
+      0.06333333333333335
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.08333333333333326,
+     0.08333333333333337
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.8033333333333333,
+     "fix_A": 0.8033333333333333,
+     "fix_B": 0.8033333333333333,
+     "fix_both": 0.8033333333333333
+    },
+    "n": {
+     "orig": 300,
+     "fix_A": 300,
+     "fix_B": 300,
+     "fix_both": 300
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06333333333333335,
+      0.06333333333333335
+     ],
+     "fix_B": [
+      -0.06333333333333324,
+      0.06333333333333335
+     ],
+     "fix_both": [
+      -0.06341666666666668,
+      0.06333333333333335
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.09333333333333338,
+     0.08999999999999997
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "44": {
+   "full": {
+    "acc": {
+     "orig": 0.7733333333333333,
+     "fix_A": 0.7733333333333333,
+     "fix_B": 0.7733333333333333,
+     "fix_both": 0.7733333333333333
+    },
+    "n": {
+     "orig": 300,
+     "fix_A": 300,
+     "fix_B": 300,
+     "fix_both": 300
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06666666666666665,
+      0.06666666666666665
+     ],
+     "fix_B": [
+      -0.06666666666666665,
+      0.06333333333333324
+     ],
+     "fix_both": [
+      -0.060083333333333384,
+      0.06999999999999995
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.0934166666666667,
+     0.09666666666666657
+    ],
+    "I_excludes_0": false
+   },
+   "same_n": {
+    "acc": {
+     "orig": 0.7733333333333333,
+     "fix_A": 0.7733333333333333,
+     "fix_B": 0.7733333333333333,
+     "fix_both": 0.7733333333333333
+    },
+    "n": {
+     "orig": 300,
+     "fix_A": 300,
+     "fix_B": 300,
+     "fix_both": 300
+    },
+    "drop": {
+     "fix_A": 0.0,
+     "fix_B": 0.0,
+     "fix_both": 0.0
+    },
+    "drop_ci": {
+     "fix_A": [
+      -0.06333333333333335,
+      0.07000000000000006
+     ],
+     "fix_B": [
+      -0.07333333333333325,
+      0.06333333333333335
+     ],
+     "fix_both": [
+      -0.06666666666666665,
+      0.06999999999999995
+     ]
+    },
+    "I": 0.0,
+    "I_ci": [
+     -0.0900833333333334,
+     0.09666666666666668
+    ],
+    "I_excludes_0": false
+   }
+  }
+ },
+ "metric": "accuracy"
+}

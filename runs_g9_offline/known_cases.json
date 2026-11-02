@@ -1,0 +1,501 @@
+{
+ "known_correct": [
+  {
+   "case": "ehg_disguised",
+   "label": "EHG oversampling moved into the fold",
+   "op": {
+    "op": "move_into_fold",
+    "step": "claimed_eval",
+    "call": "oversample"
+   },
+   "new": {
+    "decision": "ACCEPT",
+    "problems": [],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 185,
+      "ctx": {
+       "oversample": 447,
+       "NearestNeighbors": 185
+      },
+      "n_eval_events": 10,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {
+       "oversample": 0,
+       "NearestNeighbors": 0
+      },
+      "n_eval_events": 10,
+      "untracked": 0
+     },
+     "E_synth_orig": 224,
+     "E_synth_fix": 0,
+     "model": {
+      "RandomForestClassifier": {
+       "bootstrap": "True",
+       "ccp_alpha": "0.0",
+       "class_weight": "None",
+       "criterion": "'gini'",
+       "max_depth": "None",
+       "max_features": "'sqrt'",
+       "max_leaf_nodes": "None",
+       "max_samples": "None",
+       "min_impurity_decrease": "0.0",
+       "min_samples_leaf": "1",
+       "min_samples_split": "2",
+       "min_weight_fraction_leaf": "0.0",
+       "monotonic_cst": "None",
+       "n_estimators": "20",
+       "n_jobs": "None",
+       "oob_score": "False",
+       "random_state": "42",
+       "verbose": "0",
+       "warm_start": "False"
+      }
+     },
+     "oversample_overlap": {
+      "before": 447,
+      "after": 0
+     }
+    }
+   }
+  },
+  {
+   "case": "ehg_disguised",
+   "label": "EHG oversampler dropped from evaluation",
+   "op": {
+    "op": "drop_from_eval",
+    "step": "claimed_eval",
+    "call": "oversample"
+   },
+   "new": {
+    "decision": "ACCEPT",
+    "problems": [],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 185,
+      "ctx": {
+       "oversample": 447,
+       "NearestNeighbors": 185
+      },
+      "n_eval_events": 10,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {},
+      "n_eval_events": 10,
+      "untracked": 0
+     },
+     "E_synth_orig": 224,
+     "E_synth_fix": 0,
+     "model": {
+      "RandomForestClassifier": {
+       "bootstrap": "True",
+       "ccp_alpha": "0.0",
+       "class_weight": "None",
+       "criterion": "'gini'",
+       "max_depth": "None",
+       "max_features": "'sqrt'",
+       "max_leaf_nodes": "None",
+       "max_samples": "None",
+       "min_impurity_decrease": "0.0",
+       "min_samples_leaf": "1",
+       "min_samples_split": "2",
+       "min_weight_fraction_leaf": "0.0",
+       "monotonic_cst": "None",
+       "n_estimators": "20",
+       "n_jobs": "None",
+       "oob_score": "False",
+       "random_state": "42",
+       "verbose": "0",
+       "warm_start": "False"
+      }
+     }
+    }
+   }
+  },
+  {
+   "case": "civilwar_disguised",
+   "label": "civil-war temporal hold-out",
+   "op": {
+    "op": "replace_split",
+    "step": "split_rows",
+    "kind": "temporal",
+    "col": "epoch"
+   },
+   "new": {
+    "decision": "ACCEPT",
+    "problems": [],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 554,
+      "ctx": {
+       "DecisionTreeClassifier": 621
+      },
+      "n_eval_events": 186,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {
+       "DecisionTreeClassifier": 0
+      },
+      "n_eval_events": 6,
+      "untracked": 0
+     },
+     "E_synth_orig": 0,
+     "E_synth_fix": 0,
+     "model": {
+      "DecisionTreeClassifier": {
+       "ccp_alpha": "0.0",
+       "class_weight": "None",
+       "criterion": "'gini'",
+       "max_depth": "None",
+       "max_features": "46",
+       "max_leaf_nodes": "None",
+       "min_impurity_decrease": "0.0",
+       "min_samples_leaf": "1",
+       "min_samples_split": "2",
+       "min_weight_fraction_leaf": "0.0",
+       "monotonic_cst": "None",
+       "random_state": "944062962",
+       "splitter": "'best'"
+      }
+     },
+     "split_temporal": {
+      "before": {
+       "bad": 186,
+       "total": 186,
+       "untracked": 0
+      },
+      "after": {
+       "bad": 0,
+       "total": 6,
+       "untracked": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "case": "civilwar_apparent",
+   "label": "civil-war temporal hold-out (year)",
+   "op": {
+    "op": "replace_split",
+    "step": "split_rows",
+    "kind": "temporal",
+    "col": "year"
+   },
+   "new": {
+    "decision": "ACCEPT",
+    "problems": [],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 554,
+      "ctx": {
+       "DecisionTreeClassifier": 621
+      },
+      "n_eval_events": 186,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {
+       "DecisionTreeClassifier": 0
+      },
+      "n_eval_events": 6,
+      "untracked": 0
+     },
+     "E_synth_orig": 0,
+     "E_synth_fix": 0,
+     "model": {
+      "DecisionTreeClassifier": {
+       "ccp_alpha": "0.0",
+       "class_weight": "None",
+       "criterion": "'gini'",
+       "max_depth": "None",
+       "max_features": "46",
+       "max_leaf_nodes": "None",
+       "min_impurity_decrease": "0.0",
+       "min_samples_leaf": "1",
+       "min_samples_split": "2",
+       "min_weight_fraction_leaf": "0.0",
+       "monotonic_cst": "None",
+       "random_state": "944062962",
+       "splitter": "'best'"
+      }
+     },
+     "split_temporal": {
+      "before": {
+       "bad": 186,
+       "total": 186,
+       "untracked": 0
+      },
+      "after": {
+       "bad": 0,
+       "total": 6,
+       "untracked": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "case": "esl_selection",
+   "label": "ESL screen moved into the fold",
+   "op": {
+    "op": "move_into_fold",
+    "step": "claimed_eval",
+    "call": "screen"
+   },
+   "new": {
+    "decision": "ACCEPT",
+    "problems": [],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 0,
+      "ctx": {
+       "screen": 50,
+       "SelectKBest": 50
+      },
+      "n_eval_events": 5,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {
+       "screen": 0
+      },
+      "n_eval_events": 5,
+      "untracked": 0
+     },
+     "E_synth_orig": 0,
+     "E_synth_fix": 0,
+     "model": {
+      "KNeighborsClassifier": {
+       "algorithm": "'auto'",
+       "leaf_size": "30",
+       "metric": "'minkowski'",
+       "metric_params": "None",
+       "n_jobs": "None",
+       "n_neighbors": "1",
+       "p": "2",
+       "weights": "'uniform'"
+      }
+     },
+     "screen_overlap": {
+      "before": 50,
+      "after": 0
+     }
+    }
+   }
+  }
+ ],
+ "known_wrong_on_clean": [
+  {
+   "case": "ehg_disguised_clean",
+   "label": "EHG clean: move oversampling",
+   "op": {
+    "op": "move_into_fold",
+    "step": "claimed_eval",
+    "call": "oversample"
+   },
+   "new": {
+    "decision": "REJECT",
+    "problems": [
+     "fix_all: NOT_APPLICABLE: move_into_fold: call 'oversample' is not at the top level of step 'claimed_eval' (not called there)"
+    ],
+    "stage": "static",
+    "crash": false
+   }
+  },
+  {
+   "case": "ehg_disguised_clean",
+   "label": "EHG clean: drop oversampling",
+   "op": {
+    "op": "drop_from_eval",
+    "step": "claimed_eval",
+    "call": "oversample"
+   },
+   "new": {
+    "decision": "REJECT",
+    "problems": [
+     "fix_all: NOT_APPLICABLE: drop_from_eval: call 'oversample' is not at the top level of step 'claimed_eval' (not called there)"
+    ],
+    "stage": "static",
+    "crash": false
+   }
+  },
+  {
+   "case": "civilwar_disguised_clean",
+   "label": "civil-war clean: temporal split again",
+   "op": {
+    "op": "replace_split",
+    "step": "split_rows",
+    "kind": "temporal",
+    "col": "epoch"
+   },
+   "new": {
+    "decision": "REJECT",
+    "problems": [
+     "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+    ],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 0,
+      "ctx": {
+       "DecisionTreeClassifier": 0
+      },
+      "n_eval_events": 6,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {
+       "DecisionTreeClassifier": 0
+      },
+      "n_eval_events": 6,
+      "untracked": 0
+     },
+     "E_synth_orig": 0,
+     "E_synth_fix": 0,
+     "model": {
+      "DecisionTreeClassifier": {
+       "ccp_alpha": "0.0",
+       "class_weight": "None",
+       "criterion": "'gini'",
+       "max_depth": "None",
+       "max_features": "46",
+       "max_leaf_nodes": "None",
+       "min_impurity_decrease": "0.0",
+       "min_samples_leaf": "1",
+       "min_samples_split": "2",
+       "min_weight_fraction_leaf": "0.0",
+       "monotonic_cst": "None",
+       "random_state": "944062962",
+       "splitter": "'best'"
+      }
+     },
+     "split_temporal": {
+      "before": {
+       "bad": 0,
+       "total": 6,
+       "untracked": 0
+      },
+      "after": {
+       "bad": 0,
+       "total": 6,
+       "untracked": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "case": "civilwar_temporal_clean",
+   "label": "civil-war temporal_clean: temporal split again",
+   "op": {
+    "op": "replace_split",
+    "step": "split_rows",
+    "kind": "temporal",
+    "col": "year"
+   },
+   "new": {
+    "decision": "REJECT",
+    "problems": [
+     "fix_all: PRECONDITION replace_split(temporal): the original split already satisfies the temporal relation in all 6 train/test pairs (nothing to replace)"
+    ],
+    "stage": "runtime",
+    "crash": false,
+    "internal": false,
+    "facts": {
+     "orig_contam": {
+      "self": 0,
+      "ctx": {
+       "DecisionTreeClassifier": 0
+      },
+      "n_eval_events": 6,
+      "untracked": 0
+     },
+     "fix_contam": {
+      "self": 0,
+      "ctx": {
+       "DecisionTreeClassifier": 0
+      },
+      "n_eval_events": 6,
+      "untracked": 0
+     },
+     "E_synth_orig": 0,
+     "E_synth_fix": 0,
+     "model": {
+      "DecisionTreeClassifier": {
+       "ccp_alpha": "0.0",
+       "class_weight": "None",
+       "criterion": "'gini'",
+       "max_depth": "None",
+       "max_features": "46",
+       "max_leaf_nodes": "None",
+       "min_impurity_decrease": "0.0",
+       "min_samples_leaf": "1",
+       "min_samples_split": "2",
+       "min_weight_fraction_leaf": "0.0",
+       "monotonic_cst": "None",
+       "random_state": "944062962",
+       "splitter": "'best'"
+      }
+     },
+     "split_temporal": {
+      "before": {
+       "bad": 0,
+       "total": 6,
+       "untracked": 0
+      },
+      "after": {
+       "bad": 0,
+       "total": 6,
+       "untracked": 0
+      }
+     }
+    }
+   }
+  },
+  {
+   "case": "esl_selection_clean",
+   "label": "ESL clean: move screen",
+   "op": {
+    "op": "move_into_fold",
+    "step": "cv_predict",
+    "call": "screen"
+   },
+   "new": {
+    "decision": "REJECT",
+    "problems": [
+     "fix_all: NOT_APPLICABLE: move_into_fold: statement shape not supported for 'screen' (supported: `X, y = call(X, y, ...)`, `k = call(X, y, ...)` used as X[:, k], `V = Cls(...).fit_transform(X)`)"
+    ],
+    "stage": "static",
+    "crash": false
+   }
+  }
+ ]
+}

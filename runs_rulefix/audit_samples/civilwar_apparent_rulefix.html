@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NullLab audit civilwar_apparent</title><style>:root{--bg:#F2EFEA;--panel:#FFFFFF;--panel-2:#F7F5F1;--ink:#111111;--ink-2:#3A3631;--muted:#6B655E;--faint:#A8A096;--line:#E3DED6;--line-2:#D2CBC0;
+--accent:#E8501F;--accent-ink:#B23A0E;--accent-soft:#FCE9E1;--r-sm:10px;--r-md:16px;--f-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+--f-mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,Menlo,monospace;color-scheme:light}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-sans)}
+main{max-width:920px;margin:0 auto;padding:32px 16px 64px}p,li,blockquote,summary{overflow-wrap:anywhere}
+h1{font-size:clamp(24px,4vw,34px);line-height:1.15;margin:0 0 8px}h2{font-size:18px;margin:0 0 10px;letter-spacing:.01em}
+.sub{color:var(--muted);margin:0 0 20px}.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:18px 20px;margin:0 0 14px}
+.badge{display:inline-block;border:1px solid var(--line-2);border-radius:999px;padding:2px 10px;font:600 12px var(--f-mono);letter-spacing:.04em;background:var(--panel-2)}
+.badge.hot{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+table{border-collapse:collapse;width:100%;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}th{color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}code,pre,.mono{font-family:var(--f-mono);font-size:13px;overflow-wrap:anywhere}.scroll{overflow-x:auto;max-width:100%}
+pre{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px;overflow:auto;white-space:pre-wrap;word-break:break-word;margin:8px 0}
+pre.diff .add{color:#1a6b2b}pre.diff .del{color:#a3260d}.k{color:var(--muted)}
+blockquote{margin:8px 0;padding:8px 14px;border-left:3px solid var(--accent);background:var(--panel-2)}
+button{font:600 13px var(--f-sans);background:var(--accent);color:#fff;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}button:hover{background:var(--accent-ink)}
+details{margin:6px 0}summary{cursor:pointer;color:var(--ink-2)}ul{margin:6px 0;padding-left:20px}.warn{color:var(--accent-ink);font-weight:600}
+@media (max-width:560px){main{padding:20px 16px 48px}.card{padding:14px}th,td{padding:5px 4px}}</style></head><body><main>
+<h1>Audit: civilwar_apparent</h1>
+<p class="sub"><span class="badge">REAL-PINNED</span> <span class="badge">RULEFIX RUN</span>
+<span class="badge">sign +</span> built from <span class="mono">runs_rulefix/civilwar_apparent.json</span> without any API call.</p>
+<div class="card"><h2>1. Claim as stated</h2><blockquote>We report cross-validated performance: the random forest reaches an area under the ROC curve of 0.91 and
+offers superior predictive power for civil war onset compared to logistic regression.</blockquote>
+<p class="k">Methods as stated: We compare a random forest with logistic regression models for predicting civil war onset in country-year data
+(1945-2000, about 1 onset per 100 country-years). The forest down-samples the majority class (30 peace and 90 war
+observations per tree) and its tuning parameter is chosen by 10-fold cross-validation.
+The models are meant to forecast civil war onsets in country-years they were not trained on.</p>
+<p>Source of the claim text: <span class="mono">real/civilwar_apparent/excerpt.md</span> (sha256 <span class="mono">67882ed6e0e4badf</span>). Provenance of the case: Muchlinski, Siroky, He, Kocher (2016), Comparing Random Forest with Logistic Regression for Predicting Class-Imbalanced Civil War Onset Data, Political Analysis 24(1):87-103 (citation as given in the reanalysis&#x27; references; DOI not checked). Published correction: Neunhoeffer &amp; Sternberg (2019), How Cross-Validation Can Go Wrong and What to Do About It, Political Analysis 27(1):101-106, doi:10.1017/pan.2018.39; author PDF https://sebastiansternberg.github.io/pdf/pa_cross_validation.pdf ; replication doi:10.7910/DVN/Y9KMJW</p></div>
+<div class="card"><h2>2. Claimed vs controlled PR-AUC</h2>
+<p>Drop = claimed minus controlled (positive means the claim looks inflated). Interval: 95%, UNPAIRED bootstrap over test rows (n_boot=1000 in the g5/g6 drivers; not stored in the run file). controlled score is lower: consistent with inflation.</p>
+<div class="scroll"><table><tr><th>seed</th><th class="n">claimed</th><th class="n">controlled</th><th class="n">drop</th><th class="n">95% interval of drop</th><th class="n">n claimed</th><th class="n">n controlled</th></tr><tr><td class='mono'>42</td><td class='n'>0.395</td><td class='n'>0.088</td><td class='n'>+0.308</td><td class='n mono'>[+0.200, +0.401]</td><td class='n'>7140</td><td class='n'>1785</td></tr><tr><td class='mono'>43</td><td class='n'>0.384</td><td class='n'>0.089</td><td class='n'>+0.295</td><td class='n mono'>[+0.185, +0.381]</td><td class='n'>7140</td><td class='n'>1785</td></tr><tr><td class='mono'>44</td><td class='n'>0.373</td><td class='n'>0.089</td><td class='n'>+0.285</td><td class='n mono'>[+0.179, +0.373]</td><td class='n'>7140</td><td class='n'>1785</td></tr><tr><td><b>mean</b></td><td class='n'><b>0.384</b></td><td class='n'><b>0.088</b></td><td class='n'><b>+0.296</b></td><td></td><td></td><td></td></tr></table></div>
+<p class="k">Factors (mean drop): A alone +0.296, B alone +0.000, interaction +0.000. Counts, not rates: 3 seeds, one dataset.</p></div>
+<div class="card"><h2>3. Exact patch: only split_rows changed</h2>
+<pre class="diff">--- train.py (claim)
++++ fix_both (executed)
+@@ -42,7 +42,7 @@
+ 
+ def split_rows(df, seed):
+<span class="del">-    &quot;&quot;&quot;Rows used to fit the final model, and rows it is scored on.&quot;&quot;&quot;</span>
+<span class="del">-    idx = np.arange(len(df))</span>
+<span class="del">-    return (idx, idx)</span>
+<span class="add">+    order = np.argsort(np.asarray(df[&#x27;year&#x27;], dtype=float), kind=&#x27;stable&#x27;)</span>
+<span class="add">+    cut = int(round(0.75 * len(order)))</span>
+<span class="add">+    return (order[:cut], order[cut:])</span>
+ 
+ def claimed_eval(df, seed):</pre><details><summary>fix_A diff</summary><pre class='diff'>--- train.py (claim)
++++ fix_A (executed)
+@@ -42,7 +42,7 @@
+ 
+ def split_rows(df, seed):
+<span class="del">-    &quot;&quot;&quot;Rows used to fit the final model, and rows it is scored on.&quot;&quot;&quot;</span>
+<span class="del">-    idx = np.arange(len(df))</span>
+<span class="del">-    return (idx, idx)</span>
+<span class="add">+    order = np.argsort(np.asarray(df[&#x27;year&#x27;], dtype=float), kind=&#x27;stable&#x27;)</span>
+<span class="add">+    cut = int(round(0.75 * len(order)))</span>
+<span class="add">+    return (order[:cut], order[cut:])</span>
+ 
+ def claimed_eval(df, seed):</pre></details><details><summary>fix_B diff</summary><pre class='diff'>no change</pre></details></div>
+<div class="card"><h2>4. Fidelity check</h2><p>Rule baseline (no model). <span class='mono'>rules applied R4, R1; steps changed split_rows</span></p><p class='k'>rule-baseline record: no model-written plan to audit</p></div>
+<div class="card"><h2>5. Preregistration</h2><ul><li>rulefix_prereg: <span class='mono'>2026-11-02T02:49:20Z</span> sha256 <span class='mono'>b10c5b88ad50525a8a643833017ed494b7ec5e2fe7dcede68970d90a6c3a3fd2</span></li><li>PREREG.md sha256 <span class='mono'>b10c5b88ad50525a8a643833017ed494b7ec5e2fe7dcede68970d90a6c3a3fd2</span></li></ul><p class="k">Source: runs_rulefix/PREREG.sha256. The plan was hashed and logged before any execution.</p></div>
+<div class="card"><h2>6. Rerun (offline, no API)</h2><pre>python -m agent.audit real/civilwar_apparent --run runs_rulefix/civilwar_apparent.json --case civilwar_apparent --remeasure --report out.html</pre></div>
+<div class="card"><h2>7. What we could not test</h2><ul><li>This record comes from a fixed rule library with no model: it applies standard remedies to code idioms it recognises and cannot reason about the claim.</li><li>We re-ran the evaluation code in the case folder, not the authors&#x27; original pipeline, raw data or software versions. Port notes: Python port (sklearn 1.9.1): per-class down-sampled bagged trees (30 peace, 90 war per tree, with replacement, 300 trees vs 1000), mtry grid (2,46,90) tuned by 10-fold stratified CV ROC-AUC (caret default grid for 90 predictors); PR-AUC = sklearn average_precision_score (the reanalysis used aucPRp from Cranmer &amp; Desmarais; small definitional differences).</li><li>Only two evaluation steps (factors A and B) were varied per run. Other leakage types were not examined, and the model, metric and features are held fixed by construction.</li><li>Intervals come from an unpaired bootstrap over test rows for 3 seeds (42/43/44). They do not cover variation across training sets, model initialisations or a fresh draw of the data.</li><li>Not tested: Kapoor &amp; Narayanan (2023), Leakage and the reproducibility crisis in ML-based science, Patterns 4(9):100804, arXiv:2207.07048, Table A1: train+test imputed together with rfImpute (outcome used); RF AUC reported 0.94 (reproduced 0.95), corrected 0.64. Not built: their raw pre-imputation data is only in CodeOcean capsule doi:10.24433/CO.4899453.v1, which returned HTTP 403 to automated download on 2026-11-01.</li></ul></div>
+<div class="card"><h2>8. Leakage type (Kapoor and Narayanan, arXiv:2207.07048)</h2><ul><li><b>L1.1 No test set</b> (primary) <span class='k'>via factor A</span><br><span class='k'>rule R1 fired and was applied</span></li><li><b>L3.1 Temporal leakage</b> <span class='k'>via factor A</span><br><span class='k'>rule R4 fired and was applied</span></li></ul>
+<p class="k">Mapped by keyword rules from the patch and the planner's description of the suspect step; check it by hand.</p></div>
+<div class="card"><h2>9. Suggested note to the authors</h2><blockquote><p>The headline result (0.91) appears to depend on the evaluation protocol: the model is scored on rows it was fit on.</p><p>In our reanalysis the code was run with only split_rows changed (fidelity guard: rules applied R4, R1; steps changed split_rows). The same model then scored 0.088 against 0.384 under the claimed protocol (metric: PR-AUC), a drop of +0.296 (mean of seeds 42/43/44; 95% unpaired-bootstrap intervals for the drop: seed 42 [+0.200, +0.401]; seed 43 [+0.185, +0.381]; seed 44 [+0.179, +0.373]; 7140 rows scored by the claim, 1785 after the change).</p><p>This matches the leakage pattern &#x27;No test set&#x27; (L1.1, Kapoor and Narayanan 2023). We would ask the authors to report the score under an evaluation on rows the model was not fit on (a held-out test set), or to explain why the current protocol is appropriate for the stated use.</p><p>We did not re-run the authors&#x27; original pipeline and cannot rule out that other choices explain part of the gap.</p></blockquote></div>
+<div class="card"><h2>10. Copy as reviewer note</h2><pre id="note">The reported result (0.91) may be inflated: the model is scored on rows it was fit on. With only split_rows changed, the same model scores 0.088 instead of 0.384 PR-AUC (+0.296, mean of seeds 42/43/44). The 95% unpaired-bootstrap interval for the drop excludes zero on 3 of 3 seeds (seed 42 [+0.200, +0.401]; seed 43 [+0.185, +0.381]; seed 44 [+0.179, +0.373]); 7140 rows scored by the claim, 1785 after the change. Separately, step A alone moves the score by +0.296, step B alone by +0.000, and their interaction by +0.000. Pattern: No test set (L1.1, Kapoor and Narayanan). Please report the score under an evaluation on rows the model was not fit on (a held-out test set), or justify the current protocol. Caveat: we re-ran the evaluation code supplied, not the authors&#x27; full pipeline; 5 limits are listed in the audit report.</pre>
+<button type="button" onclick="var t=document.getElementById('note').innerText;if(navigator.clipboard){navigator.clipboard.writeText(t)}else{var r=document.createRange();r.selectNodeContents(document.getElementById('note'));var s=getSelection();s.removeAllRanges();s.addRange(r);document.execCommand('copy')}">Copy</button></div>
+</main></body></html>

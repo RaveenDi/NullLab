@@ -1,0 +1,6 @@
+{
+ "model": "muse-wonder-1.0",
+ "temperature": 0.0,
+ "serves_chat": true,
+ "answer": "OK"
+}

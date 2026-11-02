@@ -29,13 +29,6 @@ def _mean(xs):
     return sum(xs) / len(xs) if xs else None
 
 
-def _tol():
-    """Magnitude tolerance of the G6 rule, read from g6.py (TOL = ...)."""
-    p = ROOT / "g6.py"
-    m = re.search(r"^TOL\s*=\s*([0-9.]+)", p.read_text(encoding="utf-8"), re.M) if p.exists() else None
-    return float(m.group(1)) if m else None
-
-
 PHASE = (("Recover", "Recover"), ("Verify", "Verify"), ("Act", "Act"), ("Plan", "Plan"), ("Report", "Verify"))
 
 
@@ -45,26 +38,6 @@ def _phase(raw):
             return v
     return "Verify"
 
-
-# ---------------------------------------------------------------- traces (Plan / Act / Verify / Recover)
-def _trace_live(run, src):
-    """Trace of a single-split live run (runs_live/<case>.json)."""
-    lines = []
-    for e in run.get("log", []):
-        lines.append({"phase": e["phase"], "text": e["msg"]})
-    hyp = run.get("hyp", {})
-    return {
-        "source": src,
-        "lines": lines,
-        "plan": {"hypotheses": [{"id": h["id"], "text": h["text"], "direction": h["direction"],
-                                 "primary": h["id"] == hyp.get("primary")} for h in hyp.get("hypotheses", [])],
-                 "sha": hyp.get("prereg_sha256", ""), "note": "3 competing hypotheses, hashed before any run"},
-        "act": {"edits": [{"label": "controlled_eval (written by the model, run in the sandbox)",
-                           "code": hyp.get("code_patch", "")}],
-                "note": "Split key: " + str(hyp.get("split_key", ""))},
-        "verify": {"lines": [l["text"] for l in lines if l["phase"] == "Verify"], "fidelity": []},
-        "recover": {"used": any(r.get("attempt", 1) > 1 for r in run.get("runs", [])), "lines": []},
-    }
 
 
 def _trace_fx(lr, src, plan_sha=None):
@@ -111,144 +84,6 @@ def _trace_fx(lr, src, plan_sha=None):
     }
 
 
-# ---------------------------------------------------------------- hero cases (claim bar collapse)
-def _hero_live(case, label, why):
-    run = _j(f"runs_live/{case}.json")
-    if not run:
-        return None, None
-    seeds = run["seeds"]
-    man = (_j("corpus/manifest.json") or {}).get(case, {})
-    claimed = [s["claimed_acc"] for s in seeds.values()]
-    ctrl = [s["controlled_acc"] for s in seeds.values()]
-    cv = run["claim"].get("value")
-    cv = cv / 100 if cv and cv > 1 else cv
-    v = run["verdict"]["verdict"]
-    n_ctrl = sorted({s["n_controlled"] for s in seeds.values()})
-    hero = {
-        "id": case, "label": label, "short": label.split(" (")[0],
-        "provenance": [run["provenance"]], "prov_note": man.get("note", ""),
-        "mode": run["mode"], "metric": "accuracy", "unit": "pct", "axis_max": 1.0,
-        "claim_text": run["claim"]["claim"],
-        "start": {"value": cv, "label": "claimed in the methods text"},
-        "end": {"value": _mean(ctrl), "label": "controlled re-evaluation (mean of 3 seeds)"},
-        "markers": [{"value": _mean(claimed), "label": "claim's own protocol, re-run"}],
-        "seeds": [{"seed": k, "claimed": s["claimed_acc"], "controlled": s["controlled_acc"], "delta": s["delta"],
-                   "ci": [s["ci_lo"], s["ci_hi"]], "n": s["n_controlled"]} for k, s in seeds.items()],
-        "n_text": f"n = {'/'.join(map(str, n_ctrl))} test rows per seed, seeds 42/43/44",
-        "verdict": v, "per_seed": list(run["verdict"]["per_seed"].values()),
-        "why": why, "source": f"runs_live/{case}.json",
-    }
-    return hero, _trace_live(run, f"runs_live/{case}.json")
-
-
-def _g6(rn):
-    return _j(f"runs_g6/r{rn}.json")
-
-
-def _hero_g6(case, label, d6, truth, why, prov):
-    sc = d6["cases"].get(case, {})
-    reps = [(r, x["loop"]) for r, x in sorted(sc.items())]
-    meas = [(r, lo) for r, lo in reps if "controlled" in lo]
-    pub = truth.get("published_numbers", {}) if truth else {}
-    metric = truth.get("metric", "accuracy") if truth else "accuracy"
-    r1 = _g6(1) or {}
-    lr1 = (r1.get("loop") or {}).get(case, {})
-    st = (lr1.get("stats") or {})
-    n_fb = sorted({v["full"]["n"]["fix_both"] for v in st.values()}) if st else []
-    if case == "civilwar_apparent":
-        start = {"value": pub.get("procedure5_apparent_pr_auc"), "label": "published apparent PR-AUC (Procedure 5)"}
-        markers = [{"value": pub.get("procedure6_out_of_sample_pr_auc"), "label": "published corrected (Procedure 6)"}]
-    elif case == "esl_selection":
-        start = {"value": pub.get("wrong_cv_accuracy"), "label": "book: wrong-way CV accuracy (3% error)"}
-        markers = [{"value": pub.get("true_accuracy"), "label": "book: true accuracy"}]
-    else:  # clean variant
-        start = {"value": (truth or {}).get("published_numbers", {}).get("procedure6_out_of_sample_pr_auc"), "label": ""}
-        markers = []
-    if case == "civilwar_apparent":
-        m = re.search(r"ROC-AUC ([0-9.]+)", (truth or {}).get("original_claim", ""))
-        claim_text = (f"A random forest forecasts civil-war onset: ROC-AUC {m.group(1) if m else '?'}, reported as cross-validated. "
-                      f"The reanalysis shows the score is in-sample: apparent PR-AUC {pub.get('procedure5_apparent_pr_auc')}.")
-    elif case == "esl_selection":
-        claim_text = (f"Screen 100 of 5,000 predictors on all samples, then 5-fold CV: CV error {pub.get('wrong_cv_error')} "
-                      f"(accuracy {pub.get('wrong_cv_accuracy')}), as in the textbook example.")
-    else:
-        claim_text = (truth or {}).get("original_claim", "")
-    clm = [x for _, lo in meas for x in lo["claimed"]]
-    if clm:
-        markers.append({"value": _mean(clm), "label": "claim's own protocol, re-run"})
-    seeds = []
-    for r, lo in meas:
-        for i, sd in enumerate(("42", "43", "44")):
-            seeds.append({"seed": f"{r}·{sd}", "claimed": lo["claimed"][i], "controlled": lo["controlled"][i],
-                          "delta": lo["inflation_per_seed"][i], "ci": lo["inflation_ci"][i]})
-    return {
-        "id": case, "label": label, "short": label.split(" (")[0], "provenance": prov,
-        "prov_note": ((truth or {}).get("data") or (truth or {}).get("published_numbers", {}).get("note") or "").split(" (the same file")[0], "mode": "LIVE muse-spark-1.3, 3 repeats",
-        "metric": "PR-AUC" if metric == "pr_auc" else "accuracy", "unit": "abs" if metric == "pr_auc" else "pct",
-        "axis_max": 0.5 if metric == "pr_auc" else 1.0,
-        "claim_text": claim_text,
-        "start": start,
-        "end": {"value": _mean([x for _, lo in meas for x in lo["controlled"]]),
-                "label": f"controlled re-evaluation (mean of {len(meas)} repeats x 3 seeds)"},
-        "markers": markers, "seeds": seeds,
-        "n_text": f"fix-both scored on n = {'/'.join(map(str, n_fb))} held-out rows per seed (repeat 1), seeds 42/43/44" if n_fb else "",
-        "verdict": "FALSIFIED" if all(lo["sign"] == "+" for _, lo in reps) else "INCONCLUSIVE",
-        "per_seed": [s for _, lo in meas for s in lo.get("per_seed", [])],
-        "why": why, "source": "runs_g6/score.json",
-    }
-
-
-def _hero_g6_clean(d6, truth):
-    sc = d6["cases"].get("civilwar_temporal_clean", {})
-    r1 = sc.get("r1", {}).get("loop", {})
-    r3 = sc.get("r3", {}).get("loop", {})
-    reason = (r1.get("reason") or [""])[0]
-    pub = (truth or {}).get("civilwar_apparent", {}).get("published_numbers", {})
-    signs = [sc[r]["loop"]["sign"] for r in sorted(sc)]
-    r3txt = f"{r3['inflation_mean']:+.3f}" if "inflation_mean" in r3 else "n/a"
-    return {
-        "id": "civilwar_temporal_clean", "label": "Corrected civil-war pipeline, repeat 1 (REAL-PINNED)",
-        "short": "Corrected civil-war pipeline", "provenance": ["REAL-PINNED"],
-        "prov_note": "the reanalysis' own fix: train 1945-1989, score 1990-2000",
-        "mode": "LIVE muse-spark-1.3, repeat 1 of 3", "metric": "PR-AUC", "unit": "abs", "axis_max": 0.5,
-        "claim_text": "Out-of-sample PR-AUC of the temporally held-out pipeline (correct by construction).",
-        "start": {"value": pub.get("procedure6_out_of_sample_pr_auc"), "label": "published out-of-sample PR-AUC"},
-        "end": None, "markers": [], "seeds": [], "n_text": "no measurement in this repeat",
-        "verdict": "INCONCLUSIVE", "per_seed": [],
-        "why": ("The guard rejected the planner's fix twice, so nothing was measured and nothing was claimed. "
-                f"Guard message: “{reason[:170]}”. Repeats: {' / '.join(signs)}; repeat 3 measured {r3txt} "
-                "(no inflation). Reading alone called this correct pipeline inflated in 3 of 3 repeats."),
-        "source": "runs_g6/score.json",
-    }
-
-
-def _hero_g5(c, r, d5, runs5):
-    sc = d5["cases"][c][f"r{r}"]
-    lr = runs5[r]["loop"][c]
-    st = lr["stats"]
-    acc = {k: _mean([v["full"]["acc"][k] for v in st.values()]) for k in ("orig", "fix_both")}
-    lo = sc["loop"]
-    return {
-        "id": f"{c}", "label": "Synthetic assay, interaction case (SYNTHETIC)", "short": "Synthetic assay",
-        "provenance": ["SYNTHETIC"], "prov_note": "generated by us with two planted flaws that interact",
-        "mode": f"LIVE muse-spark-1.3, repeat {r} of 3", "metric": "accuracy", "unit": "pct", "axis_max": 1.0,
-        "claim_text": "Accuracy of the claimed protocol on new compounds (synthetic case).",
-        "start": {"value": acc["orig"], "label": "claim's own protocol, re-run (mean of 3 seeds)"},
-        "end": {"value": acc["fix_both"], "label": "both suspect steps fixed (mean of 3 seeds)"},
-        "markers": [],
-        "seeds": [{"seed": s, "claimed": v["full"]["acc"]["orig"], "controlled": v["full"]["acc"]["fix_both"],
-                   "delta": v["full"]["drop"]["fix_both"], "ci": v["full"]["drop_ci"]["fix_both"],
-                   "n": v["full"]["n"]["fix_both"]} for s, v in st.items()],
-        "n_text": f"n = {'/'.join(map(str, sorted({v['full']['n']['fix_both'] for v in st.values()})))} test rows per seed",
-        "verdict": "FALSIFIED" if lo["sign"] == "+" else ("SURVIVED" if lo["sign"] == "0" else "INCONCLUSIVE"),
-        "per_seed": lo.get("per_seed", []),
-        "why": (f"Two planted flaws: fixing one alone removes {lo['components_pp']['A']:+.1f} or "
-                f"{lo['components_pp']['B']:+.1f} points; fixing both removes {lo['components_pp']['both']:+.1f}, "
-                f"{lo['components_pp']['AxB']:+.1f} more than the two separately. A case we built, not a paper."),
-        "source": f"runs_g5/r{r}.json, runs_g5/score.json",
-    }
-
-
 # ---------------------------------------------------------------- G5 factorial (SYNTHETIC)
 G5_LABEL = {"g4_freight_delay": "cancellation", "g4_pump_inspection": "wrong culprit", "g4_crop_irrigation": "benign",
             "g4_assay_replicates": "interaction", "clean_control": "correct (control)",
@@ -286,48 +121,8 @@ def _factorial(d5, runs5):
     return out
 
 
-# ---------------------------------------------------------------- G6 real + textbook
-def _real(d6, truth, tol):
-    cases = {}
-    for c, lab in (("civilwar_apparent", "Civil-war onset (Muchlinski et al. 2016)"),
-                   ("esl_selection", "Screening before cross-validation (ESL §7.10.2)")):
-        t = truth.get(c, {})
-        pub = t.get("published_numbers", {})
-        reps = []
-        for r, x in sorted(d6["cases"].get(c, {}).items()):
-            lo, b3 = x["loop"], x["b3"]
-            reps.append({"r": r, "sign": lo.get("sign"), "per_seed": lo.get("per_seed"),
-                         "inflation": lo.get("inflation_mean"), "ci": lo.get("inflation_ci"),
-                         "claimed": lo.get("claimed"), "controlled": lo.get("controlled"),
-                         "magnitude_ok": lo.get("magnitude_ok"), "reproduces": lo.get("reproduces"),
-                         "in_ci": lo.get("published_in_ci_seeds"), "fixA": lo.get("A"), "kindA": (lo.get("kinds") or {}).get("A"),
-                         "b3_pp": b3.get("fix_both_pp"), "b3_gets": b3.get("gets_it")})
-        if c == "civilwar_apparent":
-            claimed, corrected, infl = pub.get("procedure5_apparent_pr_auc"), pub.get("procedure6_out_of_sample_pr_auc"), pub.get("inflation_pr_auc")
-        else:
-            claimed, corrected = pub.get("wrong_cv_accuracy"), pub.get("true_accuracy")
-            infl = pub.get("inflation_accuracy", (round(claimed - corrected, 2) if claimed is not None and corrected is not None else None))
-        cases[c] = {"label": lab, "provenance": t.get("provenance"), "metric": "PR-AUC" if t.get("metric") == "pr_auc" else "accuracy",
-                    "flaw": t.get("flaw"), "original": t.get("original_paper") or t.get("source"),
-                    "original_claim": t.get("original_claim"), "reanalysis": t.get("reanalysis") or t.get("source"),
-                    "published": {"claimed": claimed, "corrected": corrected, "inflation": infl,
-                                  "text": pub.get("source_text", "")},
-                    "data": t.get("data"), "reps": reps}
-    clean = {}
-    for c in ("civilwar_temporal_clean", "esl_selection_clean"):
-        rows = []
-        for r, x in sorted(d6["cases"].get(c, {}).items()):
-            lo, b3 = x["loop"], x["b3"]
-            rows.append({"r": r, "sign": lo.get("sign"), "inflation": lo.get("inflation_mean"),
-                         "b3_leak": b3.get("leak"), "b3_pp": b3.get("fix_both_pp")})
-        clean[c] = rows
-    probe = _j("runs_g6/probe.json") or {}
-    return {"cases": cases, "clean": clean, "acceptance": d6["acceptance"], "rule_sha": d6.get("rule_sha256", ""),
-            "tol": tol, "probe": probe, "source": "runs_g6/score.json, eval/g6_truth.json, runs_g6/probe.json"}
-
-
 # ---------------------------------------------------------------- scoreboard (counts with n)
-def _scoreboard(d5, d6, abl):
+def _scoreboard(d5, d6, abl, d7=None, rf=None, d8=None):
     rows = []
     if d5:
         a = d5["acceptance"]
@@ -347,6 +142,27 @@ def _scoreboard(d5, d6, abl):
         rows.append({"eval": "G6 corrected versions (2 x 3)", "badges": ["REAL-PINNED", "TEXTBOOK"],
                      "metric": "false alarms", "loop": a["c_clean_false_alarms"], "b3": a["b3_clean_false_alarms"],
                      "note": f"{a['clean_inconclusive']} loop runs INCONCLUSIVE", "src": "runs_g6/score.json"})
+    if d7:
+        a = d7["acceptance"]
+        rows.append({"eval": "G7 disguised real case (5 repeats)", "badges": ["REAL-PINNED"], "metric": "direction right on the leaky case",
+                     "loop": f"{a['a_direction_right']}/{a['n_leaky_repeats']}", "b3": f"{a['b3_gets_it_leaky']}/{a['n_leaky_repeats']}",
+                     "note": "preregistered acceptance FAILED (needed 4); reading detected more here", "src": "runs_g7/score.json"})
+        rows.append({"eval": "G7 clean twin of the disguised case (5 repeats)", "badges": ["REAL-PINNED"], "metric": "false alarms",
+                     "loop": f"{a['b_clean_false_alarms']}/{a['n_clean_repeats']}", "b3": f"{a['b3_false_alarms_clean']}/{a['n_clean_repeats']}",
+                     "note": "the loop's one clear advantage in this study", "src": "runs_g7/score.json"})
+    if d8:
+        a = d8["acceptance"]
+        rows.append({"eval": "G8 disguised real case, new labelled run (5 repeats)", "badges": ["REAL-PINNED"], "metric": "direction right on the leaky case",
+                     "loop": f"{a['a_direction_right']}/{a['n_leaky']}", "b3": "not run",
+                     "note": "clauses (a) to (c) met; harness target missed (1 of 10 INCONCLUSIVE)", "src": "runs_g8/score.json"})
+        rows.append({"eval": "G8 clean twin (5 repeats)", "badges": ["REAL-PINNED"], "metric": "false alarms",
+                     "loop": f"{a['b_clean_false_alarms']}/{a['n_clean']}", "b3": "not run", "note": "all five: no effect, interval spans 0", "src": "runs_g8/score.json"})
+    if rf:
+        sm = rf.get("summary", {})
+        rows.append({"eval": "Fixed rules, no model (EVAL-8; 4 hard cases x3)", "badges": ["SYNTHETIC"], "metric": "hard-case sign right: rules vs loop",
+                     "loop": sm.get("loop_hard_correct", ""), "b3": f"rules {sm.get('rules_hard_correct_x3', '')}",
+                     "note": f"clean false alarms: rules {sm.get('rules_false_alarms_x3', '')}, loop {sm.get('loop_false_alarms', '')}; preregistered verdict {sm.get('result', '')}",
+                     "src": "runs_rulefix/score.json"})
     if abl:
         rows.append({"eval": "EVAL-2 corpus (9 cases, 1 live run)", "badges": ["SYNTHETIC", "REAL-PINNED"],
                      "metric": "recall / false alarms",
@@ -362,86 +178,342 @@ def _scoreboard(d5, d6, abl):
     return {"rows": rows, "tools": tools, "tools_src": "docs/EVAL-3.md (G1, 6 leaky + 3 clean blind inputs)"}
 
 
-def _stats(d5, d6):
+# ---------------------------------------------------------------- rules first, Spark where rules fail (EVAL-8)
+RULE_NAMES = {"g4_freight_delay": "freight (cancellation)", "g4_pump_inspection": "pump (look-ahead feature)",
+              "g4_crop_irrigation": "crop (benign)", "g4_assay_replicates": "assay (interaction)"}
+
+
+def _rules(rf, d6):
+    if not rf:
+        return None
+    rows = []
+    for c, lab in RULE_NAMES.items():
+        x = rf["cases"].get(c)
+        if not x:
+            continue
+        lp = x.get("loop") or {}
+        signs = [lp[k]["sign"] for k in sorted(lp)]
+        both = [lp[k].get("both_pp") for k in sorted(lp)]
+        ok = sum(1 for s in signs if s == x.get("truth_sign"))
+        rows.append({"case": lab, "id": c, "truth": x.get("truth_sign"), "truth_pp": x.get("truth_both_pp"),
+                     "rule_sign": x.get("sign"), "rule_pp": x.get("inflation"), "rule_ok": bool(x.get("correct")),
+                     "fired": x.get("fired"), "loop_signs": signs, "loop_pp": both, "loop_ok": ok, "n_rep": len(signs),
+                     "spark": (not x.get("correct")) and ok == len(signs)})
+    real = []
+    for c, lab, unit in (("civilwar_apparent", "Real case, not disguised (G6)", "PR-AUC"), ("esl_selection", "Textbook (ESL 7.10.2)", "pp")):
+        x = rf["cases"].get(c)
+        sc = (d6 or {}).get("cases", {}).get(c, {})
+        if not x:
+            continue
+        real.append({"case": lab, "unit": unit, "rule": x.get("inflation"), "rule_ok": x.get("reproduces"),
+                     "loop": [v["loop"].get("inflation_mean") for _, v in sorted(sc.items())],
+                     "loop_ok": sum(1 for v in sc.values() if v["loop"].get("reproduces")), "n_rep": len(sc)})
+    return {"rows": rows, "real": real, "summary": rf.get("summary", {}), "rules_sha": rf.get("rules_spec_sha256", ""),
+            "prereg_sha": rf.get("prereg_sha256_file", ""), "source": "runs_rulefix/score.json, docs/EVAL-8-RULEBASED.md"}
+
+
+# ---------------------------------------------------------------- cost ledger (estimates from the docs and the call logs)
+def _count(p):
+    return len(_jl(p))
+
+
+def _ledger(d7, d8=None):
+    g8usd = ((d8 or {}).get("usage") or {}).get("estimated_usd")
+    ph = [("G4", 2.43, _count("runs/live_calls_g4.jsonl"), "docs/EVAL-4.md"),
+          ("G5", 4.72, _count("runs/live_calls_g5.jsonl"), "docs/EVAL-5.md"),
+          ("G6", 2.84, _count("runs/live_calls_g6.jsonl"), "docs/EVAL-6.md"),
+          ("G7", (d7 or {}).get("spend_estimate_usd"), _count("runs_g7/live_calls_g7.jsonl"), "runs_g7/score.json"),
+          ("G8", g8usd, _count("runs_g8/live_calls_g8.jsonl"), "runs_g8/score.json"),
+          ("Rules baseline", 0.0, 0, "docs/EVAL-8-RULEBASED.md")]
+    ph = [p for p in ph if p[1] is not None]
+    return {"phases": [{"name": n, "usd": u, "calls": c, "src": s} for n, u, c, s in ph],
+            "total_usd": round(sum(p[1] for p in ph), 2), "total_calls": sum(p[2] for p in ph),
+            "note": "Estimated credits at per-call estimates, not invoiced prices (real per-token price UNVERIFIED). Earlier phases (G0 to G3) are not in the sum. This page makes no model call.",
+            "source": "docs/EVAL-4.md, EVAL-5.md, EVAL-6.md, runs_g7/score.json, runs/live_calls_g*.jsonl"}
+
+
+def _scalar(v):
+    if isinstance(v, bool) or v is None:
+        return str(v)
+    if isinstance(v, float):
+        return f"{v:.4g}"
+    if isinstance(v, (int, str)):
+        return str(v)[:90]
+    if isinstance(v, (list, dict)):
+        return f"{len(v)} items"
+    return None
+
+
+# ================================================================ v2 payload: every number as {k, n, src, badge}
+# k is a count (kind "count": rendered k/n) or a measured value (kind "value"); n is the denominator or the number of
+# measurements behind it; src is the file the number comes from. The page renders numbers only from these objects.
+from datetime import timedelta  # noqa: E402
+
+BANNED = ("first", "beats reading", "reproduces published", "proves", "found it anyway", "combined")
+_SCRUB = ((re.compile(r"civil[ -]?war", re.I), "famous"), (re.compile(r"Muchlinski|Neunhoeffer|Sternberg|Kapoor|Narayanan"), "the authors"),
+          (re.compile(r"conflict onset|war onset|onset", re.I), "event"))
+
+
+def scrub(x):
+    """The page never names the real study's topic or its authors (hackathon anti-project list). Applied to keys and values."""
+    if isinstance(x, str):
+        for rx, rep in _SCRUB:
+            x = rx.sub(rep, x)
+        return x
+    if isinstance(x, list):
+        return [scrub(i) for i in x]
+    if isinstance(x, dict):
+        return {scrub(k): scrub(v) for k, v in x.items()}
+    return x
+
+
+def N(k, n=None, src="", badge="REAL-PINNED", kind="count", **extra):
+    d = {"k": k, "n": n, "src": src, "badge": badge, "kind": kind}
+    d.update(extra)
+    return d
+
+
+def V(v, n=None, src="", badge="REAL-PINNED", **extra):
+    return N(v, n, src, badge, "value", **extra)
+
+
+def _frac(s):
+    m = re.match(r"^\s*(\d+)\s*/\s*(\d+)\s*$", str(s or ""))
+    return (int(m.group(1)), int(m.group(2))) if m else (None, None)
+
+
+def _fn(s, src, badge="REAL-PINNED", **extra):
+    k, n = _frac(s)
+    return N(k, n, src, badge, **extra) if k is not None else None
+
+
+def _needed(doc_text, row):
+    """Preregistered thresholds are not in score.json; read them from the 'Needed' column of docs/EVAL-9-G8-RESULT.md."""
+    m = re.search(r"\|\s*" + re.escape(row) + r"[^|]*\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|", doc_text or "")
+    return (m.group(1), m.group(2)) if m else (None, None)
+
+
+def _runs(dirname, ids=range(1, 6)):
+    return {r: _j(f"{dirname}/r{r}.json") for r in ids}
+
+
+def _case_rows(dirname, runs, case, score_cases):
+    """One row per repeat with the per-seed 95% intervals of the fix-both drop (PR-AUC), read from runs_*/rK.json."""
+    rows = []
+    for rk, sc in sorted(score_cases.items()):
+        sc = sc.get("loop", sc) if isinstance(sc, dict) else {}   # G7 nests the loop result; G8 is flat
+        r = int(rk[1:])
+        lp = (((runs.get(r) or {}).get("loop") or {}).get(case)) or {}
+        st = lp.get("stats") or {}
+        row = {"r": rk, "sign": sc.get("sign"), "src": f"{dirname}/r{r}.json"}
+        if st and sc.get("sign") != "INCONCLUSIVE":
+            seeds = []
+            for sd, v in sorted(st.items()):
+                f = v.get("full") or {}
+                ci = (f.get("drop_ci") or {}).get("fix_both")
+                if ci:
+                    seeds.append({"seed": sd, "lo": ci[0], "hi": ci[1], "d": (f.get("drop") or {}).get("fix_both"),
+                                  "claimed": (f.get("acc") or {}).get("orig"), "controlled": (f.get("acc") or {}).get("fix_both"),
+                                  "n": (f.get("n") or {}).get("fix_both")})
+            row["seeds"] = seeds
+            row["mean"] = sc.get("inflation_mean")
+            if sc.get("inflation_mean") is not None:
+                row["m"] = V(sc.get("inflation_mean"), None, f"{dirname}/r{r}.json")
+        else:
+            row["failed"] = True
+            row["reason"] = (lp.get("reason") or [""])[0] if lp else ""
+            row["harness_failure"] = lp.get("harness_failure") or sc.get("label")
+        rows.append(row)
+    return rows
+
+
+def _guard_rejects(runs, case):
+    k = n = 0
+    for r in runs.values():
+        lg = (((r or {}).get("loop") or {}).get(case) or {}).get("log") or []
+        vs = [(e.get("verdict"), " ".join(e.get("violations") or [])) for e in lg if e.get("verdict")]
+        if vs:
+            n += 1
+            if vs[0][0] == "REJECT" and "SPLIT-USE-REQUIRED" in vs[0][1] and any(v[0] == "ACCEPT" for v in vs[1:]):
+                k += 1
+    return k, n
+
+
+def _mean_stat(rows, key):
+    xs = [s[key] for r in rows for s in r.get("seeds", []) if s.get(key) is not None]
+    return _mean(xs), len(xs)
+
+
+def _gblock(tag, d, dirname, src):
+    """G7 and G8 are built by the same function so they get the same fields and the same weight."""
+    if not d:
+        return None
+    a = d["acceptance"]
+    case = "civilwar_disguised"
+    nL = a.get("n_leaky_repeats", a.get("n_leaky"))
+    nC = a.get("n_clean_repeats", a.get("n_clean"))
+    runs = _runs(dirname)
+    leaky = _case_rows(dirname, runs, case, d["cases"][case])
+    clean = _case_rows(dirname, runs, case + "_clean", d["cases"][case + "_clean"])
+    ok = [r for r in leaky if not r.get("failed")]
+    inc = a.get("harness_inconclusive", a.get("leaky_inconclusive", 0) + a.get("clean_inconclusive", 0))
+    claimed, _ = _mean_stat(ok, "claimed")
+    ctrl, ns = _mean_stat(ok, "controlled")
+    rj_k, rj_n = _guard_rejects(runs, case)
+    return {
+        "tag": tag, "src": src, "dir": dirname,
+        "direction": N(a["a_direction_right"], nL, src), "false_alarms": N(a["b_clean_false_alarms"], nC, src),
+        "magnitude": N(a.get("c_magnitude_within_0.15"), nL, src),
+        "inconclusive": N(inc, (nL or 0) + (nC or 0), src),
+        "reading_dir": N(a.get("b3_gets_it_leaky"), nL, src) if "b3_gets_it_leaky" in a else None,
+        "reading_fa": N(a.get("b3_false_alarms_clean"), nC, src) if "b3_false_alarms_clean" in a else None,
+        "pass": bool(a.get("PASS")), "harness_met": a.get("harness_target_met"),
+        "leaky": leaky, "clean": clean,
+        "claimed": V(claimed, len(ok), src) if claimed is not None else None,
+        "controlled": V(ctrl, len(ok), src) if ctrl is not None else None,
+        "n_scored": sorted({s["n"] for r in ok for s in r.get("seeds", []) if s.get("n")}),
+        "inflation": [V(r["mean"], None, r["src"]) for r in ok if r.get("mean") is not None],
+        "guard_rejects": N(rj_k, rj_n, src),
+        "usage": d.get("usage"),
+    }
+
+
+def _g9(root=None):
+    """Defensive: the G9 file may not exist yet or may be partial/garbled. Returns None (slot stays hidden) unless it parses."""
+    try:
+        p = Path(root or ROOT) / "runs_g9" / "score.json"
+        if not p.is_file():
+            return None
+        j = json.loads(p.read_text(encoding="utf-8"))
+        if not isinstance(j, dict):
+            return None
+        rows = []
+        for key in ("acceptance", "summary"):
+            blk = j.get(key)
+            if isinstance(blk, dict):
+                rows += [{"key": str(k), "val": _scalar(v)} for k, v in blk.items() if _scalar(v) is not None]
+        if not rows:
+            rows = [{"key": str(k), "val": _scalar(v)} for k, v in list(j.items())[:16] if _scalar(v) is not None]
+        if not rows:
+            return None
+        return {"rows": rows[:24], "src": "runs_g9/score.json", "badge": "LOADED FROM FILE"}
+    except Exception:
+        return None
+
+
+def _recorded():
     out = []
-    if d5:
-        a = d5["acceptance"]
-        out.append({"value": a["ii_hard_sign_correct"], "caption": "hard synthetic runs: direction measured right",
-                     "sub": f"reading only: wrong in {a['iii_b3_wrong_hard']}", "badges": ["SYNTHETIC"],
-                     "src": "runs_g5/score.json (ii, iii)"})
-        out.append({"value": a["i_clean_false_alarms"], "caption": "false alarms on correct synthetic pipelines",
-                     "sub": f"reading only: {a['b3_clean_false_alarms']}", "badges": ["SYNTHETIC"],
-                     "src": "runs_g5/score.json (i)"})
-    if d6:
-        a = d6["acceptance"]
-        cw = d6["cases"]["civilwar_apparent"]
-        sign_right = sum(1 for x in cw.values() if x["loop"].get("sign") == "+")
-        within = sum(1 for x in cw.values() if x["loop"].get("magnitude_ok"))
-        out.append({"value": a["c_clean_false_alarms"], "caption": "false alarms on the corrected real and textbook pipelines",
-                     "sub": f"{a['clean_inconclusive']} of them INCONCLUSIVE; reading only: {a['b3_clean_false_alarms']}",
-                     "badges": ["REAL-PINNED", "TEXTBOOK"], "src": "runs_g6/score.json (c)"})
-        out.append({"value": f"{sign_right}/{len(cw)}", "caption": "civil-war repeats: flaw direction found",
-                     "sub": f"size within tolerance in only {within}/{len(cw)}", "badges": ["REAL-PINNED"],
-                     "src": "runs_g6/score.json (a)"})
+    d = Path(__file__).resolve().parent / "assets" / "recorded"
+    for f in sorted(d.glob("hybrid_*.json")) if d.is_dir() else []:
+        try:
+            r = json.loads(f.read_text(encoding="utf-8"))
+            t = datetime.strptime(r["recorded_utc"], "%Y-%m-%dT%H:%M:%SZ")
+            et = timedelta(hours=-5) if t >= datetime(2026, 11, 1, 6) else timedelta(hours=-4)
+            r["recorded_slt"] = (t + timedelta(hours=5, minutes=30)).strftime("%Y-%m-%d %H:%M") + " SLT"
+            r["recorded_et"] = (t + et).strftime("%H:%M") + (" EST" if et.total_seconds() == -18000 else " EDT")
+            sm, src = r.get("summary") or {}, r.get("source_file", "")
+            nn = (sm.get("n_controlled") or [None])[0]
+            r["ba"] = {"claimed": V(sm.get("claimed"), nn, src, "SYNTHETIC"), "controlled": V(sm.get("controlled"), nn, src, "SYNTHETIC"),
+                       "inflation": V(sm.get("inflation"), nn, src, "SYNTHETIC"), "n": N(nn, nn, src, "SYNTHETIC")}
+            out.append(r)
+        except Exception:
+            continue
+    return out
+
+
+def _fx_compact(d5, runs5):
+    F = _factorial(d5, runs5) if d5 else {}
+    it = F.get("g4_assay_replicates.r1")
+    if not it or it.get("status") != "ok":
+        return None
+    c = it["loop"].get("components_pp") or {}
+    n0 = it["n"][0] if it.get("n") else None
+    return {"acc": {k: V(v, n0, it["source"], "SYNTHETIC") for k, v in it["acc"].items()},
+            "components": {k: V(v, None, it["source"], "SYNTHETIC") for k, v in c.items()}, "n": it["n"], "src": it["source"],
+            "sign": it["loop"].get("sign")}
+
+
+def _clauses(g8, doc):
+    out = []
+    if not g8:
+        return out
+    for cid, row, got, rule, lab in (("a", "(a) direction right", g8["direction"], "ge", "direction right"),
+                                      ("b", "(b) clean false alarms", g8["false_alarms"], "le", "clean false alarms"),
+                                      ("c", "(c) inflation within 0.15", g8["magnitude"], "ge", "inflation within 0.15 of the published +0.36")):
+        need_txt, _ = _needed(doc, row)
+        nk, nn = (None, None)
+        if need_txt:
+            t = re.sub(r"at least\s*", "", need_txt).replace(" of ", "/").strip()
+            nk, nn = _frac(t)
+            if nk is None and t.isdigit():
+                nk = int(t)
+        met = None
+        if nk is not None and got.get("k") is not None:
+            met = got["k"] >= nk if rule == "ge" else got["k"] <= nk
+        out.append({"id": cid, "label": lab, "rule": rule, "needed": N(nk, nn or got["n"], "docs/EVAL-9-G8-RESULT.md"), "got": got, "met": met})
     return out
 
 
 def build() -> dict:
-    d5, d6 = _j("runs_g5/score.json"), _j("runs_g6/score.json")
+    d5, d6, d7, d8, rf = (_j("runs_g5/score.json"), _j("runs_g6/score.json"), _j("runs_g7/score.json"),
+                          _j("runs_g8/score.json"), _j("runs_rulefix/score.json"))
     truth = _j("eval/g6_truth.json") or {}
-    runs5 = {r: _j(f"runs_g5/r{r}.json") for r in (1, 2, 3)}
-    runs5 = {r: v for r, v in runs5.items() if v}
+    pubn = (truth.get("civilwar_apparent") or {}).get("published_numbers") or {}
+    runs5 = {r: v for r, v in {r: _j(f"runs_g5/r{r}.json") for r in (1, 2, 3)}.items() if v}
     abl = _j("runs_live/ablation.json")
-    tol = _tol()
+    t = "eval/g6_truth.json"
+    pub = {"claimed": V(pubn.get("procedure5_apparent_pr_auc", 0.43), None, t), "corrected": V(pubn.get("procedure6_out_of_sample_pr_auc", 0.07), None, t),
+           "inflation": V(pubn.get("inflation_pr_auc", 0.36), None, t)}
+    e7 = (ROOT / "docs/EVAL-7.md").read_text(encoding="utf-8") if (ROOT / "docs/EVAL-7.md").exists() else ""
+    m = re.search(r"inflation \*\*\+(0\.\d+)\*\*", e7)
+    pub["reference"] = V(float(m.group(1)) if m else None, None, "docs/EVAL-7.md")
+    g7, g8 = _gblock("G7", d7, "runs_g7", "runs_g7/score.json"), _gblock("G8", d8, "runs_g8", "runs_g8/score.json")
 
-    heroes, traces = [], {}
-    h, t = _hero_live("hero_tabular", "Wine classifier, 96% claim (REAL-PINNED data)",
-                      "Jittered copies of each wine sample were made before the random split, so near-copies sat on "
-                      "both sides. Splitting by the original sample first, then augmenting, is the controlled run.")
-    if h:
-        heroes.append(h)
-        traces[h["id"]] = t
-    if d6:
-        g6r = {r: _g6(r) for r in (1, 2, 3)}
-        tr = truth.get("civilwar_apparent")
-        cw = _hero_g6("civilwar_apparent", "Civil-war onset, published paper (REAL-PINNED)", d6, tr,
-                      "The published score was the apparent error: the model was scored on the rows it was trained "
-                      "on. NullLab re-scored it on held-out rows. It found the direction, but under-measured the size.",
-                      ["REAL-PINNED"])
-        heroes.append(cw)
-        heroes.append(_hero_g6("esl_selection", "Screening before CV, textbook (TEXTBOOK)", d6, truth.get("esl_selection"),
-                               "The 100 predictors were chosen using all 50 labels before cross-validation. Moving the "
-                               "screen inside the folds removes the inflation.", ["TEXTBOOK"]))
-        heroes.append(_hero_g6_clean(d6, truth))
-        for c in ("civilwar_apparent", "esl_selection", "civilwar_temporal_clean"):
-            lr = ((g6r.get(1) or {}).get("loop") or {}).get(c)
-            if lr:
-                traces[c] = _trace_fx(lr, "runs_g6/r1.json")
-    if d5 and 1 in runs5:
-        hh = _hero_g5("g4_assay_replicates", 1, d5, runs5)
-        heroes.append(hh)
-        traces[hh["id"]] = _trace_fx(runs5[1]["loop"]["g4_assay_replicates"], "runs_g5/r1.json")
-    h, t = _hero_live("clean_control", "Digits classifier, correct pipeline (REAL-PINNED data)",
-                      "Here the claim holds: the controlled split scores the same as the claim's own protocol, all "
-                      "three per-seed intervals include 0. NullLab says so instead of crying wolf.")
-    if h:
-        heroes.append(h)
-        traces[h["id"]] = t
+    doc = (ROOT / "docs/EVAL-9-G8-RESULT.md").read_text(encoding="utf-8") if (ROOT / "docs/EVAL-9-G8-RESULT.md").exists() else ""
+    readout = {"measured": V(_mean([x["k"] for x in g8["inflation"]]), len(g8["inflation"]), "runs_g8/score.json") if g8 and g8["inflation"] else None,
+               "repeats": g8["inflation"] if g8 else [], "clean_fa": g8["false_alarms"] if g8 else None,
+               "harness": ({"got": g8["inconclusive"], "target": N(d8["acceptance"].get("harness_inconclusive_target"), g8["inconclusive"]["n"], "runs_g8/score.json")}
+                           if g8 else None),
+               "clauses": _clauses(g8, doc),
+               "clean_inflation": [V(r.get("mean"), None, r["src"]) for r in (g8["clean"] if g8 else []) if r.get("mean") is not None]}
 
-    prereg5 = _jl("runs_g5/prereg_log.jsonl")
-    prereg6 = _jl("runs_g6/prereg_log.jsonl")
-    return {
+    rings = None
+    if d6 and d5 and rf and g7 and g8:
+        a6, a5, sm = d6["acceptance"], d5["acceptance"], rf.get("summary", {})
+        und = (d6.get("cases") or {}).get("civilwar_apparent") or {}
+        dirk = sum(1 for x in und.values() if (x.get("loop") or {}).get("sign") == "+")
+        rings = {"core": {"g7": g7, "g8": g8},
+                 "mid": {"textbook": _fn(a6["b_esl_reproduces"], "runs_g6/score.json", "TEXTBOOK"),
+                         "undisguised_dir": N(dirk, len(und), "runs_g6/score.json"), "undisguised_size": _fn(a6["a_civilwar_reproduces"], "runs_g6/score.json")},
+                 "outer": {"loop_sign": _fn(a5["ii_hard_sign_correct"], "runs_g5/score.json", "SYNTHETIC"), "loop_fa": _fn(a5["i_clean_false_alarms"], "runs_g5/score.json", "SYNTHETIC"),
+                           "rules_sign": _fn(sm.get("rules_hard_correct_x3"), "runs_rulefix/score.json", "SYNTHETIC"),
+                           "rules_fa": _fn(sm.get("rules_false_alarms_x3"), "runs_rulefix/score.json", "SYNTHETIC")},
+                 "ghost": {"reading_dir": g7["reading_dir"], "reading_fa": g7["reading_fa"], "note": "reading-only baseline on the G7 case: one prompt, no execution"}}
+
+    tr = None
+    for r in (2, 3, 4, 5):
+        lr = (((_j(f"runs_g8/r{r}.json") or {}).get("loop") or {}).get("civilwar_disguised"))
+        if lr and lr.get("status") == "ok":
+            tr = _trace_fx(lr, f"runs_g8/r{r}.json")
+            tr["lines"] = [{**l, "text": re.sub(r"\s*sha256 [0-9a-f]+", "", l.get("text", ""))} for l in tr["lines"]]
+            tr["plan"].pop("sha", None)
+            break
+
+    def ex(a, b):
+        return N(a, b, "docs/EVAL-7.md", "SYNTHETIC")  # copied from the doc, tagged with it
+
+    out = {
         "generated_utc": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
-        "heroes": heroes, "traces": traces,
-        "factorial": _factorial(d5, runs5) if d5 else {},
-        "g5": {"acceptance": d5["acceptance"], "rule_sha": d5.get("rule_sha256", ""), "n_prereg": len(prereg5)} if d5 else None,
-        "real": _real(d6, truth, tol) if d6 else None,
-        "g6_prereg": len(prereg6),
-        "scoreboard": _scoreboard(d5, d6, abl),
-        "stats": _stats(d5, d6),
+        "pub": pub, "g7": g7, "g8": g8, "readout": readout, "rings": rings, "g9": _g9(), "recorded": _recorded(),
+        "guard": g8["guard_rejects"] if g8 else None,
+        "trace": tr, "factorial": _fx_compact(d5, runs5),
+        "scoreboard": _scoreboard(d5, d6, abl, d7, rf, d8), "rules": _rules(rf, d6), "ledger": _ledger(d7, d8),
+        "wonder": {"plans": ex(8, 8), "hard_sign": ex(4, 4), "clean_fa": ex(0, 4),
+                   "note": "8 synthetic cases x 1 repeat, temperature 0; a small sample, not evidence that Wonder is better."},
         "mock_cases": sorted(p.stem for p in (ROOT / "runs").glob("*.json") if p.stem not in ("ablation",)),
-        "tests_doc": {"value": "77 passed", "src": "docs/EVAL-6.md §6 (2026-11-02)"},
+        "tests_doc": {"value": "77 passed at G6", "src": "docs/EVAL-6.md section 6; later phases add tests not counted here"},
     }
+    return scrub(out)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,318 @@
+{
+ "case": "civilwar_apparent",
+ "tool": "rulefix (no LLM)",
+ "seeds": [
+  42,
+  43,
+  44
+ ],
+ "n_boot": 1000,
+ "bootstrap": "unpaired",
+ "fired": {
+  "R1": {
+   "test_rows_also_in_train": 1.0
+  },
+  "R4": {
+   "column": "year",
+   "nunique": 56
+  }
+ },
+ "not_applied": [],
+ "split_fn": "split_rows",
+ "configs": {
+  "fix_A": {
+   "rules_applied": [
+    "R4",
+    "R1"
+   ],
+   "steps": [
+    "split_rows"
+   ],
+   "notes": [
+    "split rules ['R4', 'R1'] fired; one splitter exists, precedence R4 > R3 > R1 => R4 is in force"
+   ],
+   "src_sha256": "110901fdab221bfd5db4d850b6151b6ef1782dd75397ded6a317093e5a72a6fc"
+  },
+  "fix_B": {
+   "rules_applied": [],
+   "steps": [],
+   "notes": [],
+   "src_sha256": "6d2f050dbeec06613da83ea7e9a1c564b5cec495354bb228cbce46e623aea6e8"
+  },
+  "fix_both": {
+   "rules_applied": [
+    "R4",
+    "R1"
+   ],
+   "steps": [
+    "split_rows"
+   ],
+   "notes": [
+    "split rules ['R4', 'R1'] fired; one splitter exists, precedence R4 > R3 > R1 => R4 is in force"
+   ],
+   "src_sha256": "110901fdab221bfd5db4d850b6151b6ef1782dd75397ded6a317093e5a72a6fc"
+  }
+ },
+ "sources": {
+  "fix_A": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'warstds'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['ager', 'agexp', 'anoc', 'army85', 'autch98', 'auto4', 'autonomy', 'avgnabo', 'centpol3', 'coldwar', 'decade1', 'decade2', 'decade3', 'decade4', 'dem', 'dem4', 'demch98', 'dlang', 'drel', 'durable', 'ef', 'ef2', 'ehet', 'elfo', 'elfo2', 'etdo4590', 'expgdp', 'exrec', 'fedpol3', 'fuelexp', 'gdpgrowth', 'geo1', 'geo2', 'geo34', 'geo57', 'geo69', 'geo8', 'illiteracy', 'incumb', 'infant', 'inst', 'inst3', 'life', 'lmtnest', 'ln_gdpen', 'lpopns', 'major', 'manuexp', 'milper', 'mirps0', 'mirps1', 'mirps2', 'mirps3', 'nat_war', 'ncontig', 'nmgdp', 'nmdp4_alt', 'numlang', 'nwstate', 'oil', 'p4mchg', 'parcomp', 'parreg', 'part', 'partfree', 'plural', 'plurrel', 'pol4', 'pol4m', 'pol4sq', 'polch98', 'polcomp', 'popdense', 'presi', 'pri', 'proxregc', 'ptime', 'reg', 'regd4_alt', 'relfrac', 'seceduc', 'second', 'semipol3', 'sip2', 'sxpnew', 'sxpsq', 'tnatwar', 'trade', 'warhist', 'xconst']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (peace, war) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    \"\"\"caret-style tuning: 10-fold CV ROC-AUC for each mtry in the grid; returns the best mtry.\"\"\"\n    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    order = np.argsort(np.asarray(df['year'], dtype=float), kind='stable')\n    cut = int(round(0.75 * len(order)))\n    return (order[:cut], order[cut:])\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_B": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'warstds'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['ager', 'agexp', 'anoc', 'army85', 'autch98', 'auto4', 'autonomy', 'avgnabo', 'centpol3', 'coldwar', 'decade1', 'decade2', 'decade3', 'decade4', 'dem', 'dem4', 'demch98', 'dlang', 'drel', 'durable', 'ef', 'ef2', 'ehet', 'elfo', 'elfo2', 'etdo4590', 'expgdp', 'exrec', 'fedpol3', 'fuelexp', 'gdpgrowth', 'geo1', 'geo2', 'geo34', 'geo57', 'geo69', 'geo8', 'illiteracy', 'incumb', 'infant', 'inst', 'inst3', 'life', 'lmtnest', 'ln_gdpen', 'lpopns', 'major', 'manuexp', 'milper', 'mirps0', 'mirps1', 'mirps2', 'mirps3', 'nat_war', 'ncontig', 'nmgdp', 'nmdp4_alt', 'numlang', 'nwstate', 'oil', 'p4mchg', 'parcomp', 'parreg', 'part', 'partfree', 'plural', 'plurrel', 'pol4', 'pol4m', 'pol4sq', 'polch98', 'polcomp', 'popdense', 'presi', 'pri', 'proxregc', 'ptime', 'reg', 'regd4_alt', 'relfrac', 'seceduc', 'second', 'semipol3', 'sip2', 'sxpnew', 'sxpsq', 'tnatwar', 'trade', 'warhist', 'xconst']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (peace, war) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    \"\"\"caret-style tuning: 10-fold CV ROC-AUC for each mtry in the grid; returns the best mtry.\"\"\"\n    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    \"\"\"Rows used to fit the final model, and rows it is scored on.\"\"\"\n    idx = np.arange(len(df))\n    return (idx, idx)\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n",
+  "fix_both": "import numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import GroupShuffleSplit, train_test_split\nimport numpy as np\nimport pandas as pd\nfrom sklearn.model_selection import StratifiedKFold\nfrom sklearn.tree import DecisionTreeClassifier\nfrom sklearn.metrics import roc_auc_score\nTARGET = 'warstds'\nMETRIC = 'pr_auc'\nN_TREES = 300\nSAMPSIZE = (30, 90)\nMTRY_GRID = (2, 46, 90)\nFEATURES = ['ager', 'agexp', 'anoc', 'army85', 'autch98', 'auto4', 'autonomy', 'avgnabo', 'centpol3', 'coldwar', 'decade1', 'decade2', 'decade3', 'decade4', 'dem', 'dem4', 'demch98', 'dlang', 'drel', 'durable', 'ef', 'ef2', 'ehet', 'elfo', 'elfo2', 'etdo4590', 'expgdp', 'exrec', 'fedpol3', 'fuelexp', 'gdpgrowth', 'geo1', 'geo2', 'geo34', 'geo57', 'geo69', 'geo8', 'illiteracy', 'incumb', 'infant', 'inst', 'inst3', 'life', 'lmtnest', 'ln_gdpen', 'lpopns', 'major', 'manuexp', 'milper', 'mirps0', 'mirps1', 'mirps2', 'mirps3', 'nat_war', 'ncontig', 'nmgdp', 'nmdp4_alt', 'numlang', 'nwstate', 'oil', 'p4mchg', 'parcomp', 'parreg', 'part', 'partfree', 'plural', 'plurrel', 'pol4', 'pol4m', 'pol4sq', 'polch98', 'polcomp', 'popdense', 'presi', 'pri', 'proxregc', 'ptime', 'reg', 'regd4_alt', 'relfrac', 'seceduc', 'second', 'semipol3', 'sip2', 'sxpnew', 'sxpsq', 'tnatwar', 'trade', 'warhist', 'xconst']\n\ndef load(path='data.csv'):\n    return pd.read_csv(path)\n\ndef feats(df):\n    return [c for c in FEATURES if c in df.columns]\n\ndef fit_forest(X, y, seed, mtry):\n    \"\"\"Random forest with per-class down-sampling: each tree sees SAMPSIZE rows (peace, war) drawn with replacement.\"\"\"\n    rng = np.random.default_rng(seed)\n    i0, i1 = (np.flatnonzero(y == 0), np.flatnonzero(y == 1))\n    trees = []\n    for _ in range(N_TREES):\n        idx = np.concatenate([rng.choice(i0, SAMPSIZE[0], replace=True), rng.choice(i1, SAMPSIZE[1], replace=True)])\n        t = DecisionTreeClassifier(max_features=mtry, random_state=int(rng.integers(2 ** 31 - 1)))\n        trees.append(t.fit(X[idx], y[idx]))\n    return trees\n\ndef forest_score(trees, X):\n    return np.mean([t.predict_proba(X)[:, 1] for t in trees], axis=0)\n\ndef tune_mtry(X, y, seed, k=10):\n    \"\"\"caret-style tuning: 10-fold CV ROC-AUC for each mtry in the grid; returns the best mtry.\"\"\"\n    cv = StratifiedKFold(n_splits=k, shuffle=True, random_state=seed)\n    best, best_auc = (MTRY_GRID[0], -1.0)\n    for m in MTRY_GRID:\n        aucs = [roc_auc_score(y[te], forest_score(fit_forest(X[tr], y[tr], seed, m), X[te])) for tr, te in cv.split(X, y)]\n        if np.mean(aucs) > best_auc:\n            best, best_auc = (m, float(np.mean(aucs)))\n    return best\n\ndef split_rows(df, seed):\n    order = np.argsort(np.asarray(df['year'], dtype=float), kind='stable')\n    cut = int(round(0.75 * len(order)))\n    return (order[:cut], order[cut:])\n\ndef claimed_eval(df, seed):\n    X = df[feats(df)].to_numpy(dtype=float)\n    y = df[TARGET].to_numpy().astype(int)\n    tr, te = split_rows(df, seed)\n    mtry = tune_mtry(X[tr], y[tr], seed)\n    trees = fit_forest(X[tr], y[tr], seed, mtry)\n    return (y[te], forest_score(trees, X[te]))\n\n\n\ndef controlled_eval(df, seed):\n    return claimed_eval(df, seed)\n"
+ },
+ "status": "ok",
+ "elapsed_s": 468.2,
+ "stats": {
+  "42": {
+   "full": {
+    "metric": "pr_auc",
+    "acc": {
+     "orig": 0.3954616819130874,
+     "fix_A": 0.08784873691770761,
+     "fix_B": 0.3954616819130874,
+     "fix_both": 0.08784873691770761
+    },
+    "n": {
+     "orig": 7140,
+     "fix_A": 1785,
+     "fix_B": 7140,
+     "fix_both": 1785
+    },
+    "drop": {
+     "fix_A": 0.3076129449953798,
+     "fix_B": 0.0,
+     "fix_both": 0.3076129449953798
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.2008169029221153,
+      0.401318694454087
+     ],
+     "fix_B": [
+      -0.12196744793170823,
+      0.12184862160280764
+     ],
+     "fix_both": [
+      0.20048476298807943,
+      0.40061166299425266
+     ]
+    },
+    "boot_dropped": 0,
+    "I": 0.0,
+    "I_ci": [
+     -0.14289644493063472,
+     0.13655878526836934
+    ],
+    "I_excludes_0": false
+   },
+   "roc_auc": {
+    "metric": "roc_auc",
+    "acc": {
+     "orig": 0.9715311051763412,
+     "fix_A": 0.8952557118464917,
+     "fix_B": 0.9715311051763412,
+     "fix_both": 0.8952557118464917
+    },
+    "n": {
+     "orig": 7140,
+     "fix_A": 1785,
+     "fix_B": 7140,
+     "fix_both": 1785
+    },
+    "drop": {
+     "fix_A": 0.07627539332984956,
+     "fix_B": 0.0,
+     "fix_both": 0.07627539332984956
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.040774928226046,
+      0.11573271986088302
+     ],
+     "fix_B": [
+      -0.009842056429037797,
+      0.009853442776361075
+     ],
+     "fix_both": [
+      0.04308197955600923,
+      0.11511100363415488
+     ]
+    },
+    "boot_dropped": 0,
+    "I": 0.0,
+    "I_ci": [
+     -0.051853153258670535,
+     0.055476502721416396
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "43": {
+   "full": {
+    "metric": "pr_auc",
+    "acc": {
+     "orig": 0.38441980695993516,
+     "fix_A": 0.08898907633322954,
+     "fix_B": 0.38441980695993516,
+     "fix_both": 0.08898907633322954
+    },
+    "n": {
+     "orig": 7140,
+     "fix_A": 1785,
+     "fix_B": 7140,
+     "fix_both": 1785
+    },
+    "drop": {
+     "fix_A": 0.2954307306267056,
+     "fix_B": 0.0,
+     "fix_both": 0.2954307306267056
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.1953565689401448,
+      0.3782752415095529
+     ],
+     "fix_B": [
+      -0.11435570309535047,
+      0.11810051529128432
+     ],
+     "fix_both": [
+      0.18517359126084326,
+      0.38097303009744204
+     ]
+    },
+    "boot_dropped": 0,
+    "I": 0.0,
+    "I_ci": [
+     -0.1398123797790609,
+     0.12870992755808625
+    ],
+    "I_excludes_0": false
+   },
+   "roc_auc": {
+    "metric": "roc_auc",
+    "acc": {
+     "orig": 0.9712641632629015,
+     "fix_A": 0.89775591511505,
+     "fix_B": 0.9712641632629015,
+     "fix_both": 0.89775591511505
+    },
+    "n": {
+     "orig": 7140,
+     "fix_A": 1785,
+     "fix_B": 7140,
+     "fix_both": 1785
+    },
+    "drop": {
+     "fix_A": 0.07350824814785151,
+     "fix_B": 0.0,
+     "fix_both": 0.07350824814785151
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.03965223072268128,
+      0.11170749410369449
+     ],
+     "fix_B": [
+      -0.008930881527617479,
+      0.009716064074468289
+     ],
+     "fix_both": [
+      0.035917501159609434,
+      0.11586104841084728
+     ]
+    },
+    "boot_dropped": 0,
+    "I": 0.0,
+    "I_ci": [
+     -0.05145695825480441,
+     0.052710259858215605
+    ],
+    "I_excludes_0": false
+   }
+  },
+  "44": {
+   "full": {
+    "metric": "pr_auc",
+    "acc": {
+     "orig": 0.37342257415282243,
+     "fix_A": 0.0885055358222855,
+     "fix_B": 0.37342257415282243,
+     "fix_both": 0.0885055358222855
+    },
+    "n": {
+     "orig": 7140,
+     "fix_A": 1785,
+     "fix_B": 7140,
+     "fix_both": 1785
+    },
+    "drop": {
+     "fix_A": 0.28491703833053694,
+     "fix_B": 0.0,
+     "fix_both": 0.28491703833053694
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.1830357734539881,
+      0.374114150566419
+     ],
+     "fix_B": [
+      -0.12578314657174497,
+      0.10843419647976786
+     ],
+     "fix_both": [
+      0.1785561158265805,
+      0.3726141905249945
+     ]
+    },
+    "boot_dropped": 0,
+    "I": 0.0,
+    "I_ci": [
+     -0.12601523934505748,
+     0.13409321305274827
+    ],
+    "I_excludes_0": false
+   },
+   "roc_auc": {
+    "metric": "roc_auc",
+    "acc": {
+     "orig": 0.9679411966852565,
+     "fix_A": 0.898091308236442,
+     "fix_B": 0.9679411966852565,
+     "fix_both": 0.898091308236442
+    },
+    "n": {
+     "orig": 7140,
+     "fix_A": 1785,
+     "fix_B": 7140,
+     "fix_both": 1785
+    },
+    "drop": {
+     "fix_A": 0.06984988844881446,
+     "fix_B": 0.0,
+     "fix_both": 0.06984988844881446
+    },
+    "drop_ci": {
+     "fix_A": [
+      0.03571826392369985,
+      0.10702416147701674
+     ],
+     "fix_B": [
+      -0.011444159430286854,
+      0.0116612655998456
+     ],
+     "fix_both": [
+      0.0346376725960958,
+      0.1069842154603064
+     ]
+    },
+    "boot_dropped": 0,
+    "I": 0.0,
+    "I_ci": [
+     -0.05270991978895749,
+     0.04918998492829752
+    ],
+    "I_excludes_0": false
+   }
+  }
+ },
+ "metric": "pr_auc"
+}
