@@ -8,6 +8,7 @@ provenance is lost where a decision needs it, the verdict is UNVERIFIABLE (treat
 
 Entry points: trace_run, analyze, behaviour_check, guard_config. Worker mode: `python -I guard_g9.py --worker args.json out.json`."""
 import ast
+import base64
 import hashlib
 import json
 import os
@@ -114,9 +115,56 @@ def _worker(args):
     def plain(o):
         return o.view(np.ndarray) if isinstance(o, TA) else o
 
+    pool, pool_ix = [], {}
+
+    def pack_rows(r):
+        """Row ids of one event as an index into a pool of identical-content packed bitsets (little bit order, bit k = row id k). Only the SET of
+        non-negative ids is kept (that is all the analysis reads). Fallback: a plain list."""
+        a = np.asarray(r)
+        if a.size == 0:
+            bits = b""
+        else:
+            if a.dtype.kind not in "iu":
+                return [int(v) for v in a]
+            a = a[a >= 0]
+            if a.size == 0:
+                bits = b""
+            else:
+                mx = int(a.max())
+                if mx > 50_000_000:
+                    return sorted(set(int(v) for v in a))
+                pres = np.zeros(mx + 1, np.uint8)
+                pres[a] = 1
+                bits = np.packbits(pres, bitorder="little").tobytes()
+        ix = pool_ix.get(bits)
+        if ix is None:
+            ix = pool_ix[bits] = len(pool)
+            pool.append(bits)
+        return ix
+
+    import weakref
+    uids = {}
+
+    def objkey(o):
+        """A key that identifies an object for as long as it lives and is NEVER reused by a later object (id() is: once a temporary estimator is
+        freed, a new one can get its address, and two different models would then look like one). Dead objects drop out of the table."""
+        i = id(o)
+        hit = uids.get(i)
+        if hit is not None and hit[0]() is o:
+            return hit[1]
+        n = len(uids_seen)
+        uids_seen.append(None)
+        try:
+            ref = weakref.ref(o, lambda _r, i=i: uids.pop(i, None))
+        except TypeError:  # not weak-referenceable: keep it alive instead
+            ref = (lambda o=o: o)
+        uids[i] = (ref, n)
+        return n
+    uids_seen = []
+
     def rec(kind, cls_name, obj, X, y_present, params=None, name=None):
         r = rids(X)
-        events.append({"i": len(events), "kind": kind, "cls": cls_name, "obj": id(obj), "rid": None if r is None else [int(v) for v in np.asarray(r)],
+        events.append({"i": len(events), "kind": kind, "cls": cls_name, "obj": objkey(obj), "rid": None if r is None else pack_rows(r),
                        "y": y_present, "stack": stack_names(), "params": params, "fn": name})
 
     class Rec:
@@ -235,6 +283,7 @@ def _worker(args):
         import traceback
         out = {"status": "crash", "error": f"{type(e).__name__}: {e}", "tb": traceback.format_exc()[-1500:]}
     out["events"] = events
+    out["rid_pool"] = [base64.b64encode(b).decode("ascii") for b in pool]
     cols = {}
     for c in args.get("cols") or []:
         if c in df.columns:
@@ -281,15 +330,152 @@ def _trace_uncached(train_src, case_dir, seed, profile, record_fns, cols, timeou
             return {"status": "timeout", "events": []}
         if not (td / "out.json").exists():
             return {"status": "crash", "error": "worker produced no output", "tb": (r.stderr or "")[-1200:], "events": []}
-        return json.loads((td / "out.json").read_text(encoding="utf-8"))
+        return _decode_trace(json.loads((td / "out.json").read_text(encoding="utf-8")))
+
+
+# ---- compact row sets. The worker ships each event's row ids as a pooled, interned packed bitset (bit k = row id k); analyze() keeps them packed
+# and does the set algebra with numpy bit operations. RowSet is an immutable set-like view (len, iteration, &, |, ==, in, bool) so code written
+# for Python sets of ints (contamination, relation_violations, the tests) keeps working unchanged.
+_POP = None
+_MAX_UNIVERSE = 50_000_000
+
+
+def _pop_table():
+    global _POP
+    if _POP is None:
+        import numpy as np
+        _POP = np.array([bin(i).count("1") for i in range(256)], dtype=np.int32)
+    return _POP
+
+
+class _Packed:
+    """A row-id set as shipped by the worker (little bit order); `b` is a uint8 array."""
+    __slots__ = ("b",)
+
+    def __init__(self, b):
+        self.b = b
+
+
+def _decode_trace(out):
+    import numpy as np
+    pool = out.pop("rid_pool", None)
+    if pool is not None:
+        objs = [_Packed(np.frombuffer(base64.b64decode(x), dtype=np.uint8)) for x in pool]
+        for e in out.get("events", ()):
+            if isinstance(e.get("rid"), int):
+                e["rid"] = objs[e["rid"]]
+    return out
+
+
+class RowSet:
+    """Immutable set of non-negative row ids stored as a packed bit array (uint8, little bit order)."""
+    __slots__ = ("b", "_n", "_c")
+
+    def __init__(self, b):
+        self.b, self._n, self._c = b, None, None
+
+    def ids(self):
+        import numpy as np
+        return np.flatnonzero(np.unpackbits(self.b, bitorder="little"))
+
+    def __len__(self):
+        if self._n is None:
+            self._n = int(_pop_table()[self.b].sum())
+        return self._n
+
+    def __bool__(self):
+        return bool(self.b.any())
+
+    def __iter__(self):
+        return iter(self.ids().tolist())
+
+    def __contains__(self, v):
+        try:
+            i = int(v)
+        except (TypeError, ValueError):
+            return False
+        if i < 0 or i >= len(self.b) * 8 or i != v:
+            return False
+        return bool((self.b[i >> 3] >> (i & 7)) & 1)
+
+    def canon(self):
+        if self._c is None:
+            self._c = self.b.tobytes().rstrip(b"\x00")
+        return self._c
+
+    def _pair(self, o):
+        import numpy as np
+        a, b = self.b, o.b
+        if len(a) < len(b):
+            a = np.concatenate([a, np.zeros(len(b) - len(a), np.uint8)])
+        elif len(b) < len(a):
+            b = np.concatenate([b, np.zeros(len(a) - len(b), np.uint8)])
+        return a, b
+
+    def __and__(self, o):
+        if isinstance(o, RowSet):
+            a, b = self._pair(o)
+            return RowSet(a & b)
+        if isinstance(o, (set, frozenset)):
+            return set(self) & o
+        return NotImplemented
+
+    def __or__(self, o):
+        if isinstance(o, RowSet):
+            a, b = self._pair(o)
+            return RowSet(a | b)
+        if isinstance(o, (set, frozenset)):
+            return set(self) | o
+        return NotImplemented
+
+    __rand__, __ror__ = __and__, __or__
+
+    def __eq__(self, o):
+        if isinstance(o, RowSet):
+            return self.canon() == o.canon()
+        if isinstance(o, (set, frozenset)):
+            return set(self) == o
+        return NotImplemented
+
+    def __ne__(self, o):
+        r = self.__eq__(o)
+        return r if r is NotImplemented else not r
+
+    def __hash__(self):
+        return hash(self.canon())
+
+    def __repr__(self):
+        return f"RowSet(n={len(self)})"
+
+
+def _canon(x):
+    """Canonical bytes of a row set (RowSet or any iterable of ints): equal sets give equal bytes."""
+    if isinstance(x, RowSet):
+        return x.canon()
+    import numpy as np
+    ids = np.fromiter(x, dtype=np.int64)
+    if ids.size == 0:
+        return b""
+    pres = np.zeros(int(ids.max()) + 1, np.uint8)
+    pres[ids] = 1
+    return np.packbits(pres, bitorder="little").tobytes().rstrip(b"\x00")
 
 
 def _arr(x):
-    return None if x is None else set(v for v in x if v >= 0)
+    """Reference semantics: the set of non-negative ids, None if untracked (plain Python set)."""
+    if x is None:
+        return None
+    if isinstance(x, _Packed):
+        return set(RowSet(x.b))
+    return set(v for v in x if v >= 0)
 
 
-def analyze(trace):
-    """Per scoring event: fit rows of the same instance, scored rows, upstream context rows. Pure function of the trace."""
+class _Fallback(Exception):
+    pass
+
+
+def _analyze_sets(trace):
+    """Original set-based implementation (kept for traces the packed path does not cover: event index != position, huge row ids)."""
     ev = trace.get("events", [])
     E = trace.get("E")
     Eset = _arr(E)
@@ -342,6 +528,176 @@ def analyze(trace):
     return out
 
 
+def _analyze_packed(trace):
+    """Same output as _analyze_sets with RowSet values, in one pass: bit-level set algebra, interned results, and an incremental "context window"
+    (events since the previous evaluation-scoring event, minus the scoring object's own) instead of rescanning it for every score event."""
+    import numpy as np
+    ev = trace.get("events", [])
+    E = trace.get("E")
+    for k, e in enumerate(ev):
+        if e["i"] != k:
+            raise _Fallback("event index differs from position")
+
+    def rid_max(r):
+        if isinstance(r, _Packed):
+            return len(r.b) * 8 - 1
+        a = np.asarray(r)
+        if a.size == 0:
+            return -1
+        if a.dtype.kind not in "iu":
+            raise _Fallback("non-integer row ids")
+        return int(a.max())
+    mx, seen = -1, set()
+    for e in ev:
+        r = e["rid"]
+        if r is not None and e["kind"] in ("fit", "score", "fn") and (isinstance(r, list) or id(r) not in seen):
+            seen.add(id(r))
+            mx = max(mx, rid_max(r))
+    if E is not None:
+        mx = max(mx, rid_max(E))
+    if mx + 1 > _MAX_UNIVERSE:
+        raise _Fallback("row ids too large")
+    nb = max(1, (mx + 1 + 7) // 8)
+    nbits = nb * 8
+    cache, intern = {}, {}
+
+    def mk(b):
+        key = b.tobytes()
+        rs = intern.get(key)
+        if rs is None:
+            rs = intern[key] = RowSet(b)
+        return rs
+
+    def to_rs(r):
+        if r is None:
+            return None
+        if isinstance(r, _Packed):
+            hit = cache.get(id(r))
+            if hit is None:
+                b = r.b
+                if len(b) != nb:
+                    b = np.concatenate([b, np.zeros(nb - len(b), np.uint8)])
+                hit = cache[id(r)] = (r, mk(b))
+            return hit[1]
+        if not isinstance(r, list):
+            hit = cache.get(id(r))
+            if hit is not None:
+                return hit[1]
+        a = np.asarray(r)
+        if a.size:
+            a = a[a >= 0]
+        pres = np.zeros(nbits, np.uint8)
+        if a.size:
+            pres[a] = 1
+        rs = mk(np.packbits(pres, bitorder="little"))
+        if not isinstance(r, list):
+            cache[id(r)] = (r, rs)
+        return rs
+    Eset = to_rs(E)
+    n_syn = 0
+    if E is not None and len(E):
+        n_syn = int(np.count_nonzero(np.asarray(E) < 0))
+    out = {"tracked": E is not None, "n_eval": trace.get("n_eval"), "E_synth": n_syn if E else 0, "scores": [], "models": {}, "fn_calls": {}, "untracked_events": 0}
+    zero = mk(np.zeros(nb, np.uint8))
+    eval_memo = {}
+    last_fit, comp_latest = {}, {}
+    # window of fit/fn events since the last evaluation-scoring event, aggregated per component name
+    w_objs, w_none, w_A, w_T, w_cnt = {}, {}, {}, {}, {}
+
+    def unpack(b):
+        return np.unpackbits(b, bitorder="little")
+
+    def window_reset():
+        for d in (w_objs, w_none, w_A, w_T, w_cnt):
+            d.clear()
+
+    def window_add(e, rows):
+        name, obj = e["cls"], e["obj"]
+        w_objs.setdefault(name, set()).add(obj)
+        if rows is None:
+            w_none.setdefault(name, set()).add(obj)
+            return
+        A = w_A.setdefault(name, {})
+        old = A.get(obj)
+        delta = rows.b if old is None else rows.b & ~old
+        A[obj] = rows.b if old is None else old | rows.b
+        w_T[name] = rows.b if name not in w_T else w_T[name] | rows.b
+        if delta.any():
+            cnt = w_cnt.get(name)
+            if cnt is None:
+                cnt = w_cnt[name] = np.zeros(nbits, np.int32)
+            cnt += unpack(delta)
+
+    for e in ev:
+        kind = e["kind"]
+        if e["rid"] is None and kind in ("fit", "score", "fn"):
+            out["untracked_events"] += 1
+        if kind not in ("fit", "score", "fn"):
+            continue
+        rows = to_rs(e["rid"])
+        if kind == "fit":
+            last_fit[e["obj"]] = e
+            comp_latest[("fit", e["cls"])] = e
+            window_add(e, rows)
+        elif kind == "fn":
+            comp_latest[("fn", e["cls"])] = e
+            out["fn_calls"][e["cls"]] = out["fn_calls"].get(e["cls"], 0) + 1
+            window_add(e, rows)
+        else:
+            o = e["obj"]
+            fit = last_fit.get(o)
+            is_eval = False
+            if rows is not None and Eset is not None:
+                is_eval = eval_memo.get(id(rows))
+                if is_eval is None:
+                    is_eval = eval_memo[id(rows)] = bool((rows.b & Eset.b).any())
+            parts = {}  # name -> [has_untracked, OR of bits or None]
+            for kk, ee in comp_latest.items():
+                if ee["obj"] != o:
+                    ent = parts.setdefault(kk[1], [False, None])
+                    r = to_rs(ee["rid"])
+                    if r is None:
+                        ent[0] = True
+                    else:
+                        ent[1] = r.b if ent[1] is None else ent[1] | r.b
+            for name, objs in w_objs.items():
+                if len(objs) <= (1 if o in objs else 0):
+                    continue
+                ent = parts.setdefault(name, [False, None])
+                nn = w_none.get(name)
+                if nn and len(nn) > (1 if o in nn else 0):
+                    ent[0] = True
+                A = w_A.get(name)
+                if not A:
+                    continue
+                if o in A:
+                    if len(A) == 1:
+                        continue
+                    cnt = w_cnt.get(name)
+                    if cnt is None:  # no row id was ever seen for this component in the window
+                        continue
+                    wb = np.packbits((cnt - unpack(A[o])) > 0, bitorder="little")
+                else:
+                    wb = w_T[name]
+                ent[1] = wb if ent[1] is None else ent[1] | wb
+            ctx_rows = {name: (None if ent[0] else (zero if ent[1] is None else mk(ent[1]))) for name, ent in parts.items()}
+            out["scores"].append({"i": e["i"], "obj": o, "cls": e["cls"], "eval": is_eval, "stack": e["stack"], "S": rows, "S_untracked": rows is None,
+                                  "R": None if fit is None else to_rs(fit["rid"]), "fit_i": None if fit is None else fit["i"],
+                                  "params": None if fit is None else fit["params"], "ctx": ctx_rows})
+            if is_eval:
+                window_reset()
+    return out
+
+
+def analyze(trace):
+    """Per scoring event: fit rows of the same instance, scored rows, upstream context rows. Pure function of the trace. Row sets are RowSet objects
+    (set-like); the result is value-identical to the original set-based implementation (tests/test_guard_g9_equivalence.py)."""
+    try:
+        return _analyze_packed(trace)
+    except _Fallback:
+        return _analyze_sets(trace)
+
+
 def model_signature(an):
     """{class: params} for models that scored evaluation rows (params at their latest fit)."""
     sig = {}
@@ -376,10 +732,30 @@ def _col(trace, name):
     return None if v is None else dict(zip(ix, v))
 
 
+def _col_arrays(cm, nb):
+    """(values, present) arrays indexed by row id for the vectorised relation check, or None when the plain-dict path must be used (NaN values,
+    ids outside the column index, negative or huge ids): the dict path reproduces the original exceptions and NaN ordering exactly."""
+    import numpy as np
+    try:
+        ids = np.fromiter(cm.keys(), dtype=np.int64, count=len(cm))
+        vals = np.fromiter(cm.values(), dtype=np.float64, count=len(cm))
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if len(ids) and (ids.min() < 0 or ids.max() > _MAX_UNIVERSE or np.isnan(vals).any()):
+        return None
+    size = max(nb * 8, 1, int(ids.max()) + 1 if len(ids) else 1)
+    v = np.zeros(size, np.float64)
+    present = np.zeros(size, bool)
+    v[ids] = vals
+    present[ids] = True
+    return v, present
+
+
 def relation_violations(an, trace, kind, col, scope_step=None):
     """Count (train, test) pairs of evaluation (or in-scope) models violating the relation implied by `kind`."""
     bad, total, untracked = 0, 0, 0
     cm = _col(trace, col) if col else None
+    arrs, memo = None, {}
     for s in an["scores"]:
         in_scope = (scope_step in s["stack"]) if scope_step else s["eval"]
         if not in_scope:
@@ -388,17 +764,46 @@ def relation_violations(an, trace, kind, col, scope_step=None):
             untracked += 1
             continue
         total += 1
+        R, S = s["R"], s["S"]
         if kind == "random":
-            bad += bool(s["R"] & s["S"])
+            bad += bool(R & S)
         elif cm is None:
             untracked += 1
-        elif kind == "group":
-            bad += bool({cm[r] for r in s["R"]} & {cm[r] for r in s["S"]})
         else:
-            tr_max = max((cm[r] for r in s["R"]), default=None)
-            te_min = min((cm[r] for r in s["S"]), default=None)
-            bad += not (tr_max is not None and te_min is not None and tr_max < te_min)
+            fast = isinstance(R, RowSet) and isinstance(S, RowSet)
+            if fast and arrs is None:
+                arrs = _col_arrays(cm, len(R.b)) or False
+            fast = fast and arrs is not False
+            if fast:
+                v, present = arrs
+
+                def vals(rs):
+                    hit = memo.get(id(rs))
+                    if hit is None:
+                        ids = rs.ids()
+                        hit = memo[id(rs)] = (rs, ids, bool(present[ids].all()), v[ids])
+                    return hit
+                hr, hs = vals(R), vals(S)
+                fast = hr[2] and hs[2]
+            if fast:
+                if kind == "group":
+                    bad += bool(len(hr[3]) and len(hs[3]) and np_intersects(hr[3], hs[3]))
+                else:
+                    tr_max = hr[3].max() if len(hr[3]) else None
+                    te_min = hs[3].min() if len(hs[3]) else None
+                    bad += not (tr_max is not None and te_min is not None and tr_max < te_min)
+            elif kind == "group":
+                bad += bool({cm[r] for r in R} & {cm[r] for r in S})
+            else:
+                tr_max = max((cm[r] for r in R), default=None)
+                te_min = min((cm[r] for r in S), default=None)
+                bad += not (tr_max is not None and te_min is not None and tr_max < te_min)
     return {"bad": bad, "total": total, "untracked": untracked}
+
+
+def np_intersects(a, b):
+    import numpy as np
+    return bool(np.intersect1d(a, b).size)
 
 
 def _ctor_consts(src):
@@ -416,7 +821,7 @@ def _ctor_consts(src):
 
 
 def _structure_sig(an):
-    h = lambda x: -1 if x is None else hash(frozenset(x))  # noqa: E731  the exact row sets, not only their sizes
+    h = lambda x: (0, b"") if x is None else (1, _canon(x))  # noqa: E731  the exact row sets, not only their sizes
     return sorted((s["cls"], h(s["R"]), h(s["S"]), s["eval"], tuple(sorted((k, h(v)) for k, v in s["ctx"].items()))) for s in an["scores"])
 
 

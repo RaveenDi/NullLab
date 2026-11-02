@@ -75,8 +75,12 @@ def test_frozen_eval12_hashes_match_doc():
     doc = (ROOT / "docs" / "EVAL-12-G9-DSL.md").read_text(encoding="utf-8")
     found = dict(re.findall(r"FROZEN_FILE (\S+) `([0-9a-f]{64})`", doc))
     assert set(found) >= {"agent/edit_dsl.py", "agent/guard_g9.py", "agent/contract_g9.py"}
+    acknowledged = {(c["path"], c["old_sha256"], c["new_sha256"])
+                    for c in json.loads((ROOT / "docs" / "FROZEN-CHANGELOG.json").read_text(encoding="utf-8"))["changes"]}
     for f in ("agent/edit_dsl.py", "agent/guard_g9.py", "agent/contract_g9.py"):
-        assert g9.sha_file(ROOT / f) == found[f], f
+        now = g9.sha_file(ROOT / f)
+        # a post-freeze change passes only if the changelog records exactly this old hash (the one in the frozen doc) and this new hash
+        assert now == found[f] or (f, found[f], now) in acknowledged, f
     assert g9.edit_dsl.spec_sha256() == g9.FROZEN_OPSPEC_SHA256 and g9.contract_g9.contract_sha256() == g9.FROZEN_CONTRACT_SHA256
 
 

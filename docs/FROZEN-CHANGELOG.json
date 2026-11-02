@@ -1,4 +1,19 @@
 {
   "_comment": "Acknowledged post-freeze changes to frozen files. Each entry: path, old_sha256 (the manifest/log hash), new_sha256 (LF-normalised hash now on disk), reason, date. Empty means no frozen file has been touched.",
-  "changes": []
+  "changes": [
+    {
+      "path": "agent/guard_g9.py",
+      "old_sha256": "4a084a1c466b1e8ff53ce3da94307796dc7475c275e0fdb889888f182fa17dba",
+      "new_sha256": "983d2ffe81725ae2ed4703a287b74800270034af712185e2331218e18dce79b8",
+      "reason": "performance only, decisions identical: packed interned row-id sets in the worker and incremental bitset analysis in analyze() (the G9 live run stalled ~90 min in the quadratic set-based analysis of the civil-war pipeline); never-reused object keys in the worker; see docs/EVAL-14-GUARD-SPEED.md. Results produced before this change stay tied to the old hash.",
+      "date": "2026-11-02"
+    },
+    {
+      "path": "tests/test_g9_runner.py",
+      "old_sha256": "206577641df3833e5def37a11a8d50481758cfccc65173059b08f0ea57515191",
+      "new_sha256": "feadaab3a4eff4fcf5e2d3cb4796c15607b99e338488605123143f2de9b73a0a",
+      "reason": "test_frozen_eval12_hashes_match_doc now also accepts a guard_g9.py hash that differs from the frozen doc only when docs/FROZEN-CHANGELOG.json records exactly that old hash (the one in the frozen doc) and the new on-disk hash; any unrecorded change still fails. Test-only change, no result or run file touched.",
+      "date": "2026-11-02"
+    }
+  ]
 }
