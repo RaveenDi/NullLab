@@ -33,15 +33,10 @@ LIBS = ("numpy", "pandas", "scikit-learn", "scipy")
 
 WORKER = r'''import importlib.util, json, os, sys
 sys.path.insert(0, os.getcwd())
-import numpy  # noqa: F401  heavy imports before the network / file allow-list is applied
+from run import _block_network, preload_heavy
+preload_heavy()  # library imports + KNN ctypes warm-up first (train.py NOT imported yet)
+_block_network()  # then the block, so train.py's module-level code runs sandboxed
 import train
-try:  # same pre-load as sandbox/run_factorial.py
-    from sklearn.neighbors import KNeighborsClassifier
-    KNeighborsClassifier(n_neighbors=1).fit([[0.0], [1.0]], [0, 1]).predict([[0.2]])
-except Exception:
-    pass
-from run import _block_network
-_block_network()
 jobs = json.loads(sys.argv[1])   # [[config, seed], ...]
 mods = {}
 for c in sorted({c for c, _ in jobs if c != "orig"}):
@@ -137,12 +132,13 @@ def _worker_env():
 def _run_worker(tmp, jobs, tag, timeout):
     out = tmp / f"out_{tag}.json"
     cmd = [sys.executable, "-I", "cx_worker.py", json.dumps(jobs), out.name]
+    from sandbox.limits import limit_note, run_limited
     try:
-        r = subprocess.run(cmd, cwd=str(tmp), env=_worker_env(), capture_output=True, text=True, timeout=timeout)
+        r = run_limited(cmd, cwd=str(tmp), env=_worker_env(), timeout=timeout)
     except subprocess.TimeoutExpired:
         return {"status": "timeout"}
     if r.returncode != 0 or not out.exists():
-        return {"status": "error", "stderr": r.stderr[-2000:]}
+        return {"status": "error", "stderr": r.stderr[-2000:], **limit_note(r)}
     return {"status": "ok", **json.loads(out.read_text(encoding="utf-8"))}
 
 
@@ -184,7 +180,7 @@ def run_factorial_cached(case_dir, patches, seeds=(42, 43, 44), timeout=300, wor
             return {"status": "timeout", "backend": "subprocess", "timeout_s": timeout}
     for o in outs:
         if o["status"] != "ok":
-            return {"status": "error", "backend": "subprocess", "stderr": o.get("stderr", "")}
+            return {"status": "error", "backend": "subprocess", "stderr": o.get("stderr", ""), **({"limit": o["limit"]} if o.get("limit") else {})}
     flat, metric = {}, None
     for o in outs:
         flat.update(o["res"])

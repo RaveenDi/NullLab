@@ -96,8 +96,14 @@ def test_real_g9_state_matches_expectation():
 
 def test_agent_views_and_prompts_equal_the_g9_freeze_and_only_the_guard_changed():
     h = b.all_hashes()
-    assert b.crosscheck_g9(h) == []
-    assert h["code"]["agent/guard_g9.py"] == b.GUARD_G9B
+    guard = h["code"]["agent/guard_g9.py"]
+    if guard == b.GUARD_G9B:
+        assert b.crosscheck_g9(h) == []
+    else:
+        # 2026-11-02 sandbox security fix changed guard_g9.py again (worker sandboxed). The G9b runs are finished, so a new run is refused:
+        # the ONLY problem verify may report is the guard drift, and the changelog must record exactly old (G9 freeze hash) -> new (on disk).
+        assert ("agent/guard_g9.py", b.GUARD_G9_PRE, guard) in b.acknowledged_changes()
+        assert b.crosscheck_g9(h) == ["agent/guard_g9.py on disk is not the speed-fixed hash 983d2ffe..."]
     g9log = [json.loads(x) for x in (ROOT / "runs_g9" / "prereg_log.jsonl").read_text(encoding="utf-8").splitlines()]
     for c in b.CASES:
         rec = [x for x in g9log if x["kind"] == "g9_agent_view_frozen" and x["case"] == c][-1]

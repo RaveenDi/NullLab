@@ -41,6 +41,19 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.skip(reason="gitignored real/*/data.csv absent (fresh clone)"))
 
 
+@pytest.fixture(autouse=True)
+def _undo_transport_install():
+    """agent.transport.install() rebinds llm.live_complete_ex process-wide (the G9 and G9b runners call it). Undo it after every
+    test so a later test never reaches the real API through a leftover binding (seen as an HTTP 401 in test_trace)."""
+    from agent import llm
+
+    orig = (llm.live_complete_ex, llm.live_complete)
+    yield
+    # runs after the test's own monkeypatch teardown (this fixture is set up first), so it also fixes a binding that a
+    # monkeypatch restored to the transport version after transport.uninstall() had already cleared its record
+    llm.live_complete_ex, llm.live_complete = orig
+
+
 def _is_absent_case_data(exc: BaseException) -> bool:
     if not isinstance(exc, FileNotFoundError):
         return False

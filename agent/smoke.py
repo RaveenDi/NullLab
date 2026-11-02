@@ -158,15 +158,10 @@ def repair_text(v):
 
 RUNNER = r'''import importlib.util, json, os, sys
 sys.path.insert(0, os.getcwd())
-import numpy  # noqa: F401  heavy imports before the network / file allow-list is applied
+from run import _block_network, preload_heavy
+preload_heavy()  # library imports + KNN ctypes warm-up first (train.py NOT imported yet)
+_block_network()  # then the block, so train.py's module-level code runs sandboxed
 import train
-try:  # same pre-load as sandbox/run_factorial.py (native thread-pool libraries are resolved before dlopen is blocked)
-    from sklearn.neighbors import KNeighborsClassifier
-    KNeighborsClassifier(n_neighbors=1).fit([[0.0], [1.0]], [0, 1]).predict([[0.2]])
-except Exception:
-    pass
-from run import _block_network
-_block_network()
 SHRINK = ("N_TREES", "N_ESTIMATORS", "N_ITER", "N_ROUNDS", "EPOCHS", "N_BOOT", "N_REPEATS")
 out = {"seeds": {}}
 mods = {}
@@ -203,15 +198,16 @@ def _run_smoke(tmp, seeds, timeout):
     import subprocess
     import sys
     from sandbox import executor
+    from sandbox.limits import limit_note, run_limited
     shutil.copy(ROOT / "sandbox" / "run.py", tmp / "run.py")
     (tmp / "smoke_runner.py").write_text(RUNNER, encoding="utf-8")
     cmd = [sys.executable, "-I", "smoke_runner.py", ",".join(map(str, seeds))]
     try:
-        r = subprocess.run(cmd, cwd=str(tmp), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=timeout)
+        r = run_limited(cmd, cwd=str(tmp), env=executor._scrubbed_env(), timeout=timeout)
     except subprocess.TimeoutExpired:
         return {"status": "timeout"}
     if r.returncode != 0 or not (tmp / "smoke_result.json").exists():
-        return {"status": "error", "stderr": r.stderr[-2000:]}
+        return {"status": "error", "stderr": r.stderr[-2000:], **limit_note(r)}
     return {"status": "ok", "result": json.loads((tmp / "smoke_result.json").read_text())}
 
 

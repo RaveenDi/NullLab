@@ -35,4 +35,8 @@ A planned post-tag security fix to `sandbox/run.py` (the network block runs afte
  "reason": "block network before importing train.py", "date": "YYYY-MM-DD"}
 ```
 
+Optional field `old_sha256_crlf` (sha256 of the OLD content with CRLF line endings): add it when the file is one of the G8 digest inputs (`G8_FILES` in `scripts/freeze_check.py`), because the runs_g8 combined digest was computed over the old bytes in either line-ending form. `sandbox/run_factorial.py` and `sandbox/executor.py` carry it.
+
+The sandbox security fix of 2026-11-02 is recorded this way for `sandbox/{run,run_factorial,executor}.py`, `agent/{cached_exec,smoke,guard_g9}.py` (see [SECURITY.md](SECURITY.md)). The G9, G9b and EHG runners' `verify` stage compares code hashes with their freeze logs and will refuse to start a new run on this code; those runs are finished, their results stay tied to the old hashes.
+
 The test accepts a difference only when both the old and the new hash match an entry exactly, and it also accepts it against the hashes quoted in the prereg logs. Any further edit changes `new_sha256` and fails again. Results produced before the change stay tied to the old hash; say so in the result doc.

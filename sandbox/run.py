@@ -10,6 +10,30 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
+def preload_heavy():
+    """Import everything the pipelines legitimately need BEFORE the sandbox block is installed, WITHOUT importing the user's train.py.
+    Workers call: preload_heavy(); _block_network(); then import train / the patch modules. This way the module-level code of an
+    untrusted train.py runs under the network block, the file allow-list and the process/ctypes bans, and heavy libraries
+    (which open files outside the work dir, start threads, load native libs through ctypes) are already resolved."""
+    import importlib
+    for name in ("numpy", "pandas", "scipy", "scipy.stats", "scipy.sparse", "scipy.special", "scipy.spatial", "sklearn",
+                 "sklearn.ensemble", "sklearn.model_selection", "sklearn.preprocessing", "sklearn.linear_model",
+                 "sklearn.neighbors", "sklearn.metrics", "sklearn.feature_selection", "sklearn.impute", "sklearn.pipeline",
+                 "sklearn.svm", "sklearn.tree", "sklearn.naive_bayes", "sklearn.cluster", "sklearn.decomposition",
+                 "sklearn.base", "sklearn.utils", "sklearn.compose", "sklearn.dummy", "sklearn.calibration",
+                 "ssl", "asyncio", "concurrent.futures", "joblib", "threadpoolctl", "ctypes", "random", "json", "math",
+                 "collections", "itertools", "functools", "re", "warnings", "datetime", "hashlib"):
+        try:
+            importlib.import_module(name)
+        except Exception:  # noqa: BLE001  (a library that is not installed is simply not preloaded)
+            pass
+    try:  # G6: sklearn's KNN loads native thread-pool libraries via ctypes on first use; do it BEFORE dlopen is blocked
+        from sklearn.neighbors import KNeighborsClassifier
+        KNeighborsClassifier(n_neighbors=1).fit([[0.0], [1.0]], [0, 1]).predict([[0.2]])  # resolves + caches the ctypes symbols
+    except Exception:  # noqa: BLE001  (older/newer sklearn layout: nothing to pre-load)
+        pass
+
+
 def _block_network():
     import socket
 
@@ -75,8 +99,9 @@ def main():
     a = ap.parse_args()
     sys.path.insert(0, os.getcwd())
     import importlib.util
-    import train  # heavy imports (sklearn, asyncio, ssl) first, then cut the network before any user patch executes
-    _block_network()
+    preload_heavy()  # library imports first (train.py NOT imported yet) ...
+    _block_network()  # ... then the block, so train.py's module-level code is sandboxed too
+    import train
     spec = importlib.util.spec_from_file_location("patch", a.patch)
     patch = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(patch)

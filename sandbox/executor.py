@@ -10,6 +10,8 @@ import sys
 import tempfile
 from pathlib import Path
 
+from sandbox.limits import limit_note, run_limited
+
 ROOT = Path(__file__).resolve().parent.parent
 IMAGE = "nulllab-sandbox:latest"
 
@@ -44,18 +46,21 @@ def run_experiment(case_dir, patch_src, seeds=(42, 43, 44), n_boot=1000, timeout
         (tmp / "patch.py").write_text(patch_src, encoding="utf-8")
         args = ["run.py", "--seeds", ",".join(map(str, seeds)), "--n-boot", str(n_boot), "--out", "result.json"]
         if backend == "docker":
-            cmd = ["docker", "run", "--rm", "--network=none", "--read-only", "--tmpfs", "/tmp", "-v", f"{tmp}:/work",
+            cmd = ["docker", "run", "--rm", "--network=none", "--read-only", "--memory=6g", "--pids-limit=64", "--tmpfs", "/tmp", "-v", f"{tmp}:/work",
                    "-w", "/work", IMAGE, "python"] + args
             env = None
         else:
             cmd = [sys.executable, "-I"] + args
             env = _scrubbed_env()
         try:
-            r = subprocess.run(cmd, cwd=str(tmp), env=env, capture_output=True, text=True, timeout=timeout)
+            if backend == "docker":  # UNVERIFIED path; the container gets its own memory / pid caps
+                r = subprocess.run(cmd, cwd=str(tmp), env=env, capture_output=True, text=True, timeout=timeout)
+            else:
+                r = run_limited(cmd, cwd=str(tmp), env=env, timeout=timeout)
         except subprocess.TimeoutExpired:
             return {"status": "timeout", "backend": backend, "timeout_s": timeout}
         if r.returncode != 0 or not (tmp / "result.json").exists():
-            return {"status": "error", "backend": backend, "stderr": r.stderr[-1500:]}
+            return {"status": "error", "backend": backend, "stderr": r.stderr[-1500:], **limit_note(r)}
         return {"status": "ok", "backend": backend, "result": json.loads((tmp / "result.json").read_text())}
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -75,11 +80,11 @@ def run_factorial(case_dir, patches, seeds=(42, 43, 44), timeout=300):
             (tmp / f"{k}.py").write_text(patches[k], encoding="utf-8")
         cmd = [sys.executable, "-I", "run_factorial.py", "--seeds", ",".join(map(str, seeds)), "--out", "result.json"]
         try:
-            r = subprocess.run(cmd, cwd=str(tmp), env=_scrubbed_env(), capture_output=True, text=True, timeout=timeout)
+            r = run_limited(cmd, cwd=str(tmp), env=_scrubbed_env(), timeout=timeout)
         except subprocess.TimeoutExpired:
             return {"status": "timeout", "backend": "subprocess", "timeout_s": timeout}
         if r.returncode != 0 or not (tmp / "result.json").exists():
-            return {"status": "error", "backend": "subprocess", "stderr": r.stderr[-2000:]}
+            return {"status": "error", "backend": "subprocess", "stderr": r.stderr[-2000:], **limit_note(r)}
         return {"status": "ok", "backend": "subprocess", "result": json.loads((tmp / "result.json").read_text())}
     finally:
         shutil.rmtree(tmp, ignore_errors=True)

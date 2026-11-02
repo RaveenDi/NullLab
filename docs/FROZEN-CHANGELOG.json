@@ -14,6 +14,53 @@
       "new_sha256": "feadaab3a4eff4fcf5e2d3cb4796c15607b99e338488605123143f2de9b73a0a",
       "reason": "test_frozen_eval12_hashes_match_doc now also accepts a guard_g9.py hash that differs from the frozen doc only when docs/FROZEN-CHANGELOG.json records exactly that old hash (the one in the frozen doc) and the new on-disk hash; any unrecorded change still fails. Test-only change, no result or run file touched.",
       "date": "2026-11-02"
+    },
+    {
+      "path": "sandbox/run.py",
+      "old_sha256": "3628a795cee96b1d4d7b5691f002980986465a8b0e9430e6793033d4a6149ad8",
+      "new_sha256": "9d3723764fe22e22100fbbd1f7a91d87f75917517a57fa091c8b440449ca401f",
+      "reason": "security: new preload_heavy() imports the libraries first, then _block_network(), then import train, so the module-level code of an untrusted train.py runs under the network / file / spawn / ctypes block (it ran before the hook existed). _block_network itself unchanged.",
+      "date": "2026-11-02",
+      "old_sha256_crlf": "7d1cb92ddeccd5ec06f686c323dd056fac3e6694ac982423bda8eefa689a2a20"
+    },
+    {
+      "path": "sandbox/run_factorial.py",
+      "old_sha256": "0eb2130abbea85e38420d353eec4c99368e99d9ea5953b9a04c91d92d0e819cb",
+      "new_sha256": "68ba1c6e0ad615a79eea601d1be10af32a96cb51214e8173866ddae98a6a0e50",
+      "reason": "security: preload_heavy() (incl. the KNN ctypes warm-up) then _block_network() before import train; same order as run.py. Results unchanged (byte-identical on 6 factorial cases, tests/test_sandbox_hardening.py).",
+      "date": "2026-11-02",
+      "old_sha256_crlf": "68fdaf3ddf0e9600df4a3e3e3a9d6496e64010310bd3581182f45bdee0971f4f"
+    },
+    {
+      "path": "sandbox/executor.py",
+      "old_sha256": "3edf9ecc1db0a61129a2d02290ed337f71df7c6cea8cbb72bc1cbccddf8159dd",
+      "new_sha256": "ab688afda1f8edb487d4b05a225e2d4fdafac9e28e9366c855f3df323626d278",
+      "reason": "security: child processes run via sandbox/limits.run_limited (Windows Job Object memory + process limits, POSIX rlimits); limit hits reported as status error with a \"limit\" field; docker command gains --memory/--pids-limit (UNVERIFIED path). No change to results.",
+      "date": "2026-11-02",
+      "old_sha256_crlf": "575aadfa0b23a331202dc7e8b413c0bbcf61fb460a6f4543072b51ca85575605"
+    },
+    {
+      "path": "agent/cached_exec.py",
+      "old_sha256": "5b5e82a45b3815bc57c88b1b0d579e147267e45426843aab98c795798375eef8",
+      "new_sha256": "8d913074f2bce75fdab36c2d85f897120c5b9a056b319366cd0db679dc729318",
+      "reason": "security: worker does preload_heavy(); _block_network(); then import train (was import train first); workers run through sandbox/limits.run_limited; limit hits reported as error. Cached values unchanged but the cache key (runner file hash) changes, so old cache entries are not reused.",
+      "date": "2026-11-02",
+      "old_sha256_crlf": "50aa6347d38ca27c60143154827318f97ec00643582195b8ebaf7a717828f11b"
+    },
+    {
+      "path": "agent/smoke.py",
+      "old_sha256": "520c93d9b0c5e67c05e878628ce009b3d922b8190a18a6000f6d82a3161319e4",
+      "new_sha256": "d6f249f29b1371b82f62bcb33ad80109c6dd4c1093299c0262dc34b386275338",
+      "reason": "security: smoke runner does preload_heavy(); _block_network(); then import train; runs through sandbox/limits.run_limited; limit hits reported as error.",
+      "date": "2026-11-02",
+      "old_sha256_crlf": "1dc214929975812cb3967998ccffab4ad45b6358a0ca9016343d838a96f65099"
+    },
+    {
+      "path": "agent/guard_g9.py",
+      "old_sha256": "4a084a1c466b1e8ff53ce3da94307796dc7475c275e0fdb889888f182fa17dba",
+      "new_sha256": "51c1ac104302cacb69e3a60d350dd4be75199a66490641871f04155e23196589",
+      "reason": "security: the guard worker now preloads libraries, then installs sandbox/run._block_network() before exec of the compiled source (it had no sandbox at all), and is launched via sandbox/limits.run_limited. Trace content unchanged. Second change after the 2026-11-02 speed change: old_sha256 is again the hash in the manifest / frozen doc.",
+      "date": "2026-11-02"
     }
   ]
 }

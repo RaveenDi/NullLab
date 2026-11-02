@@ -19,15 +19,10 @@ def main():
     ap.add_argument("--out", default="result.json")
     a = ap.parse_args()
     sys.path.insert(0, os.getcwd())
-    import numpy  # noqa: F401  heavy imports before the network / file allow-list is applied
+    from run import _block_network, preload_heavy
+    preload_heavy()  # library imports + the KNN ctypes warm-up first (train.py NOT imported yet)
+    _block_network()  # then the block, so train.py's module-level code runs sandboxed
     import train
-    try:  # G6: sklearn's KNN loads native thread-pool libraries via ctypes on first use; do it BEFORE dlopen is blocked
-        from sklearn.neighbors import KNeighborsClassifier
-        KNeighborsClassifier(n_neighbors=1).fit([[0.0], [1.0]], [0, 1]).predict([[0.2]])  # resolves + caches the ctypes symbols
-    except Exception:  # noqa: BLE001  (older/newer sklearn layout: nothing to pre-load)
-        pass
-    from run import _block_network
-    _block_network()
     mods = {}
     for c in CONFIGS:
         spec = importlib.util.spec_from_file_location(c, c + ".py")

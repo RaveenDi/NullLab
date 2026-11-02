@@ -31,6 +31,11 @@ MODNAME = "train_g9"
 def _worker(args):
     import functools
     import threading
+    import importlib.util
+    _sp = importlib.util.spec_from_file_location("nulllab_sandbox_run", ROOT / "sandbox" / "run.py")  # by path: -I keeps the repo off sys.path
+    _sbx = importlib.util.module_from_spec(_sp)
+    _sp.loader.exec_module(_sbx)
+    _sbx.preload_heavy()  # library imports first; the compiled source is NOT executed yet
     import numpy as np
     import pandas as pd
     import warnings
@@ -238,7 +243,9 @@ def _worker(args):
     mod = type(sys)(MODNAME)
     mod.__dict__["__name__"] = MODNAME
     sys.modules[MODNAME] = mod
-    exec(compile(src, "train_g9.py", "exec"), mod.__dict__)
+    code = compile(src, "train_g9.py", "exec")
+    _sbx._block_network()  # everything the worker itself needs is read; now no network, no files outside cwd, no spawn / ctypes loads
+    exec(code, mod.__dict__)
     for k, v in (args.get("overrides") or {}).items():
         if k in mod.__dict__:
             mod.__dict__[k] = v
@@ -324,12 +331,13 @@ def _trace_uncached(train_src, case_dir, seed, profile, record_fns, cols, timeou
         env = {k: v for k, v in os.environ.items() if k.upper() in ("SYSTEMROOT", "PATH", "TEMP", "TMP", "COMSPEC", "PATHEXT", "WINDIR")}
         env["OMP_NUM_THREADS"] = "1"
         env["PYTHONHASHSEED"] = "0"
+        from sandbox.limits import run_limited  # parent side only (the `-I` worker has no repo on sys.path)
         try:
-            r = subprocess.run([sys.executable, "-I", str(HERE), "--worker", str(td / "args.json")], cwd=str(td), env=env, capture_output=True, text=True, timeout=timeout)
+            r = run_limited([sys.executable, "-I", str(HERE), "--worker", str(td / "args.json")], cwd=str(td), env=env, timeout=timeout)
         except subprocess.TimeoutExpired:
             return {"status": "timeout", "events": []}
         if not (td / "out.json").exists():
-            return {"status": "crash", "error": "worker produced no output", "tb": (r.stderr or "")[-1200:], "events": []}
+            return {"status": "crash", "error": "worker produced no output" + (f" ({r.limit_hit})" if getattr(r, "limit_hit", None) else ""), "tb": (r.stderr or "")[-1200:], "events": []}
         return _decode_trace(json.loads((td / "out.json").read_text(encoding="utf-8")))
 
 

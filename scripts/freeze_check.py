@@ -146,6 +146,15 @@ def acknowledged(path: str, old: str, new: str) -> bool:
     )
 
 
+def _acknowledged_old_forms(path: str, got: str):
+    """(LF hash, CRLF hash) of the pre-change content when the changelog records the transition to the current content, else None.
+    Needed for the G8 combined digest, which was computed over the old bytes (see check_logs)."""
+    for c in load_changelog():
+        if c["path"] == path and c["new_sha256"] == got and c.get("reason") and c.get("old_sha256_crlf"):
+            return c["old_sha256"], c["old_sha256_crlf"]
+    return None
+
+
 def _data_skippable(rel: str) -> bool:
     return ALLOW_MISSING_DATA and rel.startswith("real/") and rel.endswith("/data.csv") and not (ROOT / rel).exists()
 
@@ -223,7 +232,8 @@ def check_logs() -> list[str]:
     if g8:
         # each file may have been on disk as LF or CRLF when the digest was taken: try every combination (2^11)
         forms = {
-            p: (
+            p: _acknowledged_old_forms(p, lf_sha(ROOT / p))  # a file changed after the G8 run: the digest covers its old bytes
+            or (
                 hashlib.sha256(lf_bytes(ROOT / p)).hexdigest(),
                 hashlib.sha256(lf_bytes(ROOT / p).replace(b"\n", b"\r\n")).hexdigest(),
             )
