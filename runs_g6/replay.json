@@ -1,0 +1,145 @@
+{
+ "g5-r1/g4_freight_delay": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r1/g4_pump_inspection": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r1/g4_assay_replicates": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r1/clean_control": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": false
+ },
+ "g5-r1/clean_group_correct": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix B names column(s) ['c_c95911'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "hard_case": false
+ },
+ "g5-r1/clean_wine_correct": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix A names column(s) ['c_55565a'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "hard_case": false
+ },
+ "g5-r1/g4_visit_history_clean": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": false
+ },
+ "g5-r2/g4_freight_delay": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r2/g4_pump_inspection": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r2/g4_crop_irrigation": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r2/g4_assay_replicates": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r2/clean_control": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix B names column(s) ['c_4a669f'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "hard_case": false
+ },
+ "g5-r2/clean_group_correct": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix A names column(s) ['c_c95911'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "hard_case": false
+ },
+ "g5-r2/clean_wine_correct": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix A names column(s) ['c_55565a'] that its cited line does not mention (a column seen only in the data head cannot be justified)",
+   "SPLIT-USE: fix B introduces an ordered hold-out (['random splitter replaced by a deterministic hold-out']) but the excerpt states no temporal intended use"
+  ],
+  "hard_case": false
+ },
+ "g5-r2/g4_visit_history_clean": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": false
+ },
+ "g5-r3/g4_freight_delay": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r3/g4_pump_inspection": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r3/g4_crop_irrigation": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r3/g4_assay_replicates": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": true
+ },
+ "g5-r3/clean_control": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix B names column(s) ['c_4a669f'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "hard_case": false
+ },
+ "g5-r3/clean_group_correct": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix A names column(s) ['c_c95911'] that its cited line does not mention (a column seen only in the data head cannot be justified)"
+  ],
+  "hard_case": false
+ },
+ "g5-r3/clean_wine_correct": {
+  "verdict": "REJECT",
+  "violations": [
+   "FEATURE-REASON: fix A names column(s) ['c_f20066'] that its cited line does not mention (a column seen only in the data head cannot be justified)",
+   "SPLIT-USE: fix B introduces an ordered hold-out (['positional slice', 'random splitter replaced by a deterministic hold-out']) but the excerpt states no temporal intended use"
+  ],
+  "hard_case": false
+ },
+ "g5-r3/g4_visit_history_clean": {
+  "verdict": "ACCEPT",
+  "violations": [],
+  "hard_case": false
+ },
+ "g6-ref/civilwar_apparent": {
+  "verdict": "REJECT",
+  "violations": [
+   "fix_B: SPLIT changed: evaluation splitter calls differ (removed ['StratifiedKFold(n_splits=k, random_state=seed, shuffle=True)'], added []) but no declared step has kind 'split'"
+  ]
+ },
+ "g6-ref/esl_selection": {
+  "verdict": "ACCEPT",
+  "violations": []
+ }
+}

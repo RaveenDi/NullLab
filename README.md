@@ -8,6 +8,18 @@ preregisters three competing hypotheses, writes and executes a controlled re-eva
 returns SURVIVED, FALSIFIED or INCONCLUSIVE with per-seed (unpaired) bootstrap confidence intervals over three seeds. If a claim
 holds up, it says so. Built for the Meta Global AI Developer Hackathon (Push the Frontier).
 
+## Latest result: G6, a real published correction ([docs/EVAL-6.md](docs/EVAL-6.md))
+
+| Case | Provenance | Published correction | NullLab loop (3 live repeats) | B3 reading only |
+|---|---|---|---|---|
+| Civil-war onset, Muchlinski et al. 2016; flaw documented by Neunhoeffer & Sternberg 2019 (Political Analysis) | **REAL-PINNED** (Dataverse doi:10.7910/DVN/KRKWK8, md5-pinned) | PR-AUC 0.43 → 0.07 (+0.36) | sign + 3/3; +0.23 / +0.20 / +0.20; within ±0.15 in **1/3** | right 3/3 |
+| Screening before CV, ESL §7.10.2 | **TEXTBOOK** | accuracy 0.97 → 0.50 (+0.47) | +0.53 / +0.55 / +0.43, 3/3 | right 3/3 |
+| Correct variants of both | same | none | **0/6** false alarms (2 INCONCLUSIVE) | 3/6 false alarms |
+
+Preregistered G6 acceptance: **FAIL** (real-case magnitude 1/3). Memorisation probe: Spark recognises both sources.
+Spend +$2.84. `python g6.py ref|replay|rule|probe|run <r>|score`; cases in `real/`, host-only truth in `eval/g6_truth.json`,
+rebuild data with `python eval/build_g6.py <SambnisImp.csv>`. Full suite: 77 passed.
+
 ## Setup (5 commands)
 
 ```

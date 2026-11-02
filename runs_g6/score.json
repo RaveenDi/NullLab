@@ -1,0 +1,924 @@
+{
+ "rule_sha256": "90f6f43d3f457c52b91eb302fe91a6d06c307149ca387892323cd2eeb540aa09",
+ "acceptance": {
+  "a_civilwar_reproduces": "1/3",
+  "a_pass": false,
+  "b_esl_reproduces": "3/3",
+  "b_pass": true,
+  "c_clean_false_alarms": "0/6",
+  "c_pass": true,
+  "clean_inconclusive": 2,
+  "leaky_inconclusive": 0,
+  "retries": 6,
+  "b3_gets_it": {
+   "civilwar_apparent": "3/3",
+   "esl_selection": "3/3"
+  },
+  "b3_clean_false_alarms": "3/6",
+  "PASS": false
+ },
+ "variance": {
+  "civilwar_apparent": {
+   "loop_inflation_mean_per_repeat": [
+    0.231,
+    0.203,
+    0.203
+   ],
+   "sd": 0.016,
+   "b3_fix_both_pp": [
+    24.0,
+    29.0,
+    26.0
+   ]
+  },
+  "civilwar_temporal_clean": {
+   "loop_inflation_mean_per_repeat": [
+    null,
+    null,
+    0.003
+   ],
+   "sd": null,
+   "b3_fix_both_pp": [
+    13.0,
+    14.0,
+    13.5
+   ]
+  },
+  "esl_selection": {
+   "loop_inflation_mean_per_repeat": [
+    0.527,
+    0.549,
+    0.433
+   ],
+   "sd": 0.062,
+   "b3_fix_both_pp": [
+    47.0,
+    47.0,
+    47.0
+   ]
+  },
+  "esl_selection_clean": {
+   "loop_inflation_mean_per_repeat": [
+    0.0,
+    -0.06,
+    0.047
+   ],
+   "sd": 0.054,
+   "b3_fix_both_pp": [
+    0.0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "cases": {
+  "civilwar_apparent": {
+   "r1": {
+    "loop": {
+     "sign": "+",
+     "per_seed": [
+      "+",
+      "0",
+      "+"
+     ],
+     "retries": 1,
+     "metric": "pr_auc",
+     "claimed": [
+      0.395,
+      0.384,
+      0.373
+     ],
+     "controlled": [
+      0.112,
+      0.269,
+      0.081
+     ],
+     "inflation_mean": 0.231,
+     "inflation_per_seed": [
+      0.284,
+      0.116,
+      0.292
+     ],
+     "inflation_ci": [
+      [
+       0.137,
+       0.398
+      ],
+      [
+       -0.114,
+       0.272
+      ],
+      [
+       0.19,
+       0.385
+      ]
+     ],
+     "components_mean": {
+      "A": 0.224,
+      "B": -0.219,
+      "AxB": 0.226,
+      "both": 0.231
+     },
+     "fidelity": {
+      "fix_A": "only step(s) split_rows changed (split)",
+      "fix_B": "only step(s) tune_mtry changed (split)",
+      "fix_both": "only step(s) split_rows, tune_mtry changed (split/split)"
+     },
+     "A": "split_rows returns train==test (in-sample scoring)",
+     "B": "tune_mtry tunes mtry by 10-fold CV on the same rows later scored",
+     "kinds": {
+      "A": "split",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 35.0,
+      "fix_B": 5.0,
+      "fix_both": 40.0
+     },
+     "roc_auc_claimed_controlled": [
+      [
+       0.972,
+       0.9
+      ],
+      [
+       0.971,
+       0.947
+      ],
+      [
+       0.968,
+       0.893
+      ]
+     ],
+     "published_inflation": 0.36,
+     "magnitude_ok": true,
+     "published_in_ci_seeds": 2,
+     "reproduces": true
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 24.0,
+     "A": "train-test overlap: split_rows returns identical indices so final forest is evaluated in-sample (resubstitution)",
+     "B": "random row-level StratifiedKFold + ROC-AUC reporting on ~1% onset data leaks same-country/future info and overstates value vs PR-AUC for forecasting unseen country-years",
+     "culprit": "A",
+     "gets_it": true
+    }
+   },
+   "r2": {
+    "loop": {
+     "sign": "+",
+     "per_seed": [
+      "+",
+      "0",
+      "+"
+     ],
+     "retries": 0,
+     "metric": "pr_auc",
+     "claimed": [
+      0.395,
+      0.384,
+      0.373
+     ],
+     "controlled": [
+      0.174,
+      0.293,
+      0.077
+     ],
+     "inflation_mean": 0.203,
+     "inflation_per_seed": [
+      0.222,
+      0.092,
+      0.296
+     ],
+     "inflation_ci": [
+      [
+       0.046,
+       0.368
+      ],
+      [
+       -0.122,
+       0.262
+      ],
+      [
+       0.192,
+       0.389
+      ]
+     ],
+     "components_mean": {
+      "A": 0.224,
+      "B": 0.0,
+      "AxB": -0.021,
+      "both": 0.203
+     },
+     "fidelity": {
+      "fix_A": "only step(s) split_rows changed (split)",
+      "fix_B": "only step(s) tune_mtry changed (split)",
+      "fix_both": "only step(s) split_rows, tune_mtry changed (split/split)"
+     },
+     "A": "train-test reuse: final model fit and scored on same rows (in-sample evaluation)",
+     "B": "random shuffled 10-fold CV for tuning instead of forward-looking ordered CV for forecasting",
+     "kinds": {
+      "A": "split",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 35.0,
+      "fix_B": 3.0,
+      "fix_both": 38.0
+     },
+     "roc_auc_claimed_controlled": [
+      [
+       0.972,
+       0.893
+      ],
+      [
+       0.971,
+       0.953
+      ],
+      [
+       0.968,
+       0.886
+      ]
+     ],
+     "published_inflation": 0.36,
+     "magnitude_ok": false,
+     "published_in_ci_seeds": 2,
+     "reproduces": false
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 29.0,
+     "A": "train-test identical: split_rows returns idx,idx so final forest is scored in-sample on its training rows",
+     "B": "random StratifiedKFold tuning/reporting on dependent country-year panel with contemporaneous/history features, not out-of-country/out-of-time forecast split",
+     "culprit": "A",
+     "gets_it": true
+    }
+   },
+   "r3": {
+    "loop": {
+     "sign": "+",
+     "per_seed": [
+      "+",
+      "0",
+      "+"
+     ],
+     "retries": 0,
+     "metric": "pr_auc",
+     "claimed": [
+      0.395,
+      0.384,
+      0.373
+     ],
+     "controlled": [
+      0.174,
+      0.293,
+      0.077
+     ],
+     "inflation_mean": 0.203,
+     "inflation_per_seed": [
+      0.222,
+      0.092,
+      0.296
+     ],
+     "inflation_ci": [
+      [
+       0.046,
+       0.368
+      ],
+      [
+       -0.122,
+       0.262
+      ],
+      [
+       0.192,
+       0.389
+      ]
+     ],
+     "components_mean": {
+      "A": 0.224,
+      "B": 0.0,
+      "AxB": -0.021,
+      "both": 0.203
+     },
+     "fidelity": {
+      "fix_A": "only step(s) split_rows changed (split)",
+      "fix_B": "only step(s) tune_mtry changed (split)",
+      "fix_both": "only step(s) split_rows, tune_mtry changed (split/split)"
+     },
+     "A": "train-test reuse (in-sample scoring)",
+     "B": "random 10-fold CV for tuning ignores year ordering",
+     "kinds": {
+      "A": "split",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 35.0,
+      "fix_B": 5.0,
+      "fix_both": 38.0
+     },
+     "roc_auc_claimed_controlled": [
+      [
+       0.972,
+       0.893
+      ],
+      [
+       0.971,
+       0.953
+      ],
+      [
+       0.968,
+       0.886
+      ]
+     ],
+     "published_inflation": 0.36,
+     "magnitude_ok": false,
+     "published_in_ci_seeds": 2,
+     "reproduces": false
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 26.0,
+     "A": "train-test identity: split_rows returns idx,idx so final forest is fit and scored on same country-years (in-sample training error, not forecast on unseen data)",
+     "B": "random StratifiedKFold over pooled country-years with contemporaneous covariates leaks country/time dependence instead of grouped/temporal out-of-sample forecast",
+     "culprit": "A",
+     "gets_it": true
+    }
+   }
+  },
+  "civilwar_temporal_clean": {
+   "r1": {
+    "loop": {
+     "sign": "INCONCLUSIVE",
+     "retries": 1,
+     "reason": [
+      "plan: FEATURE-REASON: fix A names column(s) ['army85', 'autch98', 'demch98', 'polch98'] but its cited line is not verbatim in train.py or the excerpt"
+     ],
+     "false_alarm": false
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 13.0,
+     "A": "Uses contemporaneous / future-coded covariates (same-year GDP, trade, polity and *98/army85 variables) that would not be available at forecast time",
+     "B": "Temporal-country leakage: year split leaves same wars/countries on both sides via ongoing-war indicators (warhist/ptime/nat_war/tnatwar) and shuffled StratifiedKFold tuning ignores time/country clustering",
+     "culprit": "B",
+     "false_alarm": true
+    }
+   },
+   "r2": {
+    "loop": {
+     "sign": "INCONCLUSIVE",
+     "retries": 1,
+     "reason": [
+      "plan: FEATURE-REASON: fix A names column(s) ['autch98', 'demch98', 'polch98'] but its cited line is not verbatim in train.py or the excerpt"
+     ],
+     "false_alarm": false
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 14.0,
+     "A": "uses same-year contemporaneous covariates including ongoing-war/economic variables instead of values lagged and available at forecast time",
+     "B": "random shuffled StratifiedKFold tuning and full-period feature coding/imputation before the 1990 temporal split leaks within-war future information into model selection",
+     "culprit": "A",
+     "false_alarm": true
+    }
+   },
+   "r3": {
+    "loop": {
+     "sign": "0",
+     "per_seed": [
+      "0",
+      "0",
+      "0"
+     ],
+     "retries": 0,
+     "metric": "pr_auc",
+     "claimed": [
+      0.092,
+      0.081,
+      0.08
+     ],
+     "controlled": [
+      0.082,
+      0.082,
+      0.079
+     ],
+     "inflation_mean": 0.003,
+     "inflation_per_seed": [
+      0.01,
+      -0.002,
+      0.001
+     ],
+     "inflation_ci": [
+      [
+       -0.046,
+       0.094
+      ],
+      [
+       -0.054,
+       0.056
+      ],
+      [
+       -0.075,
+       0.061
+      ]
+     ],
+     "components_mean": {
+      "A": 0.015,
+      "B": -0.007,
+      "AxB": -0.006,
+      "both": 0.003
+     },
+     "fidelity": {
+      "fix_A": "only step(s) split_rows changed (split)",
+      "fix_B": "only step(s) tune_mtry changed (split)",
+      "fix_both": "only step(s) split_rows, tune_mtry changed (split/split)"
+     },
+     "A": "Temporal gap / autocorrelation leakage in final train-test split",
+     "B": "Random shuffled CV for tuning leaks temporal structure",
+     "kinds": {
+      "A": "split",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 6.0,
+      "fix_B": 2.5,
+      "fix_both": 8.0
+     },
+     "roc_auc_claimed_controlled": [
+      [
+       0.896,
+       0.909
+      ],
+      [
+       0.899,
+       0.909
+      ],
+      [
+       0.898,
+       0.898
+      ]
+     ],
+     "false_alarm": false
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 13.5,
+     "A": "Uses contemporaneous same-year covariates that would not be available at forecast time instead of lagged predictors",
+     "B": "Missing-value imputation and derived historical codings computed on full 1945-2000 data before the 1990 temporal split",
+     "culprit": "A",
+     "false_alarm": true
+    }
+   }
+  },
+  "esl_selection": {
+   "r1": {
+    "loop": {
+     "sign": "+",
+     "per_seed": [
+      "+",
+      "+",
+      "+"
+     ],
+     "retries": 1,
+     "metric": "accuracy",
+     "claimed": [
+      1.0,
+      0.98,
+      1.0
+     ],
+     "controlled": [
+      0.4,
+      0.4,
+      0.6
+     ],
+     "inflation_mean": 0.527,
+     "inflation_per_seed": [
+      0.6,
+      0.58,
+      0.4
+     ],
+     "inflation_ci": [
+      [
+       0.3,
+       0.9
+      ],
+      [
+       0.28,
+       0.88
+      ],
+      [
+       0.1,
+       0.7
+      ]
+     ],
+     "components_mean": {
+      "A": 0.433,
+      "B": -0.007,
+      "AxB": 0.1,
+      "both": 0.527
+     },
+     "fidelity": {
+      "fix_A": "only step(s) claimed_eval changed (fit_scope)",
+      "fix_B": "only step(s) claimed_eval changed (split)",
+      "fix_both": "only step(s) claimed_eval changed (fit_scope/split)"
+     },
+     "A": "screening on full data before CV leaks test labels into feature selection",
+     "B": "cross-validated estimate reuses same 50 samples with no held-out test population",
+     "kinds": {
+      "A": "fit_scope",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 42.0,
+      "fix_B": 2.0,
+      "fix_both": 44.0
+     },
+     "published_inflation": 0.47,
+     "magnitude_ok": true,
+     "published_in_ci_seeds": 3,
+     "reproduces": true
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 47.0,
+     "A": "Feature screening (SelectKBest top 100 by correlation with labels) performed on full dataset before cross-validation, leaking test-fold label information into feature selection",
+     "B": "N/A - no second independent inflation mechanism identified",
+     "culprit": "A",
+     "gets_it": true
+    }
+   },
+   "r2": {
+    "loop": {
+     "sign": "+",
+     "per_seed": [
+      "+",
+      "+",
+      "+"
+     ],
+     "retries": 0,
+     "metric": "accuracy",
+     "claimed": [
+      1.0,
+      0.98,
+      1.0
+     ],
+     "controlled": [
+      0.4,
+      0.467,
+      0.467
+     ],
+     "inflation_mean": 0.549,
+     "inflation_per_seed": [
+      0.6,
+      0.513,
+      0.533
+     ],
+     "inflation_ci": [
+      [
+       0.333,
+       0.8
+      ],
+      [
+       0.247,
+       0.8
+      ],
+      [
+       0.267,
+       0.733
+      ]
+     ],
+     "components_mean": {
+      "A": 0.433,
+      "B": -0.007,
+      "AxB": 0.122,
+      "both": 0.549
+     },
+     "fidelity": {
+      "fix_A": "only step(s) claimed_eval changed (fit_scope)",
+      "fix_B": "only step(s) claimed_eval changed (split)",
+      "fix_both": "only step(s) claimed_eval changed (fit_scope/split)"
+     },
+     "A": "screening on full data before CV leaks test labels into feature selection",
+     "B": "reusing the same 50 samples for selection and CV instead of a held-out test population",
+     "kinds": {
+      "A": "fit_scope",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 45.0,
+      "fix_B": 3.0,
+      "fix_both": 47.0
+     },
+     "published_inflation": 0.47,
+     "magnitude_ok": true,
+     "published_in_ci_seeds": 3,
+     "reproduces": true
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 47.0,
+     "A": "Feature screening (SelectKBest top 100) done on full dataset before CV, leaking test-fold label info into feature choice",
+     "B": "Duplicate/near-duplicate samples split across CV train-test folds allowing 1-NN to memorize",
+     "culprit": "AxB",
+     "gets_it": true
+    }
+   },
+   "r3": {
+    "loop": {
+     "sign": "+",
+     "per_seed": [
+      "+",
+      "+",
+      "+"
+     ],
+     "retries": 0,
+     "metric": "accuracy",
+     "claimed": [
+      1.0,
+      0.98,
+      1.0
+     ],
+     "controlled": [
+      0.52,
+      0.56,
+      0.6
+     ],
+     "inflation_mean": 0.433,
+     "inflation_per_seed": [
+      0.48,
+      0.42,
+      0.4
+     ],
+     "inflation_ci": [
+      [
+       0.28,
+       0.68
+      ],
+      [
+       0.22,
+       0.6
+      ],
+      [
+       0.2,
+       0.6
+      ]
+     ],
+     "components_mean": {
+      "A": 0.433,
+      "B": 0.007,
+      "AxB": -0.007,
+      "both": 0.433
+     },
+     "fidelity": {
+      "fix_A": "only step(s) claimed_eval changed (fit_scope)",
+      "fix_B": "only step(s) claimed_eval changed (split)",
+      "fix_both": "only step(s) claimed_eval changed (fit_scope/split)"
+     },
+     "A": "Screening 100 features on the full 50 samples before CV leaks test-fold labels into selection",
+     "B": "Estimating error by 5-fold CV reusing the same 50 screened samples instead of a held-out test population",
+     "kinds": {
+      "A": "fit_scope",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 44.0,
+      "fix_B": 5.0,
+      "fix_both": 47.0
+     },
+     "published_inflation": 0.47,
+     "magnitude_ok": true,
+     "published_in_ci_seeds": 3,
+     "reproduces": true
+    },
+    "b3": {
+     "leak": true,
+     "fix_both_pp": 47.0,
+     "A": "Feature screening to 100 best-correlated genes done on full n=50 before CV, so test folds leak into feature selection",
+     "B": "Single lucky shuffled 5-fold split/seed reported for high-variance 1-NN without averaging over seeds",
+     "culprit": "A",
+     "gets_it": true
+    }
+   }
+  },
+  "esl_selection_clean": {
+   "r1": {
+    "loop": {
+     "sign": "0",
+     "per_seed": [
+      "0",
+      "0",
+      "0"
+     ],
+     "retries": 1,
+     "metric": "accuracy",
+     "claimed": [
+      0.54,
+      0.58,
+      0.56
+     ],
+     "controlled": [
+      0.54,
+      0.58,
+      0.56
+     ],
+     "inflation_mean": 0.0,
+     "inflation_per_seed": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "inflation_ci": [
+      [
+       -0.181,
+       0.2
+      ],
+      [
+       -0.18,
+       0.2
+      ],
+      [
+       -0.18,
+       0.2
+      ]
+     ],
+     "components_mean": {
+      "A": 0.0,
+      "B": 0.0,
+      "AxB": 0.0,
+      "both": 0.0
+     },
+     "fidelity": {
+      "fix_A": "only step(s) cv_predict changed (fit_scope)",
+      "fix_B": "only step(s) cv_predict changed (split)",
+      "fix_both": "only step(s) cv_predict changed (fit_scope/split)"
+     },
+     "A": "Selection-bias from screening outside the CV folds (screen uses labels so must be refit inside each fold)",
+     "B": "Optimistic CV split / test leakage in 1NN evaluation (test rows must stay held out of screen and fit)",
+     "kinds": {
+      "A": "fit_scope",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 0,
+      "fix_B": 0,
+      "fix_both": 0
+     },
+     "false_alarm": false
+    },
+    "b3": {
+     "leak": false,
+     "fix_both_pp": 0.0,
+     "A": "no feature-selection leakage - SelectKBest rerun inside each fold on training only",
+     "B": "no test-label or duplicate leakage in CV loop",
+     "culprit": null,
+     "false_alarm": false
+    }
+   },
+   "r2": {
+    "loop": {
+     "sign": "0",
+     "per_seed": [
+      "0",
+      "0",
+      "0"
+     ],
+     "retries": 1,
+     "metric": "accuracy",
+     "claimed": [
+      0.54,
+      0.58,
+      0.56
+     ],
+     "controlled": [
+      0.62,
+      0.62,
+      0.62
+     ],
+     "inflation_mean": -0.06,
+     "inflation_per_seed": [
+      -0.08,
+      -0.04,
+      -0.06
+     ],
+     "inflation_ci": [
+      [
+       -0.28,
+       0.1
+      ],
+      [
+       -0.24,
+       0.16
+      ],
+      [
+       -0.24,
+       0.14
+      ]
+     ],
+     "components_mean": {
+      "A": 0.0,
+      "B": -0.06,
+      "AxB": 0.0,
+      "both": -0.06
+     },
+     "fidelity": {
+      "fix_A": "only step(s) cv_predict changed (fit_scope)",
+      "fix_B": "only step(s) cv_predict changed (split)",
+      "fix_both": "only step(s) cv_predict changed (fit_scope/split)"
+     },
+     "A": "feature screening fitted outside CV folds (selection leakage)",
+     "B": "optimistic CV split / seed-dependent test population handling",
+     "kinds": {
+      "A": "fit_scope",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 0,
+      "fix_B": 0,
+      "fix_both": 0
+     },
+     "false_alarm": false
+    },
+    "b3": {
+     "leak": false,
+     "fix_both_pp": 0.0,
+     "A": "none",
+     "B": "none",
+     "culprit": null,
+     "false_alarm": false
+    }
+   },
+   "r3": {
+    "loop": {
+     "sign": "0",
+     "per_seed": [
+      "0",
+      "0",
+      "0"
+     ],
+     "retries": 0,
+     "metric": "accuracy",
+     "claimed": [
+      0.54,
+      0.58,
+      0.56
+     ],
+     "controlled": [
+      0.48,
+      0.6,
+      0.46
+     ],
+     "inflation_mean": 0.047,
+     "inflation_per_seed": [
+      0.06,
+      -0.02,
+      0.1
+     ],
+     "inflation_ci": [
+      [
+       -0.14,
+       0.24
+      ],
+      [
+       -0.2,
+       0.18
+      ],
+      [
+       -0.1,
+       0.3
+      ]
+     ],
+     "components_mean": {
+      "A": 0.0,
+      "B": 0.047,
+      "AxB": 0.0,
+      "both": 0.047
+     },
+     "fidelity": {
+      "fix_A": "only step(s) cv_predict changed (fit_scope)",
+      "fix_B": "only step(s) cv_predict changed (split)",
+      "fix_both": "only step(s) cv_predict changed (fit_scope/split)"
+     },
+     "A": "feature screening scope (SelectKBest inside each fold)",
+     "B": "cross-validation split scheme (5-fold StratifiedKFold)",
+     "kinds": {
+      "A": "fit_scope",
+      "B": "split"
+     },
+     "planner_pred_pp": {
+      "fix_A": 1.0,
+      "fix_B": 2.0,
+      "fix_both": 2.5
+     },
+     "false_alarm": false
+    },
+    "b3": {
+     "leak": false,
+     "fix_both_pp": 0.0,
+     "A": "",
+     "B": "",
+     "culprit": null,
+     "false_alarm": false
+    }
+   }
+  }
+ }
+}

@@ -20,6 +20,22 @@ def index():
     return (ROOT / "report" / "index.html").read_text(encoding="utf-8")
 
 
+@app.get("/api/demo")
+def api_demo():
+    """Everything the demo page shows, read fresh from the run files (the page falls back to its embedded copy)."""
+    from report import spa_data
+    return JSONResponse(spa_data.build())
+
+
+@app.get("/{case}.html")
+def case_page(case: str):
+    """Per-case MOCK pages linked from the limits drawer (same relative links work from file://)."""
+    p = ROOT / "report" / f"{case}.html"
+    if case not in pipeline.cases() or not p.exists():
+        raise HTTPException(404)
+    return FileResponse(p)
+
+
 @app.get("/verdict/{case}")
 def verdict(case: str):
     p = ROOT / "report" / f"{case}.html"

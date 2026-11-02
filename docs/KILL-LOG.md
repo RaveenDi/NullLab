@@ -52,3 +52,18 @@ Evidence: [EVAL-5.md](EVAL-5.md), `runs_g5/score.json`. Rule sha256 `734de856…
 - **Residual risk:** wine r2 was a declared, in-scope but unjustified fix (a named column drop plus an ordered split). The guard checks scope, not justification.
 - **Independence:** the hard-case repeats are near-identical, so they are weakly independent.
 - **Decision:** not pivoting. Keep "execution beats reading on sign/verdict" as the claim, scoped to synthetic cases.
+
+## 2026-11-01, G6 (real published case + textbook case): preregistered acceptance FAILS on the real-case magnitude clause
+Evidence: [EVAL-6.md](EVAL-6.md), `runs_g6/score.json`. Rule sha256 `90f6f43d…` logged at 08:24:55Z (13:54:55 SLT / 03:24:55 ET), before any G6 live call.
+
+| Clause | Measured | Pass? |
+|---|---|---|
+| (a) civil war (Muchlinski 2016; correction by Neunhoeffer & Sternberg 2019, PR-AUC +0.36) reproduced in ≥ 2/3 | **1/3** (sign + in 3/3; mean +0.231 / +0.203 / +0.203 vs +0.36 ± 0.15) | **no** |
+| (b) ESL 7.10.2 (+0.47 accuracy) reproduced in ≥ 2/3 | 3/3 (+0.53 / +0.55 / +0.43) | yes |
+| (c) clean variants: 0 loop false alarms | 0/6 (2 INCONCLUSIVE) | yes |
+
+- **Cause of (a):** the planner fixed the in-sample scoring with a random stratified hold-out, not the temporal hold-out the forecasting claim requires; the guard does not require a split to match the claimed use, it only blocks ordered splits that the claim does not support. Not rescued: no prompt or rule was changed after the runs.
+- **Execution did not beat reading here.** B3 got both leaky cases right with the right magnitude in 6/6 runs (loop 4/6). B3 false-alarmed on the clean civil-war pipeline 3/3; the loop never did.
+- **Contamination:** the memorisation probe names Muchlinski et al. (2016) from the excerpt and ESL from the full view. These cases cannot separate experiment from recall.
+- **Spend:** +$2.84, 34 calls (budget $3.50).
+- **Decision:** do not claim "NullLab reproduces published corrections". Claim, scoped: on one real published pipeline with pinned data, the loop finds the documented flaw, measures an inflation in the published direction (published value inside 2/3 seed CIs), and does not false-alarm on the corrected pipeline, while reading alone false-alarms on it. Next step if time allows: a de-identified real case (renamed columns, paraphrased domain) with a new preregistration, and a guard rule that a forecast claim's split fix must be temporal.

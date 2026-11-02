@@ -7,12 +7,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-CSS = """:root{--bg:#0e1116;--panel:#161b22;--line:#30363d;--txt:#e6e9ef;--dim:#9aa4b2;
---blue:#58a6ff;--red:#f85149;--green:#3fb950;--amber:#d29922;--mock:#f0883e}
-[data-theme=light]{--bg:#ffffff;--panel:#f3f4f6;--line:#d7dce2;--txt:#16191e;--dim:#5b6572;
---blue:#0969da;--red:#cf222e;--green:#1a7f37;--amber:#9a6700;--mock:#bc4c00}
+CSS = """:root{--bg:#F2EFEA;--panel:#ffffff;--line:#E3DED6;--txt:#111111;--dim:#6B655E;
+--blue:#111111;--red:#B23A0E;--green:#111111;--amber:#6B655E;--mock:#A8A096}
+[data-theme=dark]{--bg:#121110;--panel:#1B1A18;--line:#2E2B28;--txt:#F3EFE9;--dim:#A39C92;
+--blue:#F3EFE9;--red:#FF8A5B;--green:#F3EFE9;--amber:#A39C92;--mock:#6F685F}
 *{box-sizing:border-box}body{font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
-background:var(--bg);color:var(--txt);margin:0;padding:20px}
+background:var(--bg);color:var(--txt);margin:0;padding:16px}
+#ctrl{background:#E8501F!important}
 .wrap{max-width:1020px;margin:auto}
 .topbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:space-between}
 h1{font-size:22px;margin:8px 0}h2{font-size:17px;margin:26px 0 8px}.sub{color:var(--dim)}
@@ -123,8 +124,9 @@ def render_case(run: dict) -> str:
 <title>NullLab verdict: {html.escape(run['case'])}</title><style>{CSS}</style>
 <div class=wrap>
 <div class=topbar><h1>NullLab</h1><button onclick="document.documentElement.dataset.theme=
-document.documentElement.dataset.theme==='light'?'':'light';try{{localStorage.nlt=document.documentElement.dataset.theme}}catch(e){{}}">
-dark / light</button></div>
+document.documentElement.dataset.theme==='dark'?'light':'dark';try{{localStorage.setItem('nl-theme',document.documentElement.dataset.theme)}}catch(e){{}}">
+light / dark</button></div>
+<script>try{{var t=localStorage.getItem('nl-theme');if(t)document.documentElement.dataset.theme=t}}catch(e){{}}</script>
 <p class=sub>Every AI can give you an answer; this one tries to prove it wrong.</p>
 <span class="wm {wm}">{run['provenance']}</span><span class=mock>{html.escape(run['mode'])}</span>
 <h2>Claim</h2><p>{html.escape(run['claim']['claim'])}</p>
@@ -165,6 +167,8 @@ def _ablation_table(ab) -> str:
 
 
 def render_all() -> int:
+    """Per-case verdict pages from runs/*.json (MOCK plumbing runs, labelled as such) + the demo SPA (index.html).
+    The SPA is assembled by report/spa.py from report/assets/ and the data built by report/spa_data.py."""
     out = ROOT / "report"
     runs = {}
     for p in sorted((ROOT / "runs").glob("*.json")):
@@ -173,86 +177,8 @@ def render_all() -> int:
         run = json.loads(p.read_text())
         runs[run["case"]] = run
         (out / f"{run['case']}.html").write_text(render_case(run), encoding="utf-8")
-    ab = {}
-    abp = ROOT / "runs" / "ablation.json"
-    if abp.exists():
-        ab = json.loads(abp.read_text())
-    payload = json.dumps({"runs": runs, "ablation": ab}).replace("</", "<\\/")
-    from report import g5_panel
-    G5_CSS = g5_panel.CSS
-    g5_html, g5_js = g5_panel.section()
-    g6_html, g6_js = "", ""
-    links = "".join(
-        f"<option value='{html.escape(c)}'>{html.escape(c)} · {r['provenance']} · {r['verdict']['verdict']}</option>"
-        for c, r in runs.items())
-    page = f"""<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>
-<title>NullLab — adversarial falsification demo</title><style>{CSS}{G5_CSS}</style>
-<div class=wrap>
-<div class=topbar><h1>NullLab</h1><div class=toolbar>
-<button onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'':'light';
-try{{localStorage.nlt=document.documentElement.dataset.theme}}catch(e){{}}">dark / light</button>
-<button class=go onclick="replay()">↻ replay the collapse</button></div></div>
-<p class=sub>Every AI can give you an answer; this one tries to prove it wrong. Pick a case — watch the
-claimed accuracy collapse under a controlled re-evaluation. <span class=mock>MOCK runs are labelled, never model results</span></p>
-{g6_html}
-<h2>Early single-case demos</h2>
-<div class=toolbar><label>case <select id=sel>{links}</select></label>
-<label title="Preview a runs/*.json file">upload <input type=file id=up accept=.json></label>
-<a id=plink href="#">open verdict page →</a></div>
-<div id=stage></div>
-<h2>Hypothesis tree (preregistered)</h2><div class=htree id=tree></div>
-<h2>Plan → Act → Verify → Recover</h2><div class=grid4 id=steps></div>
-<h2>Evidence</h2><div id=ev></div>
-<h2>Citations (verbatim)</h2><div id=cites></div>
-<h2>Baselines scoreboard</h2><div id=score>{_ablation_table(ab)}</div>
-{g5_html}
-<footer>NullLab · plan→act→verify→recover · sandbox: restricted subprocess (not Docker) ·
-<a href="https://arxiv.org/abs/2207.07048">Kapoor–Narayanan leakage taxonomy</a></footer>
-</div>
-<script>const DATA={payload};
-const $=id=>document.getElementById(id);
-function esc(s){{return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}}
-function show(c){{const r=DATA.runs[c];if(!r)return;
- const seeds=Object.entries(r.seeds||{{}});const m=k=>seeds.length?seeds.reduce((a,[,s])=>a+s[k],0)/seeds.length:0;
- const cl=m('claimed_acc'),ct=m('controlled_acc');
- const ci=seeds.map(([s,v])=>`[${{v.ci_lo>=0?'+':''}}${{v.ci_lo.toFixed(3)}}, ${{v.ci_hi>=0?'+':''}}${{v.ci_hi.toFixed(3)}}]`).join(' ');
- const dl=seeds.map(([,v])=>`${{v.delta>=0?'+':''}}${{v.delta.toFixed(3)}}`).join(' ');
- const wm=r.provenance==='REAL-PINNED'?'REAL':'SYNTH';
- $('stage').innerHTML=`<span class="wm ${{wm}}">${{r.provenance}}</span><span class=mock>${{esc(r.mode)}}</span>
- <p><b>Claim:</b> ${{esc(r.claim.claim)}}</p>
- <div class=bars><div class=bar id=claim style="height:${{(cl*260).toFixed(0)}}px"><b>${{(cl*100).toFixed(1)}}%</b>
- <small>claimed protocol</small></div>
- <div class=bar id=ctrl style="height:${{(cl*260).toFixed(0)}}px"><b>${{(ct*100).toFixed(1)}}%</b>
- <small>controlled re-evaluation</small></div>
- <div class="stamp ${{r.verdict.verdict}}" id=stamp>${{r.verdict.verdict}}</div></div>
- <p class=ci>Paired delta per seed ${{dl}} · 95% CIs ${{ci}}</p>
- <p><b>Why:</b> ${{esc(r.hyp.broken_assumption)}}</p>`;
- requestAnimationFrame(()=>requestAnimationFrame(()=>{{
-   const b=document.querySelector('#stage #ctrl');if(b)b.style.height=(ct*260).toFixed(0)+'px';
-   const s=$('stamp');if(s)s.classList.add('show');}}));
- $('tree').innerHTML=r.hyp.hypotheses.map(x=>
-  `<div class="${{x.id===r.hyp.primary?'hyp primary':'hyp'}}"><span class=tag>${{esc(x.id)}}${{x.id===r.hyp.primary?' ★ primary':''}}</span><br>${{esc(x.text)}}<br><span class=dir>${{esc(x.direction)}}</span> <span class=sig>predicted signature: ${{esc(x.predicted_signature)}}</span></div>`).join('')
-  +`<p class=sub>Preregistered before any run · sha256 ${{esc(r.hyp.prereg_sha256.slice(0,16))}} · split key: ${{esc(r.hyp.split_key||'')}}</p>`;
- const ph=['Plan','Act','Verify','Recover'];
- $('steps').innerHTML=ph.map(p=>{{const ms=r.log.filter(e=>e.phase===p).map(e=>esc(e.msg)).join('<br>');
-  return `<div class=step><h4>${{p}}</h4>${{ms||'<span class=sub>not needed</span>'}}</div>`}}).join('');
- $('ev').innerHTML=`<table><tr><th>seed<th>claimed acc<th>controlled acc<th>delta<th>95% CI<th>call</tr>${{seeds.map(([s,v])=>
-  `<tr><td>${{s}}<td>${{v.claimed_acc.toFixed(3)}}<td>${{v.controlled_acc.toFixed(3)}}<td>${{v.delta>=0?'+':''}}${{v.delta.toFixed(3)}}<td>[${{v.ci_lo.toFixed(3)}}, ${{v.ci_hi.toFixed(3)}}]<td>${{r.verdict.per_seed[s]||''}}`).join('')}}</table>`;
- const g=r.claim.grounding||{{}},ln=g.line_numbers||{{}};
- $('cites').innerHTML=`<div class=cite><b>Methods line</b>${{r.claim.methods_line_no||ln.methods_line_no?' (line '+(r.claim.methods_line_no||ln.methods_line_no)+')':''}}: “${{esc(r.claim.methods_line)}}”</div>
- <div class=cite><b>Code line</b>${{r.claim.code_line_no||ln.code_line_no?' (line '+(r.claim.code_line_no||ln.code_line_no)+')':''}}: <code>${{esc(r.claim.code_line)}}</code></div>
- <p class=sub>Grounding precision ${{g.precision}} (normalised-whitespace match at the reported line number).</p>`;
- $('plink').href=c+'.html';try{{localStorage.nlc=c}}catch(e){{}}}}
-function replay(){{show($('sel').value)}}
-$('sel').onchange=e=>show(e.target.value);
-$('up').onchange=e=>{{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
- rd.onload=()=>{{try{{const r=JSON.parse(rd.result);DATA.runs['uploaded:'+f.name]=r;
-  $('sel').insertAdjacentHTML('beforeend',`<option value="uploaded:${{f.name}}">uploaded:${{esc(f.name)}}</option>`);
-  $('sel').value='uploaded:'+f.name;show('uploaded:'+f.name);}}catch(err){{alert('not a run JSON: '+err)}}}};
- rd.readAsText(f);}};
-try{{document.documentElement.dataset.theme=localStorage.nlt||''}}catch(e){{}}
-show(localStorage.nlc&&DATA.runs[localStorage.nlc]?localStorage.nlc:$('sel').value);</script>{g5_js}{g6_js}"""
-    (out / "index.html").write_text(page, encoding="utf-8")
+    from report import spa
+    (out / "index.html").write_text(spa.build_page(), encoding="utf-8")
     return len(runs)
 
 

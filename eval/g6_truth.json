@@ -1,0 +1,45 @@
+{
+ "civilwar_apparent": {
+  "provenance": "REAL-PINNED",
+  "leaky": true,
+  "metric": "pr_auc",
+  "flaw": "apparent (in-sample) error reported as cross-validated: the CV-tuned, down-sampled random forest is scored on the same rows it was trained on (caret predict() without newdata)",
+  "original_paper": "Muchlinski, Siroky, He, Kocher (2016), Comparing Random Forest with Logistic Regression for Predicting Class-Imbalanced Civil War Onset Data, Political Analysis 24(1):87-103 (citation as given in the reanalysis' references; DOI not checked)",
+  "original_claim": "random forest ROC-AUC 0.91, 'cross-validated' (p. 96, fn. 7); superior predictive power vs logistic regression (p. 101)",
+  "reanalysis": "Neunhoeffer & Sternberg (2019), How Cross-Validation Can Go Wrong and What to Do About It, Political Analysis 27(1):101-106, doi:10.1017/pan.2018.39; author PDF https://sebastiansternberg.github.io/pdf/pa_cross_validation.pdf ; replication doi:10.7910/DVN/Y9KMJW",
+  "published_numbers": {
+   "procedure5_apparent_pr_auc": 0.43,
+   "procedure6_out_of_sample_pr_auc": 0.07,
+   "inflation_pr_auc": 0.36,
+   "source_text": "Section 4 and Online Appendix C.2: PR-AUC drops from 0.43 (Procedure 5, apparent error) to 0.07 (Procedure 6, train 1945-1989, test 1990-2000)",
+   "roc_auc_digitised_from_figure1_UNVERIFIED": {"procedure5": 0.97, "procedure6": 0.89, "note": "read off vector glyph positions in Figure 1 lower panel; about +-0.01; not stated in text"}
+  },
+  "related_reanalysis_not_reproduced": "Kapoor & Narayanan (2023), Leakage and the reproducibility crisis in ML-based science, Patterns 4(9):100804, arXiv:2207.07048, Table A1: train+test imputed together with rfImpute (outcome used); RF AUC reported 0.94 (reproduced 0.95), corrected 0.64. Not built: their raw pre-imputation data is only in CodeOcean capsule doi:10.24433/CO.4899453.v1, which returned HTTP 403 to automated download on 2026-11-01.",
+  "data": "SambnisImp.csv, Harvard Dataverse doi:10.7910/DVN/KRKWK8 version 1.0, file id 2701491, md5 5e570898c1c9335c6eeb6515ec9c8a28 (the same file ships in the reanalysis replication zip). 90 predictors per the reanalysis code (R/reanalysis.R) + year + warstds.",
+  "port_notes": "Python port (sklearn 1.9.1): per-class down-sampled bagged trees (30 peace, 90 war per tree, with replacement, 300 trees vs 1000), mtry grid (2,46,90) tuned by 10-fold stratified CV ROC-AUC (caret default grid for 90 predictors); PR-AUC = sklearn average_precision_score (the reanalysis used aucPRp from Cranmer & Desmarais; small definitional differences).",
+  "builder_check_2026-11-01": {"apparent_pr_auc_seed42": 0.395, "apparent_roc_auc_seed42": 0.972, "temporal_pr_auc_seeds_42_43_44": [0.092, 0.081, 0.080], "temporal_roc_auc": [0.896, 0.899, 0.898]}
+ },
+ "civilwar_temporal_clean": {
+  "provenance": "REAL-PINNED",
+  "leaky": false,
+  "metric": "pr_auc",
+  "flaw": "none: the same pipeline trained on 1945-1989 and scored on 1990-2000 (the reanalysis's Procedure 6)",
+  "expected_sign": "0"
+ },
+ "esl_selection": {
+  "provenance": "TEXTBOOK",
+  "leaky": true,
+  "metric": "accuracy",
+  "flaw": "univariate screening of 100 of 5000 predictors on ALL samples before 5-fold CV of a 1-NN classifier",
+  "source": "Hastie, Tibshirani, Friedman, The Elements of Statistical Learning, 2nd ed., 12th printing, section 7.10.2, p. 245-247 (PDF from the authors' site via https://hastie.su.domains/ElemStatLearn/ , sha256 8d098d65cf53925ba0fc13a52a2790d48a32433223cbd876d0a527cd1afe2e0f)",
+  "published_numbers": {"wrong_cv_error": 0.03, "true_error": 0.50, "wrong_cv_accuracy": 0.97, "true_accuracy": 0.50, "inflation_accuracy": 0.47, "note": "average over 50 simulations in the book; our case is ONE draw (seed 7)"},
+  "builder_check_2026-11-01": {"wrong_accuracy_seeds_42_43_44": [1.0, 0.98, 1.0], "right_accuracy": [0.54, 0.58, 0.56]}
+ },
+ "esl_selection_clean": {
+  "provenance": "TEXTBOOK",
+  "leaky": false,
+  "metric": "accuracy",
+  "flaw": "none: screening repeated inside each fold (the book's 'right way')",
+  "expected_sign": "0"
+ }
+}
