@@ -224,7 +224,7 @@
         <p>Every headline number shows its n and its file. Counts on cases we built or picked, not rates for the wild.</p></div>
       <div><h3>Estimated spend</h3><p>About <b class="num" data-p="ledger.total_usd" data-f="usd">$${L.total_usd.toFixed(2)}</b> in estimated Meta credits over <b class="num">${L.total_calls}</b> live calls, G4 to G8. Estimate at per-call figures, not billing. This page makes no model call.</p>
         <p class="xs">${L.phases.map(p => `${esc(p.name)} $${p.usd.toFixed(2)}`).join(" &middot; ")}</p></div>
-      <div>${G9 ? `<div class="g9"><h3>G9 &middot; scored, as the file states</h3><dl>${G9.rows.map(r => `<dt>${esc(r.key)}</dt><dd class="num">${esc(r.val)}</dd>`).join("")}</dl><p class="xs" style="margin-top:8px">${badge(G9.badge)} ${esc(G9.src)}. No pass or fail is added by this page.</p></div>`
+      <div>${G9 ? `<div class="g9"><h3>G9 &middot; ${G9.status ? "incomplete run, recorded units only" : "scored, as the file states"}</h3>${G9.status ? `<p class="xs">${esc(G9.status)}</p>` : ""}<dl>${G9.rows.map(r => `<dt>${esc(r.key)}</dt><dd class="num">${esc(r.val)}</dd>`).join("")}</dl><p class="xs" style="margin-top:8px">${badge(G9.badge)} ${esc(G9.src)}. No pass or fail is added by this page.</p></div>`
         : `<h3>Build</h3><p>NullLab, Meta Global AI Developer Hackathon. Recorded runs on muse-spark-1.3 and muse-spark-1.3-contributor.</p>`}
         <p class="xs">Test suite: ${esc(D.tests_doc.value)} (${esc(D.tests_doc.src)}). Data generated ${esc(D.generated_utc)}.</p></div></div>`;
     $$("[data-open]", $("#footBody")).forEach(b => b.addEventListener("click", () => openDrawer(b.dataset.open)));

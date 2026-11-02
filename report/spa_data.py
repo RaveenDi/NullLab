@@ -381,6 +381,33 @@ def _gblock(tag, d, dirname, src):
     }
 
 
+def _g9_structured(j):
+    """Readable rows for the known G9 score layout; None for any other layout (the caller falls back to generic rows)."""
+    ov, eh = j.get("overall"), j.get("ehg")
+    if not (isinstance(ov, dict) and isinstance(eh, dict)):
+        return None
+    done, planned = ov.get("cases_scored"), ov.get("cases_planned")
+    if not (isinstance(done, int) and isinstance(planned, int)):
+        return None
+    incomplete = done < planned
+    rows = []
+    per = (j.get("cases") or {}).get("ehg_disguised") or {}
+    infl = [r.get("inflation_mean") for r in per.values() if isinstance(r, dict) and isinstance(r.get("inflation_mean"), (int, float))]
+    if isinstance(eh.get("n_leaky"), int):
+        rows.append({"key": "EHG leaky: inflation found", "val": f"{eh.get('direction_right')} of {eh['n_leaky']} recorded repeats ({eh.get('denominator_each')} planned)"})
+    if infl:
+        rows.append({"key": "EHG leaky: measured inflation", "val": ", ".join(f"{v:+.3f}" for v in infl) + "  (offline reference +0.430)"})
+    if isinstance(eh.get("n_clean"), int):
+        rows.append({"key": "EHG clean twin: false alarms", "val": f"{eh.get('clean_false_alarms')} of {eh['n_clean']} recorded repeats"})
+    if isinstance(eh.get("b3_gets_it_leaky"), int):
+        rows.append({"key": "Reading only on EHG", "val": f"found the leaky case {eh['b3_gets_it_leaky']} of {eh.get('n_leaky')}; false alarms on clean {eh.get('b3_false_alarms_clean')} of {eh.get('n_clean')}"})
+    if isinstance(ov.get("harness_inconclusive"), int):
+        rows.append({"key": "Harness failures", "val": f"{ov['harness_inconclusive']} of {done} recorded units"})
+    status = (f"INCOMPLETE: {done} of {planned} units recorded; the run was stopped (guard too slow on the large case). "
+              "The preregistered bar cannot be evaluated." if incomplete else f"complete: {done} of {planned} units")
+    return {"rows": rows, "src": "runs_g9/score.json", "badge": "REAL-PINNED, disguised", "status": status}
+
+
 def _g9(root=None):
     """Defensive: the G9 file may not exist yet or may be partial/garbled. Returns None (slot stays hidden) unless it parses."""
     try:
@@ -390,6 +417,9 @@ def _g9(root=None):
         j = json.loads(p.read_text(encoding="utf-8"))
         if not isinstance(j, dict):
             return None
+        structured = _g9_structured(j)
+        if structured:
+            return structured
         rows = []
         for key in ("acceptance", "summary"):
             blk = j.get(key)
@@ -399,7 +429,7 @@ def _g9(root=None):
             rows = [{"key": str(k), "val": _scalar(v)} for k, v in list(j.items())[:16] if _scalar(v) is not None]
         if not rows:
             return None
-        return {"rows": rows[:24], "src": "runs_g9/score.json", "badge": "LOADED FROM FILE"}
+        return {"rows": rows[:24], "src": "runs_g9/score.json", "badge": "LOADED FROM FILE", "status": None}
     except Exception:
         return None
 
