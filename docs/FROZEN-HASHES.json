@@ -84,6 +84,10 @@
       "pinned_lines": 8,
       "sha256_of_pinned_lines": "e4d8152560503575bb780e320f5e8eca896b9e523eec183ad0daf4eada96942f"
     },
+    "runs_g9b/prereg_log.jsonl": {
+      "pinned_lines": 8,
+      "sha256_of_pinned_lines": "d2b7ce17aee5b1cddd62f672bdb29021f0b23d936c87a5eee2913e8e805e77bb"
+    },
     "runs_rulefix/prereg_log.jsonl": {
       "pinned_lines": 1,
       "sha256_of_pinned_lines": "aea038d42c51ab94f76ac238298b2f84a29414a8b6fa22c4fe3532ae56e4fea9"
