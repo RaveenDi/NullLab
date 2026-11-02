@@ -1,6 +1,6 @@
 # NullLab EVAL-3: BRIEF-4 spike, gates G0 to G3 (Sun Nov 1, 2026, about 11:40 to 12:30 SLT / 02:10 to 03:00 ET)
 
-All numbers below were measured on this machine. Raw outputs: `logs_spike4/`, `runs_g1/`, `runs_spike4/`, `runs_mock3/`. The spike case is **SYNTHETIC**. G4 and G5 were not started.
+All numbers below were measured on this machine. Raw outputs: `logs_spike4/`, `runs_g1/` (not tracked), `runs_spike4/`. (The MOCK plumbing outputs `runs_mock3/` and the spike driver `scripts/legacy/spike4.py` were removed in the repo hygiene pass; they are in git history and `python pipeline.py` regenerates mock runs.) The spike case is **SYNTHETIC**. G4 and G5 were not started.
 
 ## G0: harness ($0)
 - `eval/build_corpus.py` rebuilt 9 cases byte-identically (0 files changed). No materialisation failures, so nothing was fixed.

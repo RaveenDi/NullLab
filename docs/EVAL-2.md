@@ -3,7 +3,7 @@
 Date: Nov 1, iteration 2. Status: **PROTOCOL READY, LIVE RUN PENDING** — no new live calls were made
 in this session (the session shell was unavailable, so `pipeline.py --live` could not be executed and no
 `pip install` was possible). Nothing below is presented as a new model result. Earlier measured numbers are
-quoted from [STATUS](STATUS.md) and [LIVE-RESULT-2026-11-01](LIVE-RESULT-2026-11-01.md) and labelled as such.
+quoted from the earlier recorded runs (the first live run, 3 cases, 3 seeds) and labelled as such.
 
 ## Protocol
 
@@ -43,7 +43,7 @@ quoted from [STATUS](STATUS.md) and [LIVE-RESULT-2026-11-01](LIVE-RESULT-2026-11
   feature), `leak_group` (site identifier as a feature, sites repeat across split), `synthetic_leak`
   (target-rate feature), plus 3 clean controls (`clean_control`, `clean_wine_correct`, `clean_group_correct`).
 - B3 single-prompt baseline (one call, no execution) for the loop-vs-single-prompt ablation.
-- Real-suite probe: `runs/ablation.json` records whether `deepchecks`/`giskard` are importable. They are not
+- Real-suite probe: the (MOCK, since removed, regenerable with `python -m eval.score`) `runs/ablation.json` recorded whether `deepchecks`/`giskard` are importable. They are not
   installed here; B0/B1 remain labelled reimplementations. To run the real suites:
   `pip install deepchecks` (giskard only if easy), then extend `eval/score.py` — the reimplementation rows
   stay for comparison.
@@ -56,4 +56,4 @@ quoted from [STATUS](STATUS.md) and [LIVE-RESULT-2026-11-01](LIVE-RESULT-2026-11
 3. Mock falsifier routing for the new classes is scripted (regex), same caveat as before: a mock "win" is
    plumbing, not evidence the model can do it.
 4. Sandbox is a restricted subprocess, not Docker; sklearn is unpinned (1.9.1 vs planned 1.3).
-5. Excerpt claim percentages are nominal; the measured claimed-protocol accuracies come from `runs/*.json`.
+5. Excerpt claim percentages are nominal; the measured claimed-protocol accuracies came from the MOCK `runs/*.json` (removed in the hygiene pass; `python pipeline.py` regenerates them).

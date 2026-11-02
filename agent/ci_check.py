@@ -2,7 +2,7 @@
 
     python -m agent.ci_check <path> [--threshold 0.05] [--summary $GITHUB_STEP_SUMMARY] [--fresh] [--spark --live]
 
-A "case" is a folder with train.py (defining load, feats, claimed_eval) and data.csv, the NullLab case layout (see docs/PRODUCT-FEATURES.md).
+A "case" is a folder with train.py (defining load, feats, claimed_eval) and data.csv, the NullLab case layout (see docs/USAGE.md).
 <path> may be one case or a tree; every folder holding both files is audited.
 
 Default mode is RULES ONLY: the fixed rule library plus the local sandbox. It costs $0, calls no model, needs no secret and no network.
@@ -70,7 +70,7 @@ def check_path(path: str | Path, threshold: float = 0.05, measure: Any = None, f
     cases = discover_cases(path)
     rows, msgs = [], []
     if not cases:
-        msg = f"ERROR: no case found under {path} (a case folder holds train.py and data.csv). See docs/PRODUCT-FEATURES.md."
+        msg = f"ERROR: no case found under {path} (a case folder holds train.py and data.csv). See docs/USAGE.md."
         return {"exit_code": EXIT_ERROR, "rows": [], "messages": [msg], "markdown": render_summary([], threshold, [msg], spark)}
     for c in cases:
         try:

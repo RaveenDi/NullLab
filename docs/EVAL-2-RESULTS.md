@@ -1,6 +1,6 @@
 # NullLab EVAL-2 results: 9 cases, LIVE muse-spark-1.3 (Sun Nov 1, ~12:00 SLT)
 
-Run by the evaluation driver: `python pipeline.py --live` then `python -m eval.score --live`. 27 live calls, Meta spend about $1.0 (running total $9.84 of the $30 cap). Mock runs are kept in runs_mock2/. Corpus: 9 cases written by builder agents (6 leaky, 3 clean), small and synthetic or sklearn-derived. Rates below are from 9 cases and are not population estimates.
+Run by the evaluation driver: `python pipeline.py --live` then `python -m eval.score --live`. 27 live calls, Meta spend about $1.0 (running total $9.84 of the $30 cap). The mock runs (formerly runs_mock2/) were removed in the hygiene pass; `python pipeline.py` regenerates them. Corpus: 9 cases written by builder agents (6 leaky, 3 clean), small and synthetic or sklearn-derived. Rates below are from 9 cases and are not population estimates.
 
 | Method | Recall (6 leaky) | False alarms (3 clean) |
 |---|---|---|

@@ -1,6 +1,6 @@
 # NullLab leakage audit. DEFAULT = rules only: no model, no secrets, $0.
 # Fails the job (exit 1) when a case's evaluation is inflated beyond the threshold with the 95% interval above 0.
-# A "case" is a folder holding train.py + data.csv (see docs/PRODUCT-FEATURES.md). Set AUDIT_PATH to your case folder or a tree of them.
+# A "case" is a folder holding train.py + data.csv (see docs/USAGE.md). Set AUDIT_PATH to your case folder or a tree of them.
 #
 # OPTIONAL Spark mode (asks the Meta model about cases the rules cannot judge) is NOT enabled here. To use it you would add a repository
 # secret MODEL_API_KEY and run `python -m agent.ci_check <path> --spark --live` yourself; it also goes through agent/llm.py's spend gate,

@@ -59,7 +59,7 @@ famous example. A recognised source could let Spark answer from memory. `g6.py p
 - So Spark recognises both sources. It may know the published critiques too. Any agreement between the loop and the
   published number on these cases cannot, by itself, separate "found by experiment" from "recalled". The measured
   numbers come from the sandbox, not from the model, but the model's choice of *what to fix* may be recalled.
-  PLAN.md's rule ("if Spark names the source, replace the hero") is triggered; no de-identified variant was built in
+  The project's de-identification rule ("if Spark names the source, replace the hero") is triggered; no de-identified variant was built in
   this time box (it would need a new preregistration).
 
 ## 2. Harness changes (before any live call)

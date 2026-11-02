@@ -44,3 +44,16 @@ out/
 *.egg-info/
 build/
 dist/
+
+# mock / scratch run output (regenerate with `python pipeline.py`)
+runs/*.json
+runs_mock*/
+logs_*/
+!logs_spike4/
+
+# caches and coverage
+.cache/
+.coverage
+htmlcov/
+.pytest_cache/
+*.tmp
