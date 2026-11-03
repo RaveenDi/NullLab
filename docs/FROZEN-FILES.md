@@ -2,7 +2,7 @@
 
 The G8, EHG and G9 preregistrations hash their inputs. Those files must stay byte-identical (after CRLF -> LF normalisation) and keep the same repo-relative path, or the recorded hashes no longer describe what ran.
 
-- Manifest: [FROZEN-HASHES.json](FROZEN-HASHES.json) (53 files plus 9 prereg logs).
+- Manifest: [FROZEN-HASHES.json](FROZEN-HASHES.json) (53 files plus 10 prereg logs).
 - Checker: `python scripts/freeze_check.py verify` (also `write`, `list`).
 - Test: `tests/test_frozen_hashes.py` runs the same checks, including the hashes written inside `runs_ehg/` and `runs_g9/prereg_log.jsonl` and the combined G8 digest.
 
@@ -28,7 +28,7 @@ Prompts, contract text, op specs and the rules payload live inside the frozen mo
 
 ## Recording a deliberate change
 
-A planned post-tag security fix to `sandbox/run.py` (the network block runs after `import train`) will change its hash. Do not regenerate the manifest to hide it. Append an entry to [FROZEN-CHANGELOG.json](FROZEN-CHANGELOG.json):
+Example: a post-tag security fix to `sandbox/run.py` (the network block runs after `import train`) will change its hash. Do not regenerate the manifest to hide it. Append an entry to [FROZEN-CHANGELOG.json](FROZEN-CHANGELOG.json):
 
 ```json
 {"path": "sandbox/run.py", "old_sha256": "<hash in FROZEN-HASHES.json>", "new_sha256": "<new LF sha256>",
@@ -40,3 +40,5 @@ Optional field `old_sha256_crlf` (sha256 of the OLD content with CRLF line endin
 The sandbox security fix of 2026-11-02 is recorded this way for `sandbox/{run,run_factorial,executor}.py`, `agent/{cached_exec,smoke,guard_g9}.py` (see [SECURITY.md](SECURITY.md)). The G9, G9b and EHG runners' `verify` stage compares code hashes with their freeze logs and will refuse to start a new run on this code; those runs are finished, their results stay tied to the old hashes.
 
 The test accepts a difference only when both the old and the new hash match an entry exactly, and it also accepts it against the hashes quoted in the prereg logs. Any further edit changes `new_sha256` and fails again. Results produced before the change stay tied to the old hash; say so in the result doc.
+
+The curated source archive omits full historical datasets and some runners. Full historical freeze verification requires the complete Git repository and applicable inputs. Retained hash metadata does not substitute for absent data.

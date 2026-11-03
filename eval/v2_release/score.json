@@ -1,0 +1,960 @@
+{
+  "schema": "nulllab.release-internal-score.v1",
+  "scope": "Fresh post-repair internal synthetic evaluation. New fixed data/case bytes, familiar mechanism families and one new entity-separation pair. Coordinator preparation/adjudication; not external validation or a reliability benchmark.",
+  "totals": {
+    "scheduled_per_mode": 10,
+    "category_denominators": {
+      "supported_flawed": 3,
+      "clean": 3,
+      "missing_information": 1,
+      "generated_scope": 1,
+      "unsupported_feature": 1,
+      "invalid_input": 1
+    },
+    "live_verdicts": {
+      "MODEL_NO_FLAW": 3,
+      "UNSUPPORTED": 2,
+      "NEEDS_INFORMATION": 1,
+      "INCONCLUSIVE": 4
+    },
+    "supported_flawed_measured_live": 0,
+    "clean_controls_measured_live": 0,
+    "provider_attempts": 11,
+    "reserved_estimate_usd_exact": "2.03047350",
+    "token_usage": {
+      "prompt_tokens": 13909,
+      "completion_tokens": 8489,
+      "total_tokens": 22398
+    }
+  },
+  "results": [
+    {
+      "case": "rx-a9w4",
+      "mode": "offline",
+      "category": "clean",
+      "family": "entity_separation",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "NOT_TESTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.5645833333333333,
+        "per_seed_scores": {
+          "42": 0.56875,
+          "43": 0.5375,
+          "44": 0.5875
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-d2n6",
+      "mode": "offline",
+      "category": "clean",
+      "family": "fitted_scaling",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "NOT_TESTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.7948717948717948,
+        "per_seed_scores": {
+          "42": 0.782051282051282,
+          "43": 0.7884615384615384,
+          "44": 0.8141025641025641
+        },
+        "n_scored": {
+          "42": 156,
+          "43": 156,
+          "44": 156
+        },
+        "reference": 0.5128205128205128,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-e1c5",
+      "mode": "offline",
+      "category": "unsupported_feature",
+      "family": "post_outcome_predictor",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "NOT_TESTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 1.0,
+        "per_seed_scores": {
+          "42": 1.0,
+          "43": 1.0,
+          "44": 1.0
+        },
+        "n_scored": {
+          "42": 112,
+          "43": 112,
+          "44": 112
+        },
+        "reference": 0.5,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-f6b8",
+      "mode": "offline",
+      "category": "missing_information",
+      "family": "author_contract",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "NEEDS_INFORMATION",
+      "baseline": null,
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-j4t9",
+      "mode": "offline",
+      "category": "clean",
+      "family": "label_screening",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "NOT_TESTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.5208333333333334,
+        "per_seed_scores": {
+          "42": 0.5125,
+          "43": 0.54375,
+          "44": 0.50625
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5375,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-k8p3",
+      "mode": "offline",
+      "category": "supported_flawed",
+      "family": "fitted_scaling",
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "StandardScaler"
+        }
+      ],
+      "status": "inconclusive",
+      "verdict": "NOT_TESTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.7927350427350427,
+        "per_seed_scores": {
+          "42": 0.7756410256410257,
+          "43": 0.7884615384615384,
+          "44": 0.8141025641025641
+        },
+        "n_scored": {
+          "42": 156,
+          "43": 156,
+          "44": 156
+        },
+        "reference": 0.5128205128205128,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-r7m2",
+      "mode": "offline",
+      "category": "supported_flawed",
+      "family": "label_screening",
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "screen"
+        }
+      ],
+      "status": "completed",
+      "verdict": "NO_EFFECT_DETECTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.5875,
+        "per_seed_scores": {
+          "42": 0.5375,
+          "43": 0.65,
+          "44": 0.575
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5375,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": true,
+      "plan": {
+        "verdict": "flaw",
+        "reason": "Label-based screening occurs before evaluation folds; test a fold-local control.",
+        "factors": [
+          {
+            "id": "A",
+            "flaw": "Whole-data label-based feature screening",
+            "evidence_line": "k = screen(X, y)",
+            "ops": [
+              {
+                "op": "move_into_fold",
+                "step": "claimed_eval",
+                "call": "screen"
+              }
+            ]
+          }
+        ],
+        "predicted_drop_pp": {
+          "fix_all": 0
+        },
+        "culprit_ranking": [
+          "A"
+        ]
+      },
+      "summary": {
+        "metric": "accuracy",
+        "unit": "accuracy",
+        "claimed": 0.5875,
+        "controlled": 0.5208333333333334,
+        "inflation": 0.0666666666666667,
+        "sign": "0",
+        "per_seed_sign": [
+          "0",
+          "0",
+          "0"
+        ],
+        "seeds": [
+          "42",
+          "43",
+          "44"
+        ],
+        "ci_per_seed": {
+          "42": [
+            -0.08781250000000002,
+            0.13453124999999982
+          ],
+          "43": [
+            -0.012499999999999956,
+            0.19999999999999996
+          ],
+          "44": [
+            -0.03125,
+            0.19703124999999982
+          ]
+        },
+        "n_controlled": [
+          160,
+          160,
+          160
+        ],
+        "interval_note": "Unpaired row bootstrap, conditional on fixed predictions; all seeds must agree for an inflation verdict.",
+        "positive_prevalence": 0.5375,
+        "controlled_prevalence": 0.5375
+      },
+      "guard": {
+        "ok": true,
+        "problems": [],
+        "layout": "single",
+        "configs": [
+          "fix_all"
+        ],
+        "notes": [],
+        "runtime": {
+          "layout": "single",
+          "configs": {
+            "fix_all": {
+              "decision": "ACCEPT",
+              "problems": [],
+              "facts": {
+                "orig_contam": {
+                  "self": 0,
+                  "ctx": {
+                    "screen": 160,
+                    "SelectKBest": 160
+                  },
+                  "n_eval_events": 4,
+                  "untracked": 0
+                },
+                "fix_contam": {
+                  "self": 0,
+                  "ctx": {
+                    "screen": 0,
+                    "SelectKBest": 0
+                  },
+                  "n_eval_events": 4,
+                  "untracked": 0
+                },
+                "E_synth_orig": 0,
+                "E_synth_fix": 0,
+                "model": {
+                  "DecisionTreeClassifier": {
+                    "ccp_alpha": "0.0",
+                    "class_weight": "None",
+                    "criterion": "'gini'",
+                    "max_depth": "3",
+                    "max_features": "None",
+                    "max_leaf_nodes": "None",
+                    "min_impurity_decrease": "0.0",
+                    "min_samples_leaf": "4",
+                    "min_samples_split": "2",
+                    "min_weight_fraction_leaf": "0.0",
+                    "monotonic_cst": "None",
+                    "random_state": "42",
+                    "splitter": "'best'"
+                  }
+                },
+                "screen_overlap": {
+                  "before": 160,
+                  "after": 0
+                }
+              }
+            }
+          },
+          "decision": "ACCEPT",
+          "problems": [],
+          "crash": false
+        }
+      },
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-u3h7",
+      "mode": "offline",
+      "category": "generated_scope",
+      "family": "author_contract",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "UNSUPPORTED",
+      "baseline": null,
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-v5q1",
+      "mode": "offline",
+      "category": "supported_flawed",
+      "family": "entity_separation",
+      "reference_ops": [
+        {
+          "op": "replace_split",
+          "step": "evaluate",
+          "kind": "group",
+          "col": "device"
+        }
+      ],
+      "status": "inconclusive",
+      "verdict": "NOT_TESTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.9541666666666666,
+        "per_seed_scores": {
+          "42": 0.95625,
+          "43": 0.9625,
+          "44": 0.94375
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-z0s2",
+      "mode": "offline",
+      "category": "invalid_input",
+      "family": "multiclass",
+      "reference_ops": [],
+      "status": "failed",
+      "verdict": "INCONCLUSIVE",
+      "baseline": null,
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": "Current adapter supports binary 0/1 targets with at least five rows per class",
+      "attempts": 0
+    },
+    {
+      "case": "rx-a9w4",
+      "mode": "live",
+      "category": "clean",
+      "family": "entity_separation",
+      "reference_ops": [],
+      "status": "completed",
+      "verdict": "MODEL_NO_FLAW",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.5645833333333333,
+        "per_seed_scores": {
+          "42": 0.56875,
+          "43": 0.5375,
+          "44": 0.5875
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": {
+        "verdict": "no_flaw",
+        "factors": [],
+        "reason": "Evaluation already matches intended use on unseen devices: GroupKFold grouped by device ensures no device is both fit and scored, DecisionTree is refit inside each fold on training rows only, device column is excluded from predictors via feats(), and no resampler/selector/transformer is fit outside folds."
+      },
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "supported",
+        "concerns": [],
+        "questions": [],
+        "scope_gaps": [],
+        "reason": "Evaluation matches the declared unseen-device population: features exclude target and device, predictor columns are signature_a/signature_b/signature_c, and GroupKFold splits by device so test readings come from held-out devices rather than repeat readings of training devices. Declared decision time is at commissioning before the event with predictor availability confirmed, and no unsupported numerical benchmark claim is made."
+      },
+      "critic": null,
+      "error": null,
+      "attempts": 2
+    },
+    {
+      "case": "rx-d2n6",
+      "mode": "live",
+      "category": "clean",
+      "family": "fitted_scaling",
+      "reference_ops": [],
+      "status": "completed",
+      "verdict": "MODEL_NO_FLAW",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.7948717948717948,
+        "per_seed_scores": {
+          "42": 0.782051282051282,
+          "43": 0.7884615384615384,
+          "44": 0.8141025641025641
+        },
+        "n_scored": {
+          "42": 156,
+          "43": 156,
+          "44": 156
+        },
+        "reference": 0.5128205128205128,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": {
+        "verdict": "no_flaw",
+        "factors": [],
+        "reason": "StratifiedKFold random-row evaluation matches stated independent-record random-row estimand with no forecast or entity-generalization claim; StandardScaler is fit on X[tr] inside each fold and LogisticRegression is refit inside loop, so no leakage, split, or retrain flaw is present."
+      },
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "supported",
+        "concerns": [],
+        "questions": [],
+        "scope_gaps": [
+          "Inference is limited to synthetic independent packaging records represented by the supplied rows; no entity generalization, forecasting, or external-population claim is supported."
+        ],
+        "reason": "The stated estimand is independent-record random-row accuracy, which matches the shuffled StratifiedKFold evaluation. The five signal predictors are declared already available before final inspection, the target is excluded from features, and the scaler and LogisticRegression are fitted only on training folds. No grouped, temporal, or forecast claim is made, and no numerical reference score is asserted to verify."
+      },
+      "critic": null,
+      "error": null,
+      "attempts": 2
+    },
+    {
+      "case": "rx-e1c5",
+      "mode": "live",
+      "category": "unsupported_feature",
+      "family": "post_outcome_predictor",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "UNSUPPORTED",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 1.0,
+        "per_seed_scores": {
+          "42": 1.0,
+          "43": 1.0,
+          "44": 1.0
+        },
+        "n_scored": {
+          "42": 112,
+          "43": 112,
+          "44": 112
+        },
+        "reference": 0.5,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": {
+        "verdict": "unsupported",
+        "factors": [],
+        "reason": "The only identified concern is use of post_inspection_code which is generated after inspection and unavailable at the intended pre-inspection decision. Correcting it requires a feature edit in feats(), which is explicitly not covered and has no op in the frozen list (move_into_fold, drop_from_eval, replace_split, retrain_inside). No other flaw expressible by the edit list is present. Per contract this limitation must abstain, not be turned into 'no_flaw'.",
+        "scope_gaps": [
+          "post_inspection_code is unavailable at pre-inspection decision time but used in feats(); dropping it requires a feature-edit op which is not in the frozen op list and is declared not covered (G6 FEATURE-REASON path not reproduced)"
+        ]
+      },
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "unsupported",
+        "concerns": [
+          "Target/future leakage: feats() includes post_inspection_code, which is generated from the inspection outcome after the intended pre-inspection decision and is unavailable at decision time.",
+          "The current evaluation therefore estimates post-inspection reconstruction rather than the claimed pre-inspection performance; the reported accuracy would likely be optimistically biased for the intended use.",
+          "Correcting the leakage would require dropping post_inspection_code from feats(), a feature edit outside the evaluation as supplied.",
+          "No numerical reference score is supplied to validate any claimed performance value.",
+          "StratifiedKFold with shuffling, stratification, a fixed seed, and a shallow regularized tree are legitimate controls for class balance and variance, but they do not address future-feature leakage."
+        ],
+        "questions": [],
+        "scope_gaps": [
+          "Findings are conditional on the 112 supplied synthetic rows and do not establish performance in any real deployment population.",
+          "No leakage-free pre-inspection evaluation using only pre_sensor is provided.",
+          "No temporal or external validation for performance at the actual pre-inspection decision point is provided."
+        ],
+        "reason": "Predictor timing and intended decision point are supplied: pre_sensor is available before inspection, while post_inspection_code is generated afterward from the inspection outcome. Because feats() currently uses both, the evaluation does not answer the intended pre-inspection question and cannot be supported without a feature edit to remove the post-inspection feature. No numerical reference score is available for comparison."
+      },
+      "critic": null,
+      "error": null,
+      "attempts": 2
+    },
+    {
+      "case": "rx-f6b8",
+      "mode": "live",
+      "category": "missing_information",
+      "family": "author_contract",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "NEEDS_INFORMATION",
+      "baseline": null,
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-j4t9",
+      "mode": "live",
+      "category": "clean",
+      "family": "label_screening",
+      "reference_ops": [],
+      "status": "completed",
+      "verdict": "MODEL_NO_FLAW",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.5208333333333334,
+        "per_seed_scores": {
+          "42": 0.5125,
+          "43": 0.54375,
+          "44": 0.50625
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5375,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": {
+        "verdict": "no_flaw",
+        "factors": [],
+        "reason": "Selection via screen(X[tr],y[tr]) and DecisionTree fit are both inside the StratifiedKFold loop on training rows only; random-row split matches stated independent-recording use with no temporal/group claim, so no edit-list flaw applies."
+      },
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "supported",
+        "concerns": [],
+        "questions": [],
+        "scope_gaps": [],
+        "reason": "Predictor timing and intended population are stated: band measurements are collected before inspection and are available at decision time for predicting an independent recording's event, with each row asserted independent and no chronological or grouped use claimed. The implementation excludes the target (and device, if present) from features and performs SelectKBest feature selection only on each training fold before fitting the decision tree, avoiding selection leakage. Stratified random-row cross-validation therefore matches the stated random-row validation for independent recordings, and no external numerical score is asserted. Scope is limited to the stated synthetic records."
+      },
+      "critic": null,
+      "error": null,
+      "attempts": 2
+    },
+    {
+      "case": "rx-k8p3",
+      "mode": "live",
+      "category": "supported_flawed",
+      "family": "fitted_scaling",
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "StandardScaler"
+        }
+      ],
+      "status": "failed",
+      "verdict": "INCONCLUSIVE",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.7927350427350427,
+        "per_seed_scores": {
+          "42": 0.7756410256410257,
+          "43": 0.7884615384615384,
+          "44": 0.8141025641025641
+        },
+        "n_scored": {
+          "42": 156,
+          "43": 156,
+          "44": 156
+        },
+        "reference": 0.5128205128205128,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "unsupported",
+        "concerns": [
+          "StandardScaler is fitted on the entire dataset in claimed_eval via fit_transform(X) before StratifiedKFold splitting, leaking test-fold distributional information into training folds and preventing the reported cross-validated accuracy from being a clean out-of-fold estimate."
+        ],
+        "questions": [],
+        "scope_gaps": [],
+        "reason": "Predictor timing, intended synthetic independent-record population, and the random-row accuracy estimand are declared, and StratifiedKFold is otherwise aligned with that scope with no forecast or entity-generalization claim. However, global preprocessing before cross-validation is a known leakage concern that undermines the claimed evaluation as implemented."
+      },
+      "critic": null,
+      "error": "Reviewer abstention must provide concrete scope_gaps",
+      "attempts": 1
+    },
+    {
+      "case": "rx-r7m2",
+      "mode": "live",
+      "category": "supported_flawed",
+      "family": "label_screening",
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "screen"
+        }
+      ],
+      "status": "failed",
+      "verdict": "INCONCLUSIVE",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.5875,
+        "per_seed_scores": {
+          "42": 0.5375,
+          "43": 0.65,
+          "44": 0.575
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5375,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "unsupported",
+        "concerns": [
+          "Feature-selection leakage: claimed_eval() calls screen(X, y) on the full dataset, fitting SelectKBest(f_classif, k=4) with all rows and labels before StratifiedKFold evaluation. Held-out fold labels therefore influence feature choice, optimistically biasing the reported random-row accuracy.",
+          "The cross-validation in evaluate() only refits the DecisionTreeClassifier within each fold; it does not refit feature selection within training folds, so the validation does not estimate performance of the complete modelling pipeline on independent recordings."
+        ],
+        "questions": [],
+        "scope_gaps": [],
+        "reason": "Predictor timing and the intended independent-recording population are stated, and random-row StratifiedKFold matches the claimed scope. However, fitting feature selection on the entire dataset before cross-validation is a known label-leakage flaw that invalidates the reported validation accuracy as an unbiased estimate, so the evaluation methodology is unsupported."
+      },
+      "critic": null,
+      "error": "Reviewer abstention must provide concrete scope_gaps",
+      "attempts": 1
+    },
+    {
+      "case": "rx-u3h7",
+      "mode": "live",
+      "category": "generated_scope",
+      "family": "author_contract",
+      "reference_ops": [],
+      "status": "inconclusive",
+      "verdict": "UNSUPPORTED",
+      "baseline": null,
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": null,
+      "attempts": 0
+    },
+    {
+      "case": "rx-v5q1",
+      "mode": "live",
+      "category": "supported_flawed",
+      "family": "entity_separation",
+      "reference_ops": [
+        {
+          "op": "replace_split",
+          "step": "evaluate",
+          "kind": "group",
+          "col": "device"
+        }
+      ],
+      "status": "failed",
+      "verdict": "INCONCLUSIVE",
+      "baseline": {
+        "metric": "accuracy",
+        "reproduced": true,
+        "seeds": [
+          42,
+          43,
+          44
+        ],
+        "score": 0.9541666666666666,
+        "per_seed_scores": {
+          "42": 0.95625,
+          "43": 0.9625,
+          "44": 0.94375
+        },
+        "n_scored": {
+          "42": 160,
+          "43": 160,
+          "44": 160
+        },
+        "reference": 0.5,
+        "reference_note": "Majority-class accuracy on the original supplied records; resampled scoring changes prevalence."
+      },
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": {
+        "assessment": "unsupported",
+        "concerns": [
+          "The evaluate function accepts a groups argument but ignores it, using StratifiedKFold.split(X, y) instead of a group-aware split.",
+          "With repeated readings per device, StratifiedKFold can place readings from the same device in both training and test folds, so accuracy does not measure performance on previously unseen devices as required.",
+          "This device-level leakage can optimistically bias accuracy relative to held-out-device performance; GroupKFold or an equivalent grouped split by device would be required."
+        ],
+        "questions": [],
+        "scope_gaps": [],
+        "reason": "Predictor timing and intended population are declared: prediction at commissioning before the event for unseen_entities, with device excluded from predictors. However, the implemented evaluation disregards the supplied device groups and uses ordinary StratifiedKFold, allowing known devices in test folds. The evaluation therefore does not support the claimed held-out-device accuracy scope."
+      },
+      "critic": null,
+      "error": "Reviewer abstention must provide concrete scope_gaps",
+      "attempts": 1
+    },
+    {
+      "case": "rx-z0s2",
+      "mode": "live",
+      "category": "invalid_input",
+      "family": "multiclass",
+      "reference_ops": [],
+      "status": "failed",
+      "verdict": "INCONCLUSIVE",
+      "baseline": null,
+      "control_measured": false,
+      "plan": null,
+      "summary": null,
+      "guard": null,
+      "independent_review": null,
+      "critic": null,
+      "error": "Current adapter supports binary 0/1 targets with at least five rows per class",
+      "attempts": 0
+    }
+  ],
+  "result_sha256": {
+    "results/offline/rx-a9w4/result.json": "9c3f3211bf95f2fbd95e6249f93389e43e293ff525f81029cefa205896745ea6",
+    "results/offline/rx-d2n6/result.json": "bdace9dc0f97768bfda32b50ac4a13b4a2eddeb3cba1ad5514868be71b9a7837",
+    "results/offline/rx-e1c5/result.json": "c18f860cded0387b77a56747b1822624e5ad75430036323de545967ea305ff6d",
+    "results/offline/rx-f6b8/result.json": "c1921d9d1e75f5bd2dfed47668958c60b18f1d5355da6b4ff4d9fdf7dea31d17",
+    "results/offline/rx-j4t9/result.json": "2e1b1fa55ac23463b6866f15f29d839cee20797c48f2cfdb1a011efaa0b2dbee",
+    "results/offline/rx-k8p3/result.json": "78eb3bacf7fa8cafa81eb3d47df6dce0dd1618affd72047c803bb9f910980af7",
+    "results/offline/rx-r7m2/result.json": "5a42878a4be5197ba36261eb37025bc5cd225c4a3331be0263244029846251c4",
+    "results/offline/rx-u3h7/result.json": "8cf5453fc99c1f856adbd33671f2ed66a839ae4929d251e6b0f505308a936a59",
+    "results/offline/rx-v5q1/result.json": "ee5089fd78825c8fff94dc111fb66a43a8bde2f5c7e21ddeeb5d0d45226237cf",
+    "results/offline/rx-z0s2/result.json": "93e04b8663ce509dddc693539bde352859961c3ce0771ece593c7f65c8adffb5",
+    "results/live/rx-a9w4/result.json": "cdc23d2756819bbbe9ad25b5732160a40731c9c96a563c6c44a286c78b660e05",
+    "results/live/rx-d2n6/result.json": "7214a7b67b352a62ca925cf42c4ee5c548df1ed2d982032c2028540b75425be7",
+    "results/live/rx-e1c5/result.json": "5975f7aca2502d11910ab9729ed7749f49a6caa150e60f694286d27efb83c70e",
+    "results/live/rx-f6b8/result.json": "0fc0b7eb74b27a4438f8033cc36f4ab0f7900139f054c9199f578e79ec23381a",
+    "results/live/rx-j4t9/result.json": "38bcc3712249fdf391eb73d4cc56aeaca4abddb188603fe814c14167afbfd5c9",
+    "results/live/rx-k8p3/result.json": "d392b449ced0c9dd74874195c2a65da0c09f545c72024ca4eea25e73b7cbf9ec",
+    "results/live/rx-r7m2/result.json": "7775f1011cbecaad478e5b154b2561c04603980380694627d6066767ae9044d9",
+    "results/live/rx-u3h7/result.json": "c30c7f74066f37926e1c3da966f44846bf47d89a226c600700e4ebdedb313e4e",
+    "results/live/rx-v5q1/result.json": "3ab6b44f60df9b573793cb8e84a614d4724453fc83ec9e43dfac42015be795a2",
+    "results/live/rx-z0s2/result.json": "190319c2d4eec327e2a55205881bacfec39a5a4c4786a8d072105d90defdb77e"
+  },
+  "limitations": [
+    "No independent case preparer, no human researcher, no real-project generalization estimate.",
+    "No matched no-critic arm, causal critic benefit or model superiority estimate.",
+    "No empirical clean specificity from no-control outcomes. No effect magnitude required by mechanism truth.",
+    "Group measurements remain descriptive; fixed-prediction row intervals do not establish group-aware uncertainty.",
+    "Earlier cohort failures and development repairs remain separate; these scheduled outcomes are never replaced by reruns."
+  ]
+}

@@ -3,6 +3,7 @@
 from pathlib import Path
 import hashlib
 import json
+import re
 import shutil
 import zipfile
 
@@ -17,12 +18,15 @@ html = (
     .replace('href="/static/', 'href="./static/')
     .replace('src="/static/', 'src="./static/')
 )
-html = html.replace(
-    '<script src="./static/workspace.js"',
-    '<script src="./static/recording.js"></script><script src="./static/workspace.js"',
+html, replaced = re.subn(
+    r'(<script\b[^>]*\bsrc="\./static/workspace\.js"[^>]*>)',
+    lambda match: '<script src="./static/recording.js"></script>' + match[1],
+    html, count=1,
 )
+if replaced != 1:
+    raise ValueError("The public demo must load its recording before the workspace script")
 (dest / "index.html").write_text(html, encoding="utf-8")
-for name in ("workspace.css", "workspace.js"):
+for name in ("workspace.css", "workspace.js", "workspace-shell.js"):
     shutil.copyfile(ROOT / "app/static" / name, dest / "static" / name)
 (dest / "static/recording.js").write_text(
     "window.__NL_RECORDED = " + json.dumps(data, ensure_ascii=True) + ";\n", encoding="utf-8"

@@ -1,0 +1,17 @@
+This model reports almost perfect average precision: zero point nine eight three. But what if the evaluation helped create that score?
+
+I built NullLab for machine-learning authors who need to challenge an evaluation before trusting it. This uses real UCI semiconductor measurements with a resampling flaw we deliberately introduced.
+
+Start with the decision: what are you predicting, when are measurements available, and who receives the predictions? Supply supported Python code, or prepare a numeric CSV baseline. Missing facts trigger questions before training. Clarifications create a new version.
+
+Here, Muse Spark proposes a specific intervention: generate synthetic records only inside training folds, and score original held-out records. It returns typed operations. NullLab checks applicability, traces training and scoring rows, preserves the classifier, and executes both protocols on three fixed seeds.
+
+Average precision changes from zero point nine eight three to zero point one three nine. But Muse Wonder disputes the interpretation: the scored population and prevalence also changed. We keep that objection. This is a protocol comparison, not a pure causal estimate of leakage.
+
+The research room shows actual checks, model assessments, and measurements. Disagreements stay visible. A clean twin with no proposed control says not tested. A model's no-flaw judgment also stays unmeasured. Neither becomes a clean bill of health.
+
+Each investigation keeps exact input hashes, tested edits, predictions, environment, and attempted calls. Reopen saved audits and export the evidence. If no control was measured, the export says so. Changed inputs cannot inherit old results.
+
+New internal evaluation cases exposed a critic-contract defect. We preserved that failure, repaired it, and ran a separate confirmation. This is a narrow, tested author instrument; broad research accuracy and outside-user impact remain unproven.
+
+No API key is needed for local rules and execution. Meta reasoning adds proposed controls and independent critique. Built for the Meta hackathon: NullLab. Put the score to the test.

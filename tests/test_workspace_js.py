@@ -11,13 +11,13 @@ const fs=require('fs'),vm=require('vm'),assert=require('assert');
 const nodes={},calls=[],timers=new Map();let timerId=0,postJobs=0,importCount=0,revisionCount=0;
 function el(id){if(!nodes[id])nodes[id]={value:'',checked:false,files:[],children:[],handlers:{},hidden:false,disabled:false,classList:{toggle(){}},
  addEventListener(k,f){this.handlers[k]=f},replaceChildren(){this.children=[]},append(...items){this.children.push(...items)},
- setAttribute(k,v){this[k]=v},querySelector(){return el('live-option')},scrollIntoView(){},focus(){},click(){return this.handlers.click?.()}};return nodes[id];}
+ setAttribute(k,v){this[k]=v},removeAttribute(k){delete this[k]},querySelector(){return el('live-option')},contains(){return false},scrollIntoView(options){this.lastScrollOptions=options},focus(){},click(){return this.handlers.click?.()}};return nodes[id];}
 function content(n){return String(n.textContent||'')+n.children.map(content).join(' ');}
 let cases=[{id:'secom',title:'Example',claim:'Original claim'}],details={secom:{id:'secom',title:'Example',claim:'Original claim',generated_pipeline:false}};
 let history=[],activeIds=[],states={},overrides=()=>undefined;
 const recorded={case:'secom',mode:'live',status:'completed',verdict:'DISPUTED',events:[],limitations:[]};
 global.window={location:{search:''},history:{replaceState(){}}};
-global.document={getElementById:el,createElement:()=>el('new-'+Math.random()),querySelectorAll:()=>[]};
+global.document={getElementById:el,createElement:()=>el('new-'+Math.random()),querySelectorAll:()=>[],body:el('body'),activeElement:el('fullscreenButton'),fullscreenElement:null,handlers:{},addEventListener(k,f){this.handlers[k]=f}};
 global.setTimeout=fn=>{timers.set(++timerId,fn);return timerId};global.clearTimeout=id=>timers.delete(id);
 global.fetch=async(path,opts={})=>{calls.push({path,opts});let data=await overrides(path,opts);
  if(data===undefined){
@@ -33,7 +33,7 @@ global.fetch=async(path,opts={})=>{calls.push({path,opts});let data=await overri
  return {ok:true,json:async()=>JSON.parse(JSON.stringify(data))};};
 const settle=()=>new Promise(setImmediate);
 async function tick(){const next=timers.entries().next().value;assert(next,'Expected pending poll');timers.delete(next[0]);await next[1]();await settle();}
-function load(){vm.runInThisContext(fs.readFileSync(process.argv[1],'utf8'));}
+function load(){vm.runInThisContext(fs.readFileSync(process.argv[2],'utf8'));vm.runInThisContext(fs.readFileSync(process.argv[1],'utf8'));}
 '''
 
 
@@ -43,7 +43,7 @@ def run_node(scenario):
         pytest.skip("Node not installed")
     path = Path(__file__).resolve().parents[1] / "app" / "static" / "workspace.js"
     script = HARNESS + "\n(async()=>{\n" + scenario + "\n})().catch(e=>{console.error(e);process.exitCode=1});"
-    result = subprocess.run([node, "-e", script, str(path)], capture_output=True, text=True, timeout=10, check=False)
+    result = subprocess.run([node, "-e", script, str(path), str(path.with_name("workspace-shell.js"))], capture_output=True, text=True, timeout=10, check=False)
     assert result.returncode == 0, result.stderr
 
 
@@ -164,4 +164,87 @@ def test_polling_a_failed_checkpoint_stops_and_preserves_restart_explanation():
 history=[{id:'interrupted',case:'secom',status:'running'}];activeIds=['interrupted'];states.interrupted={id:'interrupted',case:'secom',status:'running',result:{case:'secom',status:'running',events:[],limitations:[]}};
 load();await settle();states.interrupted.status='failed';states.interrupted.error='Local server restarted before this audit finished.';await tick();
 assert(content(el('modeBadge')).includes('failed'));assert(content(el('resultExplanation')).includes('restarted'));assert(el('assessmentLink').hidden);assert(el('cancelButton').hidden);
+''')
+
+
+def test_mobile_pane_navigation_keeps_setup_open_while_audit_polling_continues():
+    run_node(r'''
+load();await settle();assert.equal(el('workspace')['data-pane'],'setup');
+await el('runButton').handlers.click();assert.equal(el('workspace')['data-pane'],'evidence');assert.equal(el('evidenceTab')['aria-pressed'],'true');
+el('setupTab').handlers.click();await tick();assert.equal(el('workspace')['data-pane'],'setup');assert.equal(el('setupTab')['aria-pressed'],'true');
+await el('cancelButton').handlers.click();assert(calls.some(c=>c.path==='/api/jobs/job-1/cancel'));
+''')
+
+
+def test_clarification_returns_to_setup_and_recording_stays_read_only():
+    run_node(r'''
+cases=[{id:'user-study',title:'Draft'}];details['user-study']={id:'user-study',title:'Draft',generated_pipeline:true,study:{population:'undecided'}};
+history=[{id:'saved',case:'user-study',status:'inconclusive'}];states.saved={id:'saved',case:'user-study',status:'inconclusive',result:{case:'user-study',status:'inconclusive',verdict:'NEEDS_INFORMATION',questions:['Which population?'],events:[],limitations:[]}};
+load();await settle();assert.equal(el('workspace')['data-pane'],'evidence');await el('answerQuestions').handlers.click();assert.equal(el('workspace')['data-pane'],'setup');assert(el('preparePanel').open);assert(el('studyContext').open);
+el('openRecording').handlers.click();assert.equal(el('workspace')['data-pane'],'evidence');assert.equal(postJobs,0);
+''')
+
+
+def test_mobile_recording_selection_returns_to_result_with_matching_example():
+    run_node(r'''
+window.__NL_RECORDED={cases:[recorded,{...recorded,case:'secom_clean',verdict:'NOT_TESTED'}]};load();await settle();el('setupTab').handlers.click();el('caseSelect').value='secom_clean';el('caseSelect').handlers.change();
+assert.equal(el('workspace')['data-pane'],'evidence');assert(content(el('resultCase')).includes('secom_clean'));assert.equal(calls.length,0);
+el('openRecording').handlers.click();assert.equal(el('caseSelect').value,'secom');el('showClean').handlers.click();assert.equal(el('caseSelect').value,'secom_clean');assert.equal(calls.length,0);
+''')
+
+
+def test_reduced_motion_applies_to_explicit_workspace_navigation():
+    run_node(r'''
+window.matchMedia=query=>({matches:query.includes('prefers-reduced-motion')});load();await settle();el('openRecording').handlers.click();assert.equal(el('workspace').lastScrollOptions.behavior,'auto');
+''')
+
+
+def test_focus_fallback_exits_with_escape_and_restores_background_state():
+    run_node(r'''
+const outside={inert:false};document.querySelectorAll=selector=>selector.startsWith('.topbar')?[outside]:[];
+load();await settle();await el('fullscreenButton').handlers.click();assert.equal(el('workspace')['data-focus'],'true');assert(outside.inert);assert.equal(el('fullscreenLabel').textContent,'Exit focus');
+document.handlers.keydown({key:'Escape'});await settle();assert.equal(el('workspace')['data-focus'],'false');assert.equal(outside.inert,false);assert.equal(el('fullscreenButton')['aria-pressed'],'false');assert(!el('workspace')['aria-modal']);assert.equal(postJobs,0);
+''')
+
+
+def test_native_fullscreen_external_exit_updates_focus_state():
+    run_node(r'''
+el('workspace').requestFullscreen=async()=>{document.fullscreenElement=el('workspace');document.handlers.fullscreenchange();};
+load();await settle();await el('fullscreenButton').handlers.click();assert.equal(el('fullscreenLabel').textContent,'Exit fullscreen');
+document.fullscreenElement=null;document.handlers.fullscreenchange();assert.equal(el('workspace')['data-focus'],'false');assert.equal(el('fullscreenLabel').textContent,'Fullscreen');
+''')
+
+
+def test_denied_fullscreen_keeps_a_working_focus_view_and_exit_button():
+    run_node(r'''
+el('workspace').requestFullscreen=async()=>{throw Error('Fullscreen unavailable')};load();await settle();await el('fullscreenButton').handlers.click();assert.equal(el('workspace')['data-focus'],'true');assert.equal(el('fullscreenLabel').textContent,'Exit focus');assert(!el('fullscreenButton').disabled);
+await el('fullscreenButton').handlers.click();assert.equal(el('workspace')['data-focus'],'false');assert.equal(calls.filter(c=>c.opts.method==='POST').length,0);
+''')
+
+
+def test_focus_view_preserves_active_job_and_selected_mobile_pane():
+    run_node(r'''
+load();await settle();await el('runButton').handlers.click();el('setupTab').handlers.click();await el('fullscreenButton').handlers.click();await tick();assert.equal(el('workspace')['data-pane'],'setup');assert.equal(postJobs,1);
+await el('cancelButton').handlers.click();assert(calls.some(c=>c.path==='/api/jobs/job-1/cancel'));await el('fullscreenButton').handlers.click();assert.equal(postJobs,1);
+''')
+
+
+def test_mobile_menu_closes_on_navigation_and_escape():
+    run_node(r'''
+load();await settle();el('menuToggle').handlers.click();assert.equal(el('menuToggle')['aria-expanded'],'true');el('workspaceNav').handlers.click();assert.equal(el('mainHeader')['data-menu-open'],'false');
+el('menuToggle').handlers.click();document.handlers.keydown({key:'Escape'});assert.equal(el('menuToggle')['aria-expanded'],'false');assert.equal(postJobs,0);
+''')
+
+
+def test_recorded_focus_mode_makes_no_api_requests():
+    run_node(r'''
+window.__NL_RECORDED={cases:[recorded]};load();await settle();await el('fullscreenButton').handlers.click();assert.equal(el('workspace')['data-focus'],'true');await el('fullscreenButton').handlers.click();assert.equal(calls.length,0);
+''')
+
+
+def test_rejected_native_exit_preserves_state_until_the_browser_exits():
+    run_node(r'''
+el('workspace').requestFullscreen=async()=>{document.fullscreenElement=el('workspace');document.handlers.fullscreenchange()};document.exitFullscreen=async()=>{throw Error('Still fullscreen')};
+load();await settle();await el('fullscreenButton').handlers.click();await el('fullscreenButton').handlers.click();assert.equal(el('workspace')['data-focus'],'true');assert.equal(el('fullscreenLabel').textContent,'Exit fullscreen');
+document.fullscreenElement=null;document.handlers.fullscreenchange();assert.equal(el('workspace')['data-focus'],'false');assert(!el('fullscreenButton').disabled);
 ''')

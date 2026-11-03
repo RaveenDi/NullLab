@@ -1,6 +1,6 @@
 # NullLab CI: lint and offline tests. No secrets, no model calls, no spend.
 # Tests marked `slow` (over 60 s) and `live` (real API calls) are deselected here.
-# NOTE: this workflow has never run on GitHub (written and checked locally only): UNVERIFIED.
+# Runs on GitHub; historical missing-data checks can skip in fresh checkouts.
 name: ci
 
 on:

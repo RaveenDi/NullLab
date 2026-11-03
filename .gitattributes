@@ -15,6 +15,8 @@
 # Audit input identities bind exact bytes, including supplied line endings.
 eval/v2_cases/** -text whitespace=cr-at-eol
 eval/v2_followup_cases/** -text whitespace=cr-at-eol
+eval/v2_release/** -text whitespace=cr-at-eol
+eval/v2_confirmation/** -text whitespace=cr-at-eol
 examples/secom/** -text whitespace=cr-at-eol
 examples/secom_clean/** -text whitespace=cr-at-eol
 

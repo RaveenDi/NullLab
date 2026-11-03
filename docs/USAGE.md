@@ -2,6 +2,10 @@
 
 Start the localhost workspace using the README. Select a manufacturing example, or open **Prepare data or revise a study brief** to create a CSV case. Describe the decision, when it happens, which population the predictions must apply to, and whether the selected predictors are available then. Entity/time fields are metadata; exclude post-decision columns. These declarations are not independently verified facts. Review the claim and execution mode before running.
 
+The compact header centers the wordmark, with a Menu control on phones. **Fullscreen** expands the Author Workspace; the exit control and Escape restore the page. The browser API is used when available, with a focus-view fallback otherwise. Background navigation is inactive while focused, and active audits continue unchanged. Long forms and evidence keep their own scrolling; tiny/zoomed windows reflow for readability.
+
+On phones and tablets, **Study setup** and **Audit result** select the workspace pane. Opening a result switches to its evidence; clarification returns to setup. Long forms/evidence scroll within their panel, while the run button stays reachable. Saved audits have their own **History** navigation destination. Very short or zoomed windows use normal vertical page reflow. Desktop shows setup and results side by side.
+
 Unknown decision time, population or availability asks concrete questions before any fitting/model dispatch. A complete unseen-entity or future-record request is unsupported by the generated random-row adapter. Represented-entity baselines remain descriptive. Do not change the declared population merely to pass a gate: supply a separately validated pipeline when the real question needs group/time evaluation.
 
 The review room shows actual deterministic checks and recorded model contributions. It does not simulate conversation or vote on scientific truth. Baseline-only outcomes show seed scores without implying a controlled effect. Saved audits can be reopened after reload, including by `?job=UUID`. Viewing an older result does not change the active audit being polled or cancelled.

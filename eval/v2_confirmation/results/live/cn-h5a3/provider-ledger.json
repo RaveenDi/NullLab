@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "attempts": [
+    {
+      "id": "2ae0e21f505b4a71887f7cfe890a99ef",
+      "role": "critic",
+      "model": "muse-wonder-1.0",
+      "prompt_key": "ae923026c728579988a0a5e22fccd7d4d24a55f3edd03a052328ee820ade2836",
+      "status": "completed",
+      "reserved_usd": 0.273564,
+      "usage": {
+        "prompt_tokens": 1926,
+        "completion_tokens": 436,
+        "total_tokens": 2362
+      },
+      "billing": "usage_received",
+      "started_unix": 1793737755.2040117,
+      "replayed": false,
+      "finished_unix": 1793737759.8789647
+    },
+    {
+      "id": "f1584ba58cfa44469669dbe8832ecff1",
+      "role": "planner",
+      "model": "muse-spark-1.3",
+      "prompt_key": "37d4a10b255b41ba2966178b6555e137a1d1259ed9effffd025ed210f5f969b8",
+      "status": "completed",
+      "reserved_usd": 0.06076875,
+      "usage": {
+        "prompt_tokens": 1829,
+        "completion_tokens": 1023,
+        "total_tokens": 2852
+      },
+      "billing": "usage_received",
+      "started_unix": 1793737759.901929,
+      "replayed": false,
+      "finished_unix": 1793737770.4208953
+    }
+  ]
+}

@@ -420,11 +420,17 @@ def test_run_stage_mocked_then_score_complete(monkeypatch, env, tmp_path):
     seen, rids = [], []
     monkeypatch.setattr(b, "verify_problems", lambda: [])
     monkeypatch.setattr(g9, "install_instruments", lambda: None)
+    # Exercise scheduling/scoring without the gitignored historical datasets.
+    # Deliberately nonexistent case paths make an accidental real read fail even
+    # on a developer machine that happens to have downloaded those datasets.
+    monkeypatch.setattr(b, "CASES", {c: tmp_path / "absent-cases" / c for c in b.CASES})
+    monkeypatch.setattr(b, "agent_view", lambda case: f"MOCKED AGENT VIEW: {case.name}")
     monkeypatch.setattr(llm, "live_complete_ex", _fake_llm(seen))
     monkeypatch.setattr(g9, "pipeline", lambda dd, rid, model=None, **k: rids.append((rid, dd.name)) or dict(_default(int(rid[-1]), dd.name), rid=rid))
     b.run([])
     # B3 asked for 5 units; the 3 whose G9 B3 answer exists are not asked again; repeat ids are the G9 ones
     assert [t for t, u in seen] == ["g9b_b3"] * 5 and all("[repeat id: g9-r" in u for t, u in seen)
+    assert all(u.startswith("MOCKED AGENT VIEW: ") for _, u in seen)
     assert {(r, c) for r, c in ((int(x[0][-1]), x[1]) for x in rids)} == set(b.UNITS) and len(rids) == 8
     sizes = {r: len(json.loads((env / f"r{r}.json").read_text())["loop"]) for r in (1, 2, 3, 4, 5)}
     assert sizes == {1: 1, 2: 1, 3: 2, 4: 2, 5: 2}

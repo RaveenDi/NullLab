@@ -48,13 +48,16 @@ def main():
         files.add(ROOT / "eval" / name)
     files.add(ROOT / "docs" / "EVAL-V2-PILOT.md")
     files.add(ROOT / "docs" / "EVAL-V2-FOLLOWUP.md")
+    files.add(ROOT / "docs" / "EVAL-V2-RELEASE.md")
+    files.update(p for p in (ROOT / "eval" / "v2_release").rglob("*") if p.is_file() and "__pycache__" not in p.parts)
+    files.update(p for p in (ROOT / "eval" / "v2_confirmation").rglob("*") if p.is_file() and "__pycache__" not in p.parts)
     for name in ("v2_followup_score.json", "v2_followup_truth.json", "v2_followup_freeze.json", "v2_followup_preparation.json", "v2_followup_regression.json"):
         files.add(ROOT / "eval" / name)
     payloads = {}
     for p in sorted(files):
         data = p.read_bytes()
         scanned = data.decode("utf-8")
-        if p.suffix == ".py" and any(part in ("followup-v2-instrument", "instrument") for part in p.parts):
+        if p.suffix in (".py", ".txt") and (any(part in ("followup-v2-instrument", "instrument") for part in p.parts) or p.name == "preparation-runner.py.txt"):
             # Source legitimately names the environment variable. Reject literal
             # credentials, then scan other token patterns without that name.
             if re.search(r'''MODEL_API_KEY\s*=\s*["'][A-Za-z0-9._/-]{16,}["']''', scanned):

@@ -42,7 +42,7 @@ extend-exclude = [
     # case fixtures, run evidence and data are not source code
     "corpus", "factorial", "real", "runs", "runs_*", "logs_spike4", "out", "report/assets",
     # Exact-byte evaluation fixtures retain unused imports and planted defects.
-    "eval/v2_cases", "eval/v2_followup_cases",
+    "eval/v2_cases", "eval/v2_followup_cases", "eval/v2_release", "eval/v2_confirmation",
 ]
 
 [tool.ruff.lint]

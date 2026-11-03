@@ -1,0 +1,10 @@
+{
+  "file": "agent/engine.py",
+  "before_sha256_raw": "c8c2dbc33d8aa0607cf4baac78a2c837d0723648763b1453a2c400e95e8e2875",
+  "after_sha256_raw": "4c4311d4c3ef2bccb224616c35176a1613d4476694ecaa4f3f19752649bbfbba",
+  "before_sha256_lf": "92930d12acdf8731d27bff1d8fde20e12d7544664f0c35e28ff968e082a18843",
+  "after_sha256_lf": "a7ee843e1f6c5b928aac5989581630ee01bcfdaa65fbaf59a74065f8c1ba5b6f",
+  "reason": "Initial independent reviewer now sees the same intervention contract as the planner and explicit capability vs validity semantics. Strict invalid-abstention rejection is preserved. The ten-case original release score remains unchanged.",
+  "original_result": "0/3 supported flawed controls measured live; three invalid unsupported reviews with empty scope_gaps",
+  "verification": "22 offline engine tests passed. Earlier collection syntax error was fixed before preparation/inference; no result was generated from that intermediate edit."
+}

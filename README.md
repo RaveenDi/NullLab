@@ -1,5 +1,7 @@
 # NullLab
 
+[![CI](https://github.com/RaveenDi/NullLab/actions/workflows/ci.yml/badge.svg)](https://github.com/RaveenDi/NullLab/actions/workflows/ci.yml)
+
 **Put the evaluation behind a machine-learning score to the test.** NullLab helps an ML author reproduce a supported pipeline, challenge one evaluation assumption, run a constrained control, and export input-bound evidence.
 
 The current author workspace runs real local experiments. It supports binary numeric Python/sklearn cases and a guided CSV baseline adapter. Muse Spark proposes typed interventions; an optional Muse Wonder critic independently challenges the methodology. Deterministic code checks and measures the experiment. The free rules path handles a deliberately small set of patterns.
@@ -21,11 +23,12 @@ Python 3.12. From this folder:
 ```powershell
 python -m venv .venv
 .venv\Scripts\python -m pip install -r requirements-dev.txt
-.venv\Scripts\python scripts/build_manufacturing.py --download
 .venv\Scripts\python -m uvicorn app.server:app --host 127.0.0.1 --port 8099
 ```
 
-Open http://127.0.0.1:8099 . Prepare a study brief and CSV baseline, inspect recorded review contributions, answer questions through a new case version, reopen saved audits and compare their metadata. Download a measured control bundle or an explicitly unmeasured assessment ZIP. No key is needed for the rules/local-execution path. Keep the service on localhost.
+The public manufacturing cases are included; regeneration is optional development work, not a setup prerequisite.
+
+Open http://127.0.0.1:8099 . Use **Fullscreen** to focus the author workspace; use the exit button or Escape to return. Browsers without native fullscreen use a viewport focus view. Prepare a study brief and CSV baseline, inspect recorded review contributions, answer questions through a new case version, reopen saved audits and compare their metadata. Download a measured control bundle or an explicitly unmeasured assessment ZIP. No key is needed for the rules/local-execution path. Keep the service on localhost.
 
 ```powershell
 python -m agent.engine examples/secom --out out/my-audit
@@ -33,9 +36,13 @@ python -m agent.engine examples/secom --preview
 python -m agent.engine examples/secom --live --critic --out out/my-live-audit
 ```
 
-For a live run, copy `.env.example` to `.env`, provide your own configuration and key, then explicitly use `--live`. The default per-job budget reserves at most $1 and four attempts, with estimated costs; remote cancellation/billing are not guaranteed by a timeout. The application has no private battle-station dependency. To enable live calls through the local UI, set `NULLLAB_ALLOW_WEB_LIVE=1` in the server environment after reviewing configuration.
+For a live run, copy `.env.example` to `.env`, provide your own configuration and key, then explicitly use `--live`. The default per-job budget reserves at most $1 and four attempts, with estimated costs; remote cancellation/billing are not guaranteed by a timeout. Provider configuration is repository-owned and uses explicit environment settings. To enable live calls through the local UI, set `NULLLAB_ALLOW_WEB_LIVE=1` in the server environment after reviewing configuration.
 
 Local compatible inference is configured through `MODEL_BASE_URL` and `NULLLAB_MODEL`; loopback servers may omit a key. The transport path is implemented and tested with fake providers. **Muse Glimmer model quality and hardware performance have not been validated here.** Operator-funded public inference and arbitrary hosted Python uploads are not offered by this build.
+
+## Public hosting
+
+The prepared public evidence demo can be hosted as static files on AWS Amplify and connected to a custom domain. Fresh Python audits remain local until the proposed authenticated, isolated service is implemented. See [deployment options and exact steps](docs/DEPLOYMENT.md). The public recording is clearly labelled and makes no model calls.
 
 ## Your inputs
 
@@ -53,6 +60,8 @@ The [internal six-case pilot](docs/EVAL-V2-PILOT.md) exposed a contract bug and 
 
 An [eight-case fixed follow-up](docs/EVAL-V2-FOLLOWUP.md) included ambiguous and unsupported inputs. It measured 1/2 supported flawed-case controls, with a disputed result and no positive inflation findings. It exposed transformer tracing and scope-state weaknesses that were subsequently repaired; original scores and post-fix development evidence stay separate.
 
+A [new ten-case internal evaluation and separate six-case confirmation](docs/EVAL-V2-RELEASE.md) retained a critic-contract failure (0/3 flawed controls measured), repaired its prompt, then measured 3/3 controls on new fixed data: one disputed, one no-effect and one descriptive/inconclusive group result. Three clean confirmation cases remained unmeasured model judgments. All outcomes and actual instrument snapshots are public; this is internal control-coverage evidence, not general accuracy.
+
 [Architecture](docs/ARCHITECTURE.md) · [Security and privacy](docs/SECURITY.md) · [Deployment](docs/DEPLOYMENT.md) · [Current evidence](docs/RESULTS-V2.md) · [Implementation status](docs/RELEASE-STATUS.md)
 
 ## Verification
@@ -61,11 +70,12 @@ Run the full offline suite after the rebuild:
 
 ```powershell
 python -m pytest -m "not live" -q
-python scripts/freeze_check.py verify
+python scripts/freeze_check.py verify --allow-missing-data
 node --check app/static/workspace.js
+node --check app/static/workspace-shell.js
 ```
 
-The old protocol files and run histories are retained for reproducibility. Deliberate instrument changes are recorded in `docs/FROZEN-CHANGELOG.json`; historical results are not rescored under the new engine. Browser walkthrough is excluded by the owner's instruction. Current test outcomes are recorded in the release status, not inferred from this command list.
+The [documentation index](docs/README.md) lists the active guides. [Historical protocols and run records](docs/HISTORY.md) are retained for reproducibility at their original paths. Deliberate instrument changes are recorded in `docs/FROZEN-CHANGELOG.json`; historical results are not rescored under the new engine. Browser walkthrough is excluded by the owner's instruction. The fresh-clone flag permits only known unredistributed historical data to be missing; use strict verification without it when those inputs are present. The first pushed CI run had a historical G9b runner failure caused by a mocked test reading absent gitignored data. That test now uses deliberately nonexistent case paths with an explicit input-view stub, preserving its scheduling/scoring assertions. The CI badge links to actual remote status; dated runs and their distinct validation scopes are retained in release status.
 
 ## Built during the hackathon
 

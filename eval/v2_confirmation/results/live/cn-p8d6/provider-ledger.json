@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "attempts": [
+    {
+      "id": "c0856fef98954df098cbf4af93375ce9",
+      "role": "critic",
+      "model": "muse-wonder-1.0",
+      "prompt_key": "c846d6b5d746d2ebd10c712b9527b30f576cda7939b75c6c1df1eca2a2eac7b1",
+      "status": "completed",
+      "reserved_usd": 0.277384,
+      "usage": {
+        "prompt_tokens": 2150,
+        "completion_tokens": 536,
+        "total_tokens": 2686
+      },
+      "billing": "usage_received",
+      "started_unix": 1793737776.9870663,
+      "replayed": false,
+      "finished_unix": 1793737782.3584442
+    },
+    {
+      "id": "675acbf94229405787c0cb875553b1c3",
+      "role": "planner",
+      "model": "muse-spark-1.3",
+      "prompt_key": "8a83a8cd2876f14ed273e1a97ead58020c9fc3b7feb7dbb6136936296354bff0",
+      "status": "completed",
+      "reserved_usd": 0.0619625,
+      "usage": {
+        "prompt_tokens": 2053,
+        "completion_tokens": 985,
+        "total_tokens": 3038
+      },
+      "billing": "usage_received",
+      "started_unix": 1793737782.380912,
+      "replayed": false,
+      "finished_unix": 1793737793.871361
+    },
+    {
+      "id": "8c0dd4b72f344f5fbac1f891f59e708a",
+      "role": "critic",
+      "model": "muse-wonder-1.0",
+      "prompt_key": "a77a3f2aa4b80b95aa25ef411eeb0a0ce862c95907b0cffcd3ea2be084967cb5",
+      "status": "completed",
+      "reserved_usd": 0.264676,
+      "usage": {
+        "prompt_tokens": 1408,
+        "completion_tokens": 357,
+        "total_tokens": 1765
+      },
+      "billing": "usage_received",
+      "started_unix": 1793737815.9602304,
+      "replayed": false,
+      "finished_unix": 1793737821.4211464
+    }
+  ]
+}

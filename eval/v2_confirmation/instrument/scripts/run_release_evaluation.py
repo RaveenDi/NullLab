@@ -1,0 +1,265 @@
+"""Fixed post-repair internal evaluation. Prepare once, run once, retain all outcomes.
+
+No inference without the explicit `run --env-file ...` command. The credential
+path is a caller argument, never a product default. Truth never enters prompts.
+"""
+from __future__ import annotations
+
+import argparse
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
+from datetime import UTC, datetime
+from decimal import Decimal
+import hashlib
+import json
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from agent import evidence
+from agent.engine import preflight, run_audit, write_json
+from agent.provider import Provider, ProviderConfig, read_config
+
+BASE = ROOT / "eval/v2_release"
+SETTINGS = {
+    "planner_model": "muse-spark-1.3", "critic_model": "muse-wonder-1.0",
+    "base_url": "https://api.meta.ai/v1", "reasoning_effort": "low",
+    "max_tokens": 12000, "timeout_s": 120, "retries": 0,
+    "seeds": [42, 43, 44], "n_boot": 300, "workers": 2,
+    "scheduled_cases": 10, "max_usd_per_case": 1.0, "max_calls_per_case": 4,
+    "max_reserved_usd_total": 10.0, "max_attempts_total": 40,
+}
+HEADER = '''import numpy as np
+import pandas as pd
+from sklearn.model_selection import StratifiedKFold, GroupKFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.feature_selection import SelectKBest, f_classif
+TARGET = "event"
+METRIC = "accuracy"
+def load(path="data.csv"):
+    return pd.read_csv(path)
+def feats(df):
+    return [c for c in df.columns if c not in (TARGET, "device")]
+'''
+SELECTOR = '''def screen(X, y):
+    s = SelectKBest(f_classif, k=4).fit(X, y)
+    return s.get_support(indices=True)
+'''
+EVALUATE = '''def evaluate(X, y, seed):
+    ys, ps = [], []
+    for tr, te in StratifiedKFold(n_splits=4, shuffle=True, random_state=seed).split(X, y):
+        m = DecisionTreeClassifier(max_depth=3, min_samples_leaf=4, random_state=seed)
+        m.fit(X[tr], y[tr])
+        ys.append(y[te])
+        ps.append(m.predict(X[te]))
+    return np.concatenate(ys), np.concatenate(ps)
+'''
+CLAIM = '''def claimed_eval(df, seed):
+    X = df[feats(df)].to_numpy(dtype=float)
+    y = df[TARGET].to_numpy().astype(int)
+'''
+
+
+def prepare():
+    import numpy as np
+    import pandas as pd
+    from agent.intake import prepare as prepare_csv
+
+    BASE.mkdir(exist_ok=False)
+    # Capture actual source bytes BEFORE constructing new cases or measuring any
+    # effects. The earlier freeze supplies a dependency list, never old bytes.
+    names = set(json.loads((ROOT / "eval/v2_followup_freeze.json").read_text())["files"])
+    names.update(evidence.INSTRUMENTS)
+    names.update(("agent/assessment.py", "agent/bundle.py", "scripts/run_release_evaluation.py"))
+    files = {}
+    for name in sorted(names):
+        data = (ROOT / name).read_bytes()
+        dest = BASE / "instrument" / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+        files[name] = hashlib.sha256(data).hexdigest()
+    write_json(BASE / "instrument-freeze.json", {"captured_at_utc": datetime.now(UTC).isoformat(), "files": files})
+    cases, truth = BASE / "cases", {}
+    cases.mkdir()
+
+    def add(cid, frame, source, claim, category, family, ops=(), **extra):
+        d = cases / cid
+        d.mkdir()
+        (d / "data.csv").write_bytes(frame.to_csv(index=False, float_format="%.9g").encode())
+        (d / "train.py").write_bytes(source.encode())
+        (d / "excerpt.md").write_bytes((claim + "\n").encode())
+        write_json(d / "case.json", {"target": "event", "intended_use": claim, **extra})
+        truth[cid] = {"category": category, "family": family, "reference_ops": list(ops)}
+
+    rng = np.random.default_rng(90401)
+    X = rng.normal(size=(160, 80))
+    y = (0.25 * X[:, 0] + rng.normal(size=160) > 0).astype(int)
+    frame = pd.DataFrame(X, columns=[f"band_{i:02d}" for i in range(80)]).assign(event=y)
+    claim = "Synthetic acoustic quality records. Predict an independent recording's quality event from measurements collected before inspection. Each row is an independent recording, all bands are available at decision time, and no chronological or grouped use is claimed. Report random-row validation accuracy; no numerical reference score is asserted."
+    add("rx-r7m2", frame, HEADER + SELECTOR + EVALUATE + CLAIM + "    k = screen(X, y)\n    return evaluate(X[:, k], y, seed)\n", claim, "supported_flawed", "label_screening", [{"op": "move_into_fold", "step": "claimed_eval", "call": "screen"}])
+    clean = '''def claimed_eval(df, seed):
+    X = df[feats(df)].to_numpy(dtype=float)
+    y = df[TARGET].to_numpy().astype(int)
+    ys, ps = [], []
+    for tr, te in StratifiedKFold(n_splits=4, shuffle=True, random_state=seed).split(X, y):
+        k = screen(X[tr], y[tr])
+        m = DecisionTreeClassifier(max_depth=3, min_samples_leaf=4, random_state=seed)
+        m.fit(X[tr][:, k], y[tr])
+        ys.append(y[te])
+        ps.append(m.predict(X[te][:, k]))
+    return np.concatenate(ys), np.concatenate(ps)
+'''
+    add("rx-j4t9", frame, HEADER + SELECTOR + clean, claim, "clean", "label_screening")
+
+    rng = np.random.default_rng(90402)
+    X = rng.normal(size=(156, 5)) * np.array([1, 12, 0.05, 7, 80])
+    y = (X[:, 0] + X[:, 1] / 15 + rng.normal(size=156) > 0).astype(int)
+    frame = pd.DataFrame(X, columns=[f"signal_{i}" for i in range(5)]).assign(event=y)
+    claim = "Synthetic independent packaging records. Predict a quality event before final inspection from five already available sensor values. Independent-record random-row validation accuracy is the estimand; all selected measurements precede the decision. There is no forecast or entity-generalization claim. No numerical reference score is supplied."
+    logistic = EVALUATE.replace("DecisionTreeClassifier(max_depth=3, min_samples_leaf=4, random_state=seed)", "LogisticRegression(C=0.35, solver='liblinear', random_state=seed)")
+    add("rx-k8p3", frame, HEADER + logistic + CLAIM + "    V = StandardScaler().fit_transform(X)\n    return evaluate(V, y, seed)\n", claim, "supported_flawed", "fitted_scaling", [{"op": "move_into_fold", "step": "claimed_eval", "call": "StandardScaler"}])
+    clean = clean.replace("k = screen(X[tr], y[tr])", "scale = StandardScaler().fit(X[tr])").replace("DecisionTreeClassifier(max_depth=3, min_samples_leaf=4, random_state=seed)", "LogisticRegression(C=0.35, solver='liblinear', random_state=seed)").replace("X[tr][:, k]", "scale.transform(X[tr])").replace("X[te][:, k]", "scale.transform(X[te])")
+    add("rx-d2n6", frame, HEADER + clean, claim, "clean", "fitted_scaling")
+
+    rng = np.random.default_rng(90403)
+    device = np.repeat(np.arange(40), 4)
+    signatures = rng.normal(size=(40, 3))
+    X = signatures[device] + rng.normal(scale=0.015, size=(160, 3))
+    labels = np.tile([0, 1], 20)
+    rng.shuffle(labels)
+    frame = pd.DataFrame(X, columns=["signature_a", "signature_b", "signature_c"]).assign(device=device, event=labels[device])
+    claim = "Synthetic equipment measurements with repeated readings per device. At commissioning, use available sensor signatures to predict an event on previously unseen devices. Device is entity metadata and is excluded from predictors. Accuracy must concern held-out devices rather than additional readings of known devices. No numerical reference score is supplied."
+    declaration = {"decision_time": "At commissioning, before the event", "unit_of_analysis": "A device reading", "population": "unseen_entities", "entity_column": "device", "predictor_availability": "confirmed"}
+    group = '''def evaluate(X, y, seed, groups):
+    ys, ps = [], []
+    for tr, te in StratifiedKFold(n_splits=4, shuffle=True, random_state=seed).split(X, y):
+        m = DecisionTreeClassifier(max_depth=8, min_samples_leaf=2, random_state=seed)
+        m.fit(X[tr], y[tr])
+        ys.append(y[te])
+        ps.append(m.predict(X[te]))
+    return np.concatenate(ys), np.concatenate(ps)
+'''
+    call = CLAIM + "    return evaluate(X, y, seed, groups=df['device'].to_numpy())\n"
+    add("rx-v5q1", frame, HEADER + group + call, claim, "supported_flawed", "entity_separation", [{"op": "replace_split", "step": "evaluate", "kind": "group", "col": "device"}], study=declaration)
+    group = group.replace("StratifiedKFold(n_splits=4, shuffle=True, random_state=seed).split(X, y)", "GroupKFold(n_splits=4).split(X, y, groups=groups)")
+    add("rx-a9w4", frame, HEADER + group + call, claim, "clean", "entity_separation", study=declaration)
+
+    rng = np.random.default_rng(90404)
+    frame = pd.DataFrame({"energy": rng.normal(size=96), "phase": rng.normal(size=96), "batch_time": np.arange(96), "event": np.tile([0, 1], 48)})
+    for cid, population, availability, category in (("rx-f6b8", "independent_records", "unknown", "missing_information"), ("rx-u3h7", "future_records", "confirmed", "generated_scope")):
+        declaration = {"decision_time": "Before inspection", "unit_of_analysis": "One batch", "population": population, "time_column": "batch_time", "predictor_availability": availability}
+        prepare_csv(frame.to_csv(index=False), "event", "Predict inspection events from available energy and phase measurements for the declared population.", cases / cid, study=declaration)
+        truth[cid] = {"category": category, "family": "author_contract", "reference_ops": []}
+
+    frame = pd.DataFrame({"pre_sensor": rng.normal(size=112), "event": np.tile([0, 1], 56)})
+    frame["post_inspection_code"] = frame.event * 10 + rng.normal(scale=0.01, size=112)
+    claim = "Synthetic sorting records. The intended decision is before inspection. pre_sensor is available then; post_inspection_code is generated from the inspection outcome afterward and is unavailable at the intended decision. Both are currently used in feats(). The evaluation should answer pre-inspection performance, not reconstruction after inspection. Dropping the post-inspection feature would require a feature edit. No numerical reference score is supplied."
+    add("rx-e1c5", frame, HEADER + EVALUATE + CLAIM + "    return evaluate(X, y, seed)\n", claim, "unsupported_feature", "post_outcome_predictor")
+    frame = frame.drop(columns="post_inspection_code").assign(event=np.tile([0, 1, 2, 0], 28))
+    add("rx-z0s2", frame, HEADER + EVALUATE + CLAIM + "    return evaluate(X, y, seed)\n", "Synthetic three-class sorting task; event can be 0, 1 or 2. Evaluate classification accuracy.", "invalid_input", "multiclass")
+
+    checks, case_files = {}, {}
+    for d in sorted(cases.iterdir()):
+        try:
+            preflight(d)
+            checks[d.name] = "accepted"
+        except ValueError as exc:
+            checks[d.name] = str(exc)
+        case_files[d.name] = {p.name: evidence.file_hash(p) for p in sorted(d.iterdir()) if p.is_file()}
+    write_json(BASE / "truth.json", {"scope": "Coordinator-prepared internal synthetic cases, capability-informed; not blind independent adjudication. Mechanism truth does not require score inflation.", "cases": truth})
+    freeze = {"prepared_at_utc": datetime.now(UTC).isoformat(), "files": files, "case_files": case_files, "case_ids": sorted(truth), "truth_sha256": evidence.file_hash(BASE / "truth.json"), "settings": SETTINGS, "intake_checks": checks}
+    write_json(BASE / "freeze.json", freeze)
+    print(json.dumps({"cases": len(truth), "source_files_captured": len(files), "preflight": checks}, indent=2))
+
+
+def check_freeze(freeze):
+    for name, expected in freeze["files"].items():
+        if evidence.file_hash(ROOT / name) != expected or evidence.file_hash(BASE / "instrument" / name) != expected:
+            raise ValueError(f"Instrument drift: {name}")
+    if freeze["settings"] != SETTINGS or evidence.file_hash(BASE / "truth.json") != freeze["truth_sha256"]:
+        raise ValueError("Settings or truth drift")
+    for cid, files in freeze["case_files"].items():
+        for name, expected in files.items():
+            if evidence.file_hash(BASE / "cases" / cid / name) != expected:
+                raise ValueError(f"Case drift: {cid}/{name}")
+
+
+def run(env_file):
+    freeze = json.loads((BASE / "freeze.json").read_text())
+    check_freeze(freeze)
+    config = ProviderConfig(api_key=read_config(env_file).get("MODEL_API_KEY", ""), base_url=SETTINGS["base_url"], model=SETTINGS["planner_model"], role_models={"critic": SETTINGS["critic_model"]}, reasoning_effort=SETTINGS["reasoning_effort"], max_tokens=SETTINGS["max_tokens"], timeout_s=SETTINGS["timeout_s"], retries=0)
+    if not config.api_key:
+        raise ValueError("Explicit Meta credential required")
+    out = BASE / "results"
+    out.mkdir(exist_ok=False)  # Never resume/reroll this scheduled cohort.
+    write_json(out / "schedule.json", {"freeze": freeze, "policy": "Every case scheduled once in each mode. No independent no-critic arm; no superiority estimate. No effect-based case selection or reroll.", "budget": {"max_reserved_usd": 10, "max_attempts": 40, "project_ceiling_usd": 60, "pre_run_conservative_recorded_estimate_usd": "37.55886125", "note": "Historical shared Meta estimate plus deduplicated local v2 reservations; estimates, not an account billing balance."}})
+    for mode in ("offline", "live"):
+        def one(cid, mode=mode):
+            check_freeze(freeze)
+            job = out / mode / cid
+            provider = Provider(config, job, max_usd=1, max_calls=4) if mode == "live" else None
+            r = run_audit(BASE / "cases" / cid, job, live=mode == "live", critic=mode == "live", provider=provider, n_boot=300)
+            print(json.dumps({"mode": mode, "case": cid, "status": r["status"], "verdict": r["verdict"], "measured": bool(r.get("summary")), "calls": r["ledger"]["calls"]}), flush=True)
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            list(pool.map(one, freeze["case_ids"]))
+    check_freeze(freeze)
+    score()
+
+
+def score():
+    freeze = json.loads((BASE / "freeze.json").read_text())
+    # Check retained snapshot rather than today's instrument; later code must not
+    # rewrite the interpretation of these originally scheduled results.
+    for name, digest in freeze["files"].items():
+        if evidence.file_hash(BASE / "instrument" / name) != digest:
+            raise ValueError("Retained instrument snapshot changed")
+    if evidence.file_hash(BASE / "truth.json") != freeze["truth_sha256"]:
+        raise ValueError("Truth changed")
+    truth = json.loads((BASE / "truth.json").read_text())["cases"]
+    rows, hashes, reservations, usages = [], {}, [], Counter()
+    for mode in ("offline", "live"):
+        for cid in freeze["case_ids"]:
+            p = BASE / "results" / mode / cid / "result.json"
+            r = json.loads(p.read_text())
+            hashes[p.relative_to(BASE).as_posix()] = evidence.file_hash(p)
+            if r.get("evidence"):
+                evidence.verify(p.parent / "inputs", r)
+                if any(r["evidence"]["inputs"][name] != digest for name, digest in freeze["case_files"][cid].items()):
+                    raise ValueError("Result input does not match the frozen case")
+            lp = p.parent / "provider-ledger.json"
+            attempts = json.loads(lp.read_text())["attempts"] if lp.exists() else []
+            reservations.extend(Decimal(str(a["reserved_usd"])) for a in attempts)
+            for a in attempts:
+                usages.update(a.get("usage", {}))
+            if r.get("summary"):
+                for seed, configs in r["raw"]["seeds"].items():
+                    for name in ("orig", "fix_both"):
+                        v = configs[name]
+                        observed = sum(y == pred for y, pred in zip(v["y"], v["p"], strict=True)) / len(v["y"])
+                        if abs(observed - r["record"]["stats"][seed]["full"]["acc"][name]) > 1e-12:
+                            raise ValueError("Stored measurement does not match predictions")
+            rows.append({"case": cid, "mode": mode, **truth[cid], "status": r["status"], "verdict": r["verdict"], "baseline": r.get("baseline"), "control_measured": bool(r.get("summary")), "plan": r.get("plan"), "summary": r.get("summary"), "guard": r.get("guard"), "independent_review": r.get("independent_review"), "critic": r.get("critic"), "error": r.get("error"), "attempts": len(attempts)})
+    live = [r for r in rows if r["mode"] == "live"]
+    totals = {"scheduled_per_mode": 10, "category_denominators": dict(Counter(t["category"] for t in truth.values())), "live_verdicts": dict(Counter(r["verdict"] for r in live)), "supported_flawed_measured_live": sum(r["category"] == "supported_flawed" and r["control_measured"] for r in live), "clean_controls_measured_live": sum(r["category"] == "clean" and r["control_measured"] for r in live), "provider_attempts": sum(r["attempts"] for r in rows), "reserved_estimate_usd_exact": str(sum(reservations)), "token_usage": dict(usages)}
+    if totals["provider_attempts"] > 40 or sum(reservations) > 10:
+        raise ValueError("Cohort exceeded its predeclared bounds")
+    write_json(BASE / "score.json", {"schema": "nulllab.release-internal-score.v1", "scope": "Fresh post-repair internal synthetic evaluation. New fixed data/case bytes, familiar mechanism families and one new entity-separation pair. Coordinator preparation/adjudication; not external validation or a reliability benchmark.", "totals": totals, "results": rows, "result_sha256": hashes, "limitations": ["No independent case preparer, no human researcher, no real-project generalization estimate.", "No matched no-critic arm, causal critic benefit or model superiority estimate.", "No empirical clean specificity from no-control outcomes. No effect magnitude required by mechanism truth.", "Group measurements remain descriptive; fixed-prediction row intervals do not establish group-aware uncertainty.", "Earlier cohort failures and development repairs remain separate; these scheduled outcomes are never replaced by reruns."]})
+    print(json.dumps(totals, indent=2))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("command", choices=("prepare", "run", "score"))
+    parser.add_argument("--env-file", help="Explicit credential file for run only")
+    args = parser.parse_args()
+    if args.command == "prepare":
+        prepare()
+    elif args.command == "run":
+        if not args.env_file:
+            parser.error("run requires an explicit --env-file")
+        run(args.env_file)
+    else:
+        score()

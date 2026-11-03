@@ -2,8 +2,8 @@
 
 Team: NullLab. Track: Indie Developer. Theme: Build for Your World.
 Repository: https://github.com/RaveenDi/NullLab
-Video: pending actual recording and public upload.
-Live URL: pending approved public hosting of the view-only demo; local execution is supported.
+Video: pending actual recording and public upload. The 2:55 plan and complete narration are in submission/storyboard.md and submission/transcript.txt.
+Hosted URL: optional; none published. The product runs locally and the public video remains to be recorded.
 
 ## Project description
 
@@ -19,7 +19,7 @@ Muse Spark 1.3 independently proposed the typed resampling intervention in the l
 
 The transport also supports compatible local inference and explicit instance replay. Open-weight model quality has not been established, so no open-weight prize claim is made. The critic's additional value has not been quantified against a matched baseline; this is a demonstrated critique, not a claimed general reliability gain.
 
-Two fixed internal synthetic cohorts exposed contract, transformer-tracing and scope-state defects. Their original coverage failures remain published separately from post-fix development regressions. The repaired workspace preserves missing-information questions, unsupported concerns and reviewer objections; these checks do not establish general benchmark accuracy or outside-user impact. See docs/EVAL-V2-PILOT.md and docs/EVAL-V2-FOLLOWUP.md.
+Two fixed internal synthetic cohorts exposed contract, transformer-tracing and scope-state defects. Their original coverage failures remain published separately from post-fix development regressions. The repaired workspace preserves missing-information questions, unsupported concerns and reviewer objections; these checks do not establish general benchmark accuracy or outside-user impact. A subsequent ten-case evaluation exposed a critic-contract ambiguity (0/3 flawed controls measured); its original failures remain intact. After the prompt repair, a separate six-case confirmation on new data measured 3/3 controls: disputed screening, no-effect scaling and a descriptive/inconclusive group split. Three clean cases received unmeasured no-flaw assessments. This is bounded internal coverage evidence, not general accuracy or a measured multi-agent benefit. See docs/EVAL-V2-PILOT.md, docs/EVAL-V2-FOLLOWUP.md and docs/EVAL-V2-RELEASE.md.
 
 ## Build boundary and limitations
 

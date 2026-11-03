@@ -9,6 +9,7 @@ def test_local_workspace_assets_and_intake(tmp_path, monkeypatch):
     with TestClient(server.app) as c:
         assert c.get("/").status_code == 200
         assert c.get("/static/workspace.js").status_code == 200
+        assert c.get("/static/workspace-shell.js").status_code == 200
         assert "cases" in c.get("/api/cases").json()
         assert c.post("/api/jobs", json={"case": "../../private"}).status_code == 400
         assert c.post("/api/jobs", json={"case": "secom", "live": True}).status_code == 403

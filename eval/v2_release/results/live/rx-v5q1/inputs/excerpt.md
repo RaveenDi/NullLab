@@ -1,0 +1,1 @@
+Synthetic equipment measurements with repeated readings per device. At commissioning, use available sensor signatures to predict an event on previously unseen devices. Device is entity metadata and is excluded from predictors. Accuracy must concern held-out devices rather than additional readings of known devices. No numerical reference score is supplied.

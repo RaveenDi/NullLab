@@ -1,0 +1,1 @@
+Synthetic acoustic quality records. Predict an independent recording's quality event from measurements collected before inspection. Each row is an independent recording, all bands are available at decision time, and no chronological or grouped use is claimed. Report random-row validation accuracy; no numerical reference score is asserted.

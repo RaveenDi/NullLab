@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "attempts": [
+    {
+      "id": "b9042e1cd7124260bf60944c5b251e17",
+      "role": "critic",
+      "model": "muse-wonder-1.0",
+      "prompt_key": "2198350d3b02784b2f0c4a1e974a0d7bb1abfecfe835e77a827f7a074f974104",
+      "status": "completed",
+      "reserved_usd": 0.256896,
+      "usage": {
+        "prompt_tokens": 1081,
+        "completion_tokens": 850,
+        "total_tokens": 1931
+      },
+      "billing": "usage_received",
+      "started_unix": 1793737424.4189327,
+      "replayed": false,
+      "finished_unix": 1793737432.190544
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "cases": {
+    "cn-b4m8": {
+      "category": "supported_flawed",
+      "family": "label_screening",
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "screen"
+        }
+      ],
+      "prior_template_case": "rx-r7m2"
+    },
+    "cn-t7r1": {
+      "category": "clean",
+      "family": "label_screening",
+      "reference_ops": [],
+      "prior_template_case": "rx-j4t9"
+    },
+    "cn-q2v9": {
+      "category": "supported_flawed",
+      "family": "fitted_scaling",
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "StandardScaler"
+        }
+      ],
+      "prior_template_case": "rx-k8p3"
+    },
+    "cn-h5a3": {
+      "category": "clean",
+      "family": "fitted_scaling",
+      "reference_ops": [],
+      "prior_template_case": "rx-d2n6"
+    },
+    "cn-p8d6": {
+      "category": "supported_flawed",
+      "family": "entity_separation",
+      "reference_ops": [
+        {
+          "op": "replace_split",
+          "step": "evaluate",
+          "kind": "group",
+          "col": "device"
+        }
+      ],
+      "prior_template_case": "rx-v5q1"
+    },
+    "cn-w1j4": {
+      "category": "clean",
+      "family": "entity_separation",
+      "reference_ops": [],
+      "prior_template_case": "rx-a9w4"
+    }
+  },
+  "scope": "New data/IDs; same capability-informed templates after observing the critic-prompt defect. Internal confirmation, not blinded held-out mechanisms."
+}

@@ -120,6 +120,50 @@ def test_preview_does_not_include_raw_rows(case):
     assert not {"source", "rows_data", "samples"} & preview.keys()
 
 
+def test_initial_critic_receives_control_contract_and_testability_semantics(case, tmp_path, monkeypatch):
+    from agent import contract_g9
+
+    monkeypatch.setattr(executor, "run_factorial", fake_raw)
+    roles = []
+
+    class Reviewer:
+        def complete(self, system, user, *, role, **kwargs):
+            roles.append(role)
+            if role == "critic":
+                assert contract_g9.contract_text() in system
+                assert "a flawed pipeline can and should be supported" in system
+                assert "nonempty concrete scope_gaps" in system
+                assert kwargs["response_format"] == {"type": "json_object"}
+                return json.dumps({"assessment": "supported", "concerns": ["A fixable evaluation flaw"], "questions": [], "scope_gaps": [], "reason": "The contract can investigate this concern"})
+            return json.dumps({"verdict": "no_flaw", "factors": [], "reason": "No control proposed"})
+
+        def ledger(self):
+            return {"calls": len(roles), "est_usd": 0}
+
+    r = engine.run_audit(case, tmp_path / "job", live=True, critic=True, provider=Reviewer(), n_boot=10)
+    assert roles == ["critic", "planner"]
+    assert r["verdict"] == "DISPUTED" and r["summary"] is None
+    assert r["unresolved_concerns"] == ["A fixable evaluation flaw"]
+
+
+def test_malformed_critic_abstention_still_fails_closed(case, tmp_path, monkeypatch):
+    monkeypatch.setattr(executor, "run_factorial", fake_raw)
+    roles = []
+
+    class Reviewer:
+        def complete(self, system, user, *, role, **kwargs):
+            roles.append(role)
+            return json.dumps({"assessment": "unsupported", "concerns": ["Fixable concern"], "questions": [], "scope_gaps": [], "reason": "Original evaluation invalid"})
+
+        def ledger(self):
+            return {"calls": len(roles), "est_usd": 0}
+
+    r = engine.run_audit(case, tmp_path / "job", live=True, critic=True, provider=Reviewer(), n_boot=10)
+    assert roles == ["critic"] and r["status"] == "failed"
+    assert r["summary"] is None and "concrete scope_gaps" in r["error"]
+    assert r["independent_review"]["assessment"] == "unsupported"
+
+
 def test_cancel_before_baseline_is_terminal(case, tmp_path, monkeypatch):
     def forbidden(*a, **kw):
         raise AssertionError("must not execute")

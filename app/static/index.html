@@ -1,49 +1,767 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Turn a questionable machine-learning evaluation into a tested, reproducible research finding.">
-  <title>NullLab · Put the score to the test</title>
-  <link rel="stylesheet" href="/static/workspace.css"><script src="/static/workspace.js" defer></script>
-</head>
-<body>
-<a class="skip" href="#workspace">Skip to audit workspace</a>
-<header class="topbar"><a class="brand" href="/" aria-label="NullLab home"><span class="brand-mark">∅</span> NullLab<span class="brand-dot">.</span></a><nav aria-label="Primary"><a href="#workspace">Workspace</a><a href="#how">Method</a><a href="#boundaries">Scope & evidence</a></nav><span class="local-indicator"><span></span> Local research workspace</span></header>
-<main>
-  <section class="hero" aria-labelledby="headline">
-    <div class="hero-copy"><p class="eyebrow"><span class="tiny-line"></span> RESEARCH CLAIMS, UNDER EXAMINATION</p><h1 id="headline">A great score.<br>Does it <em>hold up?</em></h1><p class="intro">Test the evaluation behind a machine-learning result. Trace a suspect assumption, run a controlled change, and leave with evidence you can reproduce.</p><div class="hero-actions"><a class="button primary" href="#workspace">Put a score to the test <span aria-hidden="true">↗</span></a><button class="button quiet" id="openRecording" type="button">Inspect recorded evidence <span aria-hidden="true">→</span></button></div><p class="hero-caption">Meta reasoning. Constrained experiments. Measured conclusions.</p></div>
-    <div class="instrument" aria-label="An audit follows evidence from a claim through a controlled experiment"><div class="instrument-head"><span>THE EVALUATION, OPENED UP</span><span class="mono">NL / 02</span></div><div class="instrument-orbit"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="orbit-core">∅<span>TEST THE ASSUMPTION</span></div><span class="orbit-tag tag-claim">01 · Reported score</span><span class="orbit-tag tag-control">02 · Controlled test</span><span class="orbit-tag tag-evidence">03 · Measured evidence</span></div><div class="instrument-foot"><span class="status-dot"></span><p>Confidence follows the experiment.<br><strong>Agreement alone is never the result.</strong></p></div></div>
-  </section>
-
-  <section class="workspace" id="workspace" aria-labelledby="workspace-title">
-    <div class="section-heading"><div><p class="eyebrow">01 / AUTHOR WORKSPACE</p><h2 id="workspace-title">From claim to evidence.</h2></div><span class="pill neutral" id="modeBadge">Ready to inspect</span></div>
-    <div class="workspace-grid">
-      <aside class="intake card">
-        <div class="card-title"><span class="step-no">01</span><h3>Choose a pipeline</h3></div><p class="muted">Start with a manufacturing evaluation on public SECOM records.</p>
-        <label for="caseSelect">Available local case</label><select id="caseSelect"><option value="">Loading cases…</option></select>
-        <details class="claim-details" id="preparePanel"><summary>Prepare data or revise a study brief</summary><p class="muted">Create a defined Random Forest baseline, or clarify a saved CSV case. Your declarations guide the protocol; they are not verified facts.</p><label for="caseTitle">Study title · optional</label><input id="caseTitle" type="text" maxlength="160" placeholder="e.g. Quality screening before acceptance"><div id="csvInputGroup"><label for="csvFile">Binary target CSV · up to 5 MB</label><input type="file" id="csvFile" accept=".csv,text/csv"><label for="targetColumn">Target column (0 / 1)</label><input id="targetColumn" type="text" placeholder="defect"></div><label for="intendedUse">What decision will these predictions support?</label><textarea id="intendedUse" rows="3" maxlength="4000" placeholder="Describe the research question and intended use."></textarea><label for="studyPopulation">Which records must the result apply to?</label><select id="studyPopulation"><option value="undecided">Not decided yet</option><option value="independent_records">New independent records</option><option value="represented_entities">More records from represented entities</option><option value="unseen_entities">Previously unseen entities</option><option value="future_records">Future records</option></select><p id="protocolHint" class="input-note">Save what you know. Missing information and unsupported protocols remain explicit outcomes.</p><details class="study-context" id="studyContext"><summary>Decision time & column roles</summary><label for="decisionTime">When is the prediction made?</label><input id="decisionTime" type="text" maxlength="2000" placeholder="Before the final acceptance test"><label for="unitOfAnalysis">What does one row represent? · optional</label><input id="unitOfAnalysis" type="text" maxlength="300" placeholder="One inspected component"><label for="predictorAvailability">Are the proposed predictors available then?</label><select id="predictorAvailability"><option value="unknown">Not confirmed</option><option value="confirmed">I confirm they are available before the decision</option></select><div id="entityField" hidden><label for="entityColumn">Entity/group column · metadata only</label><input id="entityColumn" type="text" placeholder="production_line_id"></div><div id="timeField" hidden><label for="timeColumn">Time column · metadata only</label><input id="timeColumn" type="text" placeholder="inspection_date"></div><label for="excludedColumns">Other columns to exclude · comma separated</label><input id="excludedColumns" type="text" placeholder="post_test_status, serial_number"><p class="input-note">Entity, time and excluded columns stay in the data but do not become generated predictors. Exclude post-decision information before confirming availability.</p></details><p id="predictorPreview" class="input-note"></p><p id="caseLineage" class="input-note"></p><button id="importCsv" class="button secondary" type="button">Prepare new CSV case</button><div id="revisionActions" hidden><label for="revisionReason">Answer or revision note · optional</label><textarea id="revisionReason" rows="2" maxlength="2000" placeholder="What changed, and what evidence supports the clarification?"></textarea><button id="reviseCase" class="button secondary" type="button">Save a new case version</button><p class="input-note">Reuses this case's data. Earlier inputs and results remain unchanged.</p></div></details>
-        <details class="claim-details"><summary>Read the claim & intended use</summary><pre id="claimText">Select a case to inspect its claim.</pre></details>
-        <label for="executionMode">Audit mode</label><select id="executionMode"><option value="rules">Rules & local execution · no key</option><option value="live" disabled>Meta planner · configure locally</option></select>
-        <div id="liveOptions" hidden><label class="check"><input id="critic" type="checkbox"><span>Ask an independent methodology critic</span></label><div class="outbound"><strong>Before the model call</strong><p>The model receives full pipeline code, claim text, study declarations, column roles and aggregate diagnostics. CSV rows are not sampled, but your code, claim or declarations may contain private data. Review them and your provider settings.</p><label class="check"><input id="outbound" type="checkbox"><span>I reviewed what leaves this machine.</span></label></div></div>
-        <button id="runButton" class="button primary wide" type="button" disabled>Run a fresh audit <span aria-hidden="true">↗</span></button><p class="input-note">Fresh execution creates a new evidence record. The recorded example is available separately.</p>
-        <details class="own-project"><summary>Use your own project</summary><p>The CLI accepts a trusted local case folder with <code>train.py</code>, <code>data.csv</code> and <code>excerpt.md</code>. The training module exposes <code>load</code>, <code>feats</code> and <code>claimed_eval</code>.</p><pre>python -m agent.engine PATH_TO_CASE</pre><p>Inspect the supported input contract in the README before adapting a notebook. This browser workspace executes curated local cases.</p></details>
-      </aside>
-      <div class="evidence-workspace card" aria-live="polite" aria-atomic="false">
-        <div class="workbench-head"><span class="eyebrow">AUDIT NOTEBOOK</span><button id="cancelButton" type="button" class="text-button" hidden>Request cancellation</button></div>
-        <ol class="pipeline" aria-label="Audit stages"><li data-stage="preflight"><span>1</span>Reproduce</li><li data-stage="plan"><span>2</span>Challenge</li><li data-stage="execute"><span>3</span>Test</li><li data-stage="evidence"><span>4</span>Evidence</li></ol>
-        <p id="activeAuditStatus" class="active-audit" hidden></p>
-        <section id="researchRoom" class="research-room" aria-labelledby="research-room-title"><div class="room-heading"><div><p class="eyebrow">PERSISTENT RESEARCH ROOM</p><h3 id="research-room-title">The question, objections and evidence.</h3></div><button id="answerQuestions" class="text-button" type="button" hidden>Clarify this study →</button></div><p class="muted room-note">Only recorded contributions appear here. Agent agreement does not resolve a scientific question.</p><div id="studySummary" class="study-summary"></div><div id="roomParticipants" class="room-participants"></div><div id="openQuestionsBlock" hidden><h4>Open questions & objections</h4><ul id="openQuestions"></ul></div></section>
-        <div class="empty-state" id="emptyState"><div class="empty-symbol">∅</div><h3>Give the score a second look.</h3><p>Choose a case and run an audit, or inspect an existing recording. Conclusions appear only when the available evidence supports them.</p><div class="empty-facts"><span>Original score</span><span>Controlled score</span><span>Traceable difference</span></div></div>
-        <div id="auditOutput" hidden><div class="result-heading"><p id="resultCase" class="mono muted"></p><h3 id="resultTitle">Preparing audit</h3><p id="resultExplanation" class="muted"></p></div><div id="baselineOnly" class="baseline-only" hidden><span>Baseline only · no counterfactual</span><strong id="baselineScore"></strong><p id="baselineDetail"></p></div><div id="measurement" hidden><div class="metric-head"><span id="metricName">METRIC</span><span class="mono" id="deltaValue"></span></div><div class="score-row"><span>Reported evaluation</span><strong id="claimedScore"></strong></div><svg class="score-bar" viewBox="0 0 600 13" preserveAspectRatio="none" aria-hidden="true"><rect class="bar-track" width="600" height="13" rx="3"></rect><rect id="claimedBar" class="bar-claimed" width="0" height="13" rx="3"></rect></svg><div class="score-row"><span>Controlled evaluation</span><strong id="controlledScore"></strong></div><svg class="score-bar" viewBox="0 0 600 13" preserveAspectRatio="none" aria-hidden="true"><rect class="bar-track" width="600" height="13" rx="3"></rect><rect id="controlledBar" class="bar-controlled" width="0" height="13" rx="3"></rect></svg><p class="metric-note">Scores apply to this case and specified control. A difference does not establish that an entire paper is wrong.</p><div id="seedEvidence" class="seed-evidence"></div></div><div class="result-actions"><button class="button secondary" id="downloadJson" type="button">Evidence JSON ↓</button><a class="button secondary" id="bundleLink" hidden>Reproducibility ZIP ↓</a><a class="button secondary" id="assessmentLink" hidden>Assessment ZIP · includes inputs ↓</a><button class="text-button" id="copyNote" type="button">Copy research note</button></div><p class="input-note">ZIP downloads include input data and executable code. Review their contents before sharing.</p><details class="evidence-detail" open><summary>What was tested</summary><div id="planDetails"></div></details><details class="evidence-detail"><summary>Audit trail</summary><ol class="event-list" id="events"></ol></details><details class="evidence-detail"><summary>Limitations & provenance</summary><div id="limitations"></div><pre id="provenance"></pre></details><div class="ledger" id="ledger"></div></div>
-        <div class="notice" role="status" id="notice" hidden></div>
-      </div>
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+  <meta content="Turn a questionable machine-learning evaluation into a tested, reproducible research finding." name="description"/>
+  <title>
+   NullLab · Put the score to the test
+  </title>
+  <link href="/static/workspace.css" rel="stylesheet"/>
+  <script defer="" src="/static/workspace-shell.js">
+  </script>
+  <script defer="" src="/static/workspace.js">
+  </script>
+  <meta content="#f6f4ee" name="theme-color"/>
+ </head>
+ <body>
+  <a class="skip" href="#workspace">
+   Skip to audit workspace
+  </a>
+  <header class="topbar" data-menu-open="false" id="mainHeader">
+   <button aria-controls="primaryNav" aria-expanded="false" aria-label="Open navigation" class="menu-toggle" id="menuToggle" type="button">
+    <svg aria-hidden="true" fill="none" viewbox="0 0 24 24">
+     <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-linecap="round" stroke-width="1.7">
+     </path>
+    </svg>
+    <span class="sr-only">
+     Menu
+    </span>
+   </button>
+   <a aria-label="NullLab home" class="brand" href="#intro" id="brandHome">
+    <svg aria-hidden="true" class="brand-mark" fill="none" focusable="false" viewbox="0 0 36 36">
+     <circle cx="18" cy="18" r="11" stroke="currentColor" stroke-width="2.4">
+     </circle>
+     <path d="M8 28 28 8" stroke="currentColor" stroke-linecap="round" stroke-width="2.6">
+     </path>
+    </svg>
+    <span class="brand-name">
+     NullLab
+    </span>
+   </a>
+   <nav aria-label="Primary" class="primary-nav" id="primaryNav">
+    <div class="nav-left">
+     <a href="#workspace" id="workspaceNav">
+      Workspace
+     </a>
+     <a href="#historyPanel" id="historyNav">
+      History
+     </a>
     </div>
-    <div id="cleanComparison" class="clean-comparison" hidden><div><p class="eyebrow">THE OTHER HALF OF A GOOD AUDIT</p><h3>Check the clean twin, too.</h3><p>A useful auditor must also avoid accusing a valid evaluation. Inspect both versions of the same manufacturing example.</p></div><button id="showClean" class="button secondary" type="button">Inspect the clean control →</button></div>
-    <section id="historyPanel" class="history-panel card" aria-labelledby="history-title"><div class="room-heading"><div><p class="eyebrow">SAVED LOCALLY</p><h3 id="history-title">Return to the evidence.</h3></div><button id="refreshHistory" class="text-button" type="button">Refresh saved audits</button></div><p class="muted room-note">Reopen an audit after a reload. A revision creates a new input record; it does not replace an earlier conclusion.</p><ol id="historyList" class="history-list"></ol><details class="comparison-panel"><summary>Compare two completed audits</summary><p class="muted room-note">Compare recorded identities and outcomes descriptively. Different inputs or instruments do not establish an improvement.</p><div class="compare-controls"><label>First audit<select id="compareLeft"></select></label><label>Second audit<select id="compareRight"></select></label><button id="compareRuns" class="button secondary" type="button" disabled>Compare records</button></div><div id="comparisonResult" aria-live="polite"></div></details></section>
-  </section>
-
-  <section id="how" class="method" aria-labelledby="method-title"><div class="section-heading"><div><p class="eyebrow">02 / THE METHOD</p><h2 id="method-title">An argument you can test.</h2></div><p class="section-description">Reasoning proposes the control.<br>The experiment supplies the numbers.</p></div><div class="method-grid"><article><span class="method-icon">↳</span><p class="eyebrow">FIRST, THE ORIGINAL</p><h3>Establish the baseline.</h3><p>Identify the claim, inputs and evaluation contract. Reproduce the starting score before attributing a difference.</p></article><article><span class="method-icon">⌘</span><p class="eyebrow">THEN, THE ASSUMPTION</p><h3>Make a specific challenge.</h3><p>Rules or Meta reasoning propose a constrained intervention. A methodology critic can dispute whether that test is legitimate.</p></article><article><span class="method-icon">⌁</span><p class="eyebrow">FINALLY, THE EVIDENCE</p><h3>Measure. Explain. Export.</h3><p>Inspect the tested change, effects and uncertainty. Preserve the input identity and a record another person can inspect.</p></article></div></section>
-  <section id="boundaries" class="boundaries"><div><p class="eyebrow">03 / KNOW WHAT THE EVIDENCE SAYS</p><h2>A precise conclusion<br>is a useful conclusion.</h2></div><div><p>NullLab audits supported Python evaluation pipelines. An unsupported input, an untested model judgment and an experiment with no detected effect are different outcomes.</p><p>The manufacturing benchmark uses real public records with explicitly constructed evaluation variants. It demonstrates the instrument; it is not an allegation about a published study or evidence of deployment impact.</p><p>This workspace runs curated trusted code locally. General hosted uploads require a separately verified isolation boundary.</p><a href="https://archive.ics.uci.edu/dataset/179/secom" rel="noreferrer" target="_blank">SECOM dataset · UCI · CC BY 4.0 ↗</a></div></section>
-</main>
-<footer><a class="brand" href="/">∅ NullLab.</a><p>Make the evidence stronger.</p><span>Built for the Meta Global AI Developer Hackathon</span></footer>
-</body></html>
+    <div class="nav-right">
+     <a href="#how" id="methodNav">
+      Method
+     </a>
+     <a href="#boundaries" id="scopeNav">
+      Scope
+     </a>
+    </div>
+   </nav>
+   <span class="local-indicator">
+    <span aria-hidden="true" class="status-dot">
+    </span>
+    <span id="workspaceLocation">
+     Local workspace
+    </span>
+   </span>
+  </header>
+  <main>
+   <section aria-labelledby="headline" class="hero viewport-section" id="intro">
+    <div class="hero-copy">
+     <p class="eyebrow">
+      <span class="tiny-line">
+      </span>
+      RESEARCH CLAIMS, UNDER EXAMINATION
+     </p>
+     <h1 id="headline">
+      A great score.
+      <br/>
+      Does it
+      <em>
+       hold up?
+      </em>
+     </h1>
+     <p class="intro">
+      Challenge a machine-learning score with a controlled experiment. Leave with evidence you can reproduce.
+     </p>
+     <div class="hero-actions">
+      <a class="button primary" href="#workspace">
+       Put a score to the test
+       <span aria-hidden="true">
+        ↗
+       </span>
+      </a>
+      <button class="button quiet" id="openRecording" type="button">
+       Inspect recorded evidence
+       <span aria-hidden="true">
+        →
+       </span>
+      </button>
+     </div>
+     <p class="hero-caption">
+      Meta reasoning. Tested evidence.
+     </p>
+    </div>
+    <div aria-label="An audit follows evidence from a claim through a controlled experiment" class="instrument">
+     <div class="instrument-head">
+      <span>
+       THE EVALUATION, OPENED UP
+      </span>
+      <span class="mono">
+       NL / 02
+      </span>
+     </div>
+     <div class="instrument-orbit">
+      <div class="orbit orbit-one">
+      </div>
+      <div class="orbit orbit-two">
+      </div>
+      <div class="orbit orbit-three">
+      </div>
+      <div class="orbit-core">
+       ∅
+       <span>
+        TEST THE ASSUMPTION
+       </span>
+      </div>
+      <span class="orbit-tag tag-claim">
+       01 · Claim
+      </span>
+      <span class="orbit-tag tag-control">
+       02 · Test
+      </span>
+      <span class="orbit-tag tag-evidence">
+       03 · Evidence
+      </span>
+     </div>
+     <div class="instrument-foot">
+      <span class="status-dot">
+      </span>
+      <p>
+       Confidence follows the experiment.
+       <br/>
+       <strong>
+        Agreement alone is never the result.
+       </strong>
+      </p>
+     </div>
+    </div>
+   </section>
+   <section aria-labelledby="workspace-title" class="workspace viewport-section" data-focus="false" data-pane="setup" id="workspace">
+    <div class="section-heading workspace-heading">
+     <div>
+      <p class="eyebrow">
+       01 / AUTHOR WORKSPACE
+      </p>
+      <h2 id="workspace-title">
+       From claim to evidence.
+      </h2>
+     </div>
+     <div class="workspace-tools">
+      <span class="pill neutral" id="modeBadge" role="status">
+       Ready to inspect
+      </span>
+      <button aria-controls="workspace" aria-label="Expand author workspace" aria-pressed="false" class="button secondary fullscreen-button" id="fullscreenButton" type="button">
+       <svg aria-hidden="true" fill="none" viewbox="0 0 24 24">
+        <path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7">
+        </path>
+       </svg>
+       <span id="fullscreenLabel">
+        Fullscreen
+       </span>
+      </button>
+     </div>
+    </div>
+    <div class="notice" hidden="" id="notice" role="status">
+    </div>
+    <div aria-label="Workspace view" class="workspace-tabs" role="group">
+     <button aria-controls="setupPane" aria-pressed="true" id="setupTab" type="button">
+      Study setup
+     </button>
+     <button aria-controls="evidencePane" aria-pressed="false" id="evidenceTab" type="button">
+      Audit result
+     </button>
+    </div>
+    <div class="workspace-grid">
+     <aside class="intake card work-pane" id="setupPane">
+      <div aria-label="Pipeline setup details" class="pane-scroll" role="region" tabindex="0">
+       <div class="card-title">
+        <span class="step-no">
+         01
+        </span>
+        <h3 id="setupTitle">
+         Choose a pipeline
+        </h3>
+       </div>
+       <p class="muted" id="intakeIntro">
+        Use the public manufacturing case or prepare your own data.
+       </p>
+       <label for="caseSelect">
+        Available local case
+       </label>
+       <select id="caseSelect">
+        <option value="">
+         Loading cases…
+        </option>
+       </select>
+       <details class="claim-details" id="preparePanel">
+        <summary>
+         Prepare data or revise a study brief
+        </summary>
+        <p class="muted">
+         Create a defined Random Forest baseline, or clarify a saved CSV case. Your declarations guide the protocol; they are not verified facts.
+        </p>
+        <label for="caseTitle">
+         Study title · optional
+        </label>
+        <input id="caseTitle" maxlength="160" placeholder="e.g. Quality screening before acceptance" type="text"/>
+        <div id="csvInputGroup">
+         <label for="csvFile">
+          Binary target CSV · up to 5 MB
+         </label>
+         <input accept=".csv,text/csv" id="csvFile" type="file"/>
+         <label for="targetColumn">
+          Target column (0 / 1)
+         </label>
+         <input autocapitalize="none" autocomplete="off" id="targetColumn" placeholder="defect" spellcheck="false" type="text"/>
+        </div>
+        <label for="intendedUse">
+         What decision will these predictions support?
+        </label>
+        <textarea id="intendedUse" maxlength="4000" placeholder="Describe the research question and intended use." rows="3"></textarea>
+        <label for="studyPopulation">
+         Which records must the result apply to?
+        </label>
+        <select aria-describedby="protocolHint" id="studyPopulation">
+         <option value="undecided">
+          Not decided yet
+         </option>
+         <option value="independent_records">
+          New independent records
+         </option>
+         <option value="represented_entities">
+          More records from represented entities
+         </option>
+         <option value="unseen_entities">
+          Previously unseen entities
+         </option>
+         <option value="future_records">
+          Future records
+         </option>
+        </select>
+        <p class="input-note" id="protocolHint">
+         Save what you know. Missing information and unsupported protocols remain explicit outcomes.
+        </p>
+        <details class="study-context" id="studyContext">
+         <summary>
+          Decision time &amp; column roles
+         </summary>
+         <label for="decisionTime">
+          When is the prediction made?
+         </label>
+         <input id="decisionTime" maxlength="2000" placeholder="Before the final acceptance test" type="text"/>
+         <label for="unitOfAnalysis">
+          What does one row represent? · optional
+         </label>
+         <input id="unitOfAnalysis" maxlength="300" placeholder="One inspected component" type="text"/>
+         <label for="predictorAvailability">
+          Are the proposed predictors available then?
+         </label>
+         <select id="predictorAvailability">
+          <option value="unknown">
+           Not confirmed
+          </option>
+          <option value="confirmed">
+           I confirm they are available before the decision
+          </option>
+         </select>
+         <div hidden="" id="entityField">
+          <label for="entityColumn">
+           Entity/group column · metadata only
+          </label>
+          <input autocapitalize="none" autocomplete="off" id="entityColumn" placeholder="production_line_id" spellcheck="false" type="text"/>
+         </div>
+         <div hidden="" id="timeField">
+          <label for="timeColumn">
+           Time column · metadata only
+          </label>
+          <input autocapitalize="none" autocomplete="off" id="timeColumn" placeholder="inspection_date" spellcheck="false" type="text"/>
+         </div>
+         <label for="excludedColumns">
+          Other columns to exclude · comma separated
+         </label>
+         <input autocapitalize="none" autocomplete="off" id="excludedColumns" placeholder="post_test_status, serial_number" spellcheck="false" type="text"/>
+         <p class="input-note">
+          Entity, time and excluded columns stay in the data but do not become generated predictors. Exclude post-decision information before confirming availability.
+         </p>
+        </details>
+        <p class="input-note" id="predictorPreview">
+        </p>
+        <p class="input-note" id="caseLineage">
+        </p>
+        <button class="button secondary" id="importCsv" type="button">
+         Prepare new CSV case
+        </button>
+        <div hidden="" id="revisionActions">
+         <label for="revisionReason">
+          Answer or revision note · optional
+         </label>
+         <textarea id="revisionReason" maxlength="2000" placeholder="What changed, and what evidence supports the clarification?" rows="2"></textarea>
+         <button class="button secondary" id="reviseCase" type="button">
+          Save a new case version
+         </button>
+         <p class="input-note">
+          Reuses this case's data. Earlier inputs and results remain unchanged.
+         </p>
+        </div>
+       </details>
+       <details class="claim-details">
+        <summary>
+         Read the claim &amp; intended use
+        </summary>
+        <pre id="claimText">Select a case to inspect its claim.</pre>
+       </details>
+       <div id="executionControls">
+        <label for="executionMode">
+         Audit mode
+        </label>
+        <select id="executionMode">
+         <option value="rules">
+          Rules &amp; local execution · no key
+         </option>
+         <option disabled="" value="live">
+          Meta planner · configure locally
+         </option>
+        </select>
+        <div hidden="" id="liveOptions">
+         <label class="check">
+          <input id="critic" type="checkbox"/>
+          <span>
+           Ask an independent methodology critic
+          </span>
+         </label>
+         <div class="outbound">
+          <strong>
+           Before the model call
+          </strong>
+          <p>
+           The model receives full pipeline code, claim text, study declarations, column roles and aggregate diagnostics. CSV rows are not sampled, but your code, claim or declarations may contain private data. Review them and your provider settings.
+          </p>
+          <label class="check">
+           <input id="outbound" type="checkbox"/>
+           <span>
+            I reviewed what leaves this machine.
+           </span>
+          </label>
+         </div>
+        </div>
+       </div>
+       <details class="own-project">
+        <summary>
+         Use your own project
+        </summary>
+        <p>
+         The CLI accepts a trusted local case folder with
+         <code>
+          train.py
+         </code>
+         ,
+         <code>
+          data.csv
+         </code>
+         and
+         <code>
+          excerpt.md
+         </code>
+         . The training module exposes
+         <code>
+          load
+         </code>
+         ,
+         <code>
+          feats
+         </code>
+         and
+         <code>
+          claimed_eval
+         </code>
+         .
+        </p>
+        <pre>python -m agent.engine PATH_TO_CASE</pre>
+        <p>
+         Inspect the supported input contract in the README before adapting a notebook. This browser workspace executes curated local cases.
+        </p>
+       </details>
+      </div>
+      <div class="pane-actions" id="runControls">
+       <button class="button primary wide" disabled="" id="runButton" type="button">
+        Run a fresh audit
+        <span aria-hidden="true">
+         ↗
+        </span>
+       </button>
+       <p class="input-note">
+        Fresh execution creates a new evidence record. The recorded example is available separately.
+       </p>
+      </div>
+     </aside>
+     <div class="evidence-workspace card work-pane" id="evidencePane">
+      <div class="workbench-head">
+       <span class="eyebrow">
+        AUDIT NOTEBOOK
+       </span>
+       <button class="text-button" hidden="" id="cancelButton" type="button">
+        Request cancellation
+       </button>
+      </div>
+      <ol aria-label="Audit stages" class="pipeline">
+       <li data-stage="preflight">
+        <span>
+         1
+        </span>
+        Reproduce
+       </li>
+       <li data-stage="plan">
+        <span>
+         2
+        </span>
+        Challenge
+       </li>
+       <li data-stage="execute">
+        <span>
+         3
+        </span>
+        Test
+       </li>
+       <li data-stage="evidence">
+        <span>
+         4
+        </span>
+        Evidence
+       </li>
+      </ol>
+      <div aria-label="Audit results and research evidence" class="pane-scroll" id="evidenceScroll" role="region" tabindex="0">
+       <p class="active-audit" hidden="" id="activeAuditStatus">
+       </p>
+       <div class="empty-state" id="emptyState">
+        <div class="empty-symbol">
+         ∅
+        </div>
+        <h3>
+         Give the score a second look.
+        </h3>
+        <p>
+         Choose a case and run an audit, or inspect an existing recording. Conclusions appear only when the available evidence supports them.
+        </p>
+        <div class="empty-facts">
+         <span>
+          Original score
+         </span>
+         <span>
+          Controlled score
+         </span>
+         <span>
+          Traceable difference
+         </span>
+        </div>
+       </div>
+       <div hidden="" id="auditOutput">
+        <div class="result-heading">
+         <p class="mono muted" id="resultCase">
+         </p>
+         <h3 aria-atomic="true" aria-live="polite" id="resultTitle" tabindex="-1">
+          Preparing audit
+         </h3>
+         <p class="muted" id="resultExplanation">
+         </p>
+         <button class="text-button" hidden="" id="answerQuestions" type="button">
+          Clarify this study →
+         </button>
+        </div>
+        <div class="baseline-only" hidden="" id="baselineOnly">
+         <span>
+          Baseline only · no counterfactual
+         </span>
+         <strong id="baselineScore">
+         </strong>
+         <p id="baselineDetail">
+         </p>
+        </div>
+        <div hidden="" id="measurement">
+         <div class="metric-head">
+          <span id="metricName">
+           METRIC
+          </span>
+          <span class="mono" id="deltaValue">
+          </span>
+         </div>
+         <div class="score-row">
+          <span>
+           Reported evaluation
+          </span>
+          <strong id="claimedScore">
+          </strong>
+         </div>
+         <svg aria-hidden="true" class="score-bar" preserveaspectratio="none" viewbox="0 0 600 13">
+          <rect class="bar-track" height="13" rx="3" width="600">
+          </rect>
+          <rect class="bar-claimed" height="13" id="claimedBar" rx="3" width="0">
+          </rect>
+         </svg>
+         <div class="score-row">
+          <span>
+           Controlled evaluation
+          </span>
+          <strong id="controlledScore">
+          </strong>
+         </div>
+         <svg aria-hidden="true" class="score-bar" preserveaspectratio="none" viewbox="0 0 600 13">
+          <rect class="bar-track" height="13" rx="3" width="600">
+          </rect>
+          <rect class="bar-controlled" height="13" id="controlledBar" rx="3" width="0">
+          </rect>
+         </svg>
+         <p class="metric-note">
+          Scores apply to this case and specified control. A difference does not establish that an entire paper is wrong.
+         </p>
+         <div class="seed-evidence" id="seedEvidence">
+         </div>
+        </div>
+        <div class="result-actions">
+         <button class="button secondary" id="downloadJson" type="button">
+          Evidence JSON ↓
+         </button>
+         <a class="button secondary" hidden="" id="bundleLink">
+          Reproducibility ZIP ↓
+         </a>
+         <a class="button secondary" hidden="" id="assessmentLink">
+          Assessment ZIP · includes inputs ↓
+         </a>
+         <button class="text-button" id="copyNote" type="button">
+          Copy research note
+         </button>
+        </div>
+        <p class="input-note">
+         ZIP downloads include input data and executable code. Review their contents before sharing.
+        </p>
+        <details class="evidence-detail">
+         <summary>
+          What was tested
+         </summary>
+         <div id="planDetails">
+         </div>
+        </details>
+        <details class="evidence-detail">
+         <summary>
+          Audit trail
+         </summary>
+         <ol class="event-list" id="events">
+         </ol>
+        </details>
+        <details class="evidence-detail">
+         <summary>
+          Limitations &amp; provenance
+         </summary>
+         <div id="limitations">
+         </div>
+         <pre id="provenance"></pre>
+        </details>
+        <div class="ledger" id="ledger">
+        </div>
+       </div>
+       <details class="review-disclosure">
+        <summary>
+         Research review &amp; open questions
+        </summary>
+        <section aria-labelledby="research-room-title" class="research-room" id="researchRoom">
+         <div class="room-heading">
+          <div>
+           <p class="eyebrow">
+            PERSISTENT RESEARCH ROOM
+           </p>
+           <h3 id="research-room-title">
+            The question, objections and evidence.
+           </h3>
+          </div>
+         </div>
+         <p class="muted room-note">
+          Only recorded contributions appear here. Agent agreement does not resolve a scientific question.
+         </p>
+         <div class="study-summary" id="studySummary">
+         </div>
+         <div class="room-participants" id="roomParticipants">
+         </div>
+         <div hidden="" id="openQuestionsBlock">
+          <h4>
+           Open questions &amp; objections
+          </h4>
+          <ul id="openQuestions">
+          </ul>
+         </div>
+        </section>
+       </details>
+       <div class="clean-comparison" hidden="" id="cleanComparison">
+        <div>
+         <p class="eyebrow">
+          THE OTHER HALF OF A GOOD AUDIT
+         </p>
+         <h3>
+          Check the clean twin, too.
+         </h3>
+         <p>
+          A useful auditor must also avoid accusing a valid evaluation. Inspect both versions of the same manufacturing example.
+         </p>
+        </div>
+        <button class="button secondary" id="showClean" type="button">
+         Inspect the clean control →
+        </button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section>
+   <section aria-labelledby="history-title" class="history-panel viewport-section" id="historyPanel">
+    <div class="room-heading">
+     <div>
+      <p class="eyebrow">
+       02 / SAVED LOCALLY
+      </p>
+      <h2 id="history-title">
+       Return to the evidence.
+      </h2>
+     </div>
+     <button class="text-button" id="refreshHistory" type="button">
+      Refresh saved audits
+     </button>
+    </div>
+    <p class="muted room-note">
+     Reopen an audit after a reload. A revision creates a new input record; it does not replace an earlier conclusion.
+    </p>
+    <div aria-label="Saved audits and comparison" class="history-content card pane-scroll" role="region" tabindex="0">
+     <ol class="history-list" id="historyList">
+     </ol>
+     <details class="comparison-panel">
+      <summary>
+       Compare two completed audits
+      </summary>
+      <p class="muted room-note">
+       Compare recorded identities and outcomes descriptively. Different inputs or instruments do not establish an improvement.
+      </p>
+      <div class="compare-controls">
+       <label>
+        First audit
+        <select id="compareLeft">
+        </select>
+       </label>
+       <label>
+        Second audit
+        <select id="compareRight">
+        </select>
+       </label>
+       <button class="button secondary" disabled="" id="compareRuns" type="button">
+        Compare records
+       </button>
+      </div>
+      <div aria-live="polite" id="comparisonResult">
+      </div>
+     </details>
+    </div>
+   </section>
+   <section aria-labelledby="method-title" class="method viewport-section" id="how">
+    <div class="section-heading">
+     <div>
+      <p class="eyebrow">
+       03 / THE METHOD
+      </p>
+      <h2 id="method-title">
+       An argument you can test.
+      </h2>
+     </div>
+     <p class="section-description">
+      Reasoning proposes the control.
+      <br/>
+      The experiment supplies the numbers.
+     </p>
+    </div>
+    <div class="method-grid">
+     <article>
+      <span class="method-icon">
+       ↳
+      </span>
+      <p class="eyebrow">
+       FIRST, THE ORIGINAL
+      </p>
+      <h3>
+       Reproduce the baseline.
+      </h3>
+      <p>
+       Pin inputs and execute the original evaluation.
+      </p>
+     </article>
+     <article>
+      <span class="method-icon">
+       ⌘
+      </span>
+      <p class="eyebrow">
+       THEN, THE ASSUMPTION
+      </p>
+      <h3>
+       Test one assumption.
+      </h3>
+      <p>
+       Meta proposes a control. Guards check it; a critic can challenge it.
+      </p>
+     </article>
+     <article>
+      <span class="method-icon">
+       ⌁
+      </span>
+      <p class="eyebrow">
+       FINALLY, THE EVIDENCE
+      </p>
+      <h3>
+       Measure and export.
+      </h3>
+      <p>
+       Inspect effects, uncertainty and objections. Export the tested evidence.
+      </p>
+     </article>
+    </div>
+   </section>
+   <section aria-labelledby="scope-title" class="boundaries viewport-section" id="boundaries">
+    <div>
+     <p class="eyebrow">
+      04 / SCOPE &amp; EVIDENCE
+     </p>
+     <h2 id="scope-title">
+      A precise conclusion
+      <br/>
+      is a useful conclusion.
+     </h2>
+    </div>
+    <div>
+     <p>
+      NullLab audits supported Python evaluation pipelines. Unsupported inputs, model judgments and measured effects remain distinct outcomes.
+     </p>
+     <p>
+      Manufacturing uses real public SECOM records with faults we constructed. It demonstrates the audit instrument and establishes no deployment impact.
+     </p>
+     <p>
+      Trusted local code runs on your machine. Public code execution needs a separately verified isolation boundary.
+     </p>
+     <a href="https://archive.ics.uci.edu/dataset/179/secom" rel="noreferrer" target="_blank">
+      SECOM dataset · UCI · CC BY 4.0 ↗
+     </a>
+    </div>
+   </section>
+  </main>
+  <footer>
+   <span>
+    Meta AI Developer Hackathon · 2026
+   </span>
+   <a href="https://github.com/RaveenDi/NullLab" rel="noreferrer" target="_blank">
+    Source ↗
+   </a>
+  </footer>
+ </body>
+</html>

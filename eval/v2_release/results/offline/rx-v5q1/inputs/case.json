@@ -1,0 +1,11 @@
+{
+  "target": "event",
+  "intended_use": "Synthetic equipment measurements with repeated readings per device. At commissioning, use available sensor signatures to predict an event on previously unseen devices. Device is entity metadata and is excluded from predictors. Accuracy must concern held-out devices rather than additional readings of known devices. No numerical reference score is supplied.",
+  "study": {
+    "decision_time": "At commissioning, before the event",
+    "unit_of_analysis": "A device reading",
+    "population": "unseen_entities",
+    "entity_column": "device",
+    "predictor_availability": "confirmed"
+  }
+}
