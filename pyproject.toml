@@ -4,12 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nulllab"
-version = "0.1.0"
+version = "0.2.0"
 description = "Falsification harness for ML evaluation claims: finds leakage that inflates a reported metric, with a preregistered, replayable verdict."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.12"
 dynamic = ["dependencies"]
+
+[project.scripts]
+nulllab = "agent.engine:main"
+
+[tool.setuptools.package-data]
+app = ["static/*"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
@@ -35,6 +41,8 @@ target-version = "py312"
 extend-exclude = [
     # case fixtures, run evidence and data are not source code
     "corpus", "factorial", "real", "runs", "runs_*", "logs_spike4", "out", "report/assets",
+    # Exact-byte evaluation fixtures retain unused imports and planted defects.
+    "eval/v2_cases", "eval/v2_followup_cases",
 ]
 
 [tool.ruff.lint]

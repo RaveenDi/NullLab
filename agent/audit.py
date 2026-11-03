@@ -22,6 +22,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from agent import evidence
+
 ROOT = Path(__file__).resolve().parent.parent
 sys.dont_write_bytecode = True
 
@@ -157,6 +159,7 @@ def locate(path: str | Path, case: str | None = None, repeat: int | None = None,
     pick = (loops or cands)[0]
     if case_dir is None or not (case_dir / "excerpt.md").exists():
         raise SystemExit(f"audit: {case_name} has no excerpt.md")
+    evidence.verify(case_dir, pick["rec"], require=False)
     return case_dir, case_name, pick
 
 
@@ -427,6 +430,8 @@ def untested(F: dict) -> list[str]:
     """What this audit did NOT test (always listed in the report)."""
     L = []
     ex = F["extras"]
+    if not F.get("input_identity_verified"):
+        L.append("HISTORICAL / INPUT IDENTITY UNVERIFIED: this result has no audit-time content manifest. Current code, data and claim text cannot be established as the original audited inputs. Export as current evidence is refused.")
     if F["kind"] == "rulefix":
         L.append("This record comes from a fixed rule library with no model: it applies standard remedies to code idioms it recognises and cannot reason about the claim.")
     L.append("We re-ran the evaluation code in the case folder, not the authors' original pipeline, raw data or software versions."
@@ -458,6 +463,7 @@ def build_finding(path: str | Path, case: str | None = None, repeat: int | None 
     """Assemble the finding dict that the HTML and Markdown reports are rendered from."""
     case_dir, case_name, cand = locate(path, case, repeat, run, root)
     rec, kind = cand["rec"], cand["kind"]
+    identity_verified = evidence.verify(case_dir, rec, require=False)
     claim = read_claim(case_dir)
     badge, source, extras = provenance(case_dir, case_name, cand, root)
     meas = measurement(rec)
@@ -490,10 +496,15 @@ def build_finding(path: str | Path, case: str | None = None, repeat: int | None 
          "provenance": badge, "source": source, "extras": extras, "meas": meas, "diff": diff, "steps_changed": steps,
          "fidelity_line": fid_line, "audit": audit, "types": types, "prereg": pre, "rerun": rerun, "A": A, "B": B,
          "probe": probe_status(cand["dir"], case_name), "retries": rec.get("retries"), "sources_sha256": {k: hashlib.sha256(v.encode()).hexdigest() for k, v in rec["sources"].items()},
-         "per_config_diffs": {c: patch_diff(case_dir, rec, c) for c in ("fix_A", "fix_B") if c in rec["sources"]}, "remeasure": remeasure}
+         "per_config_diffs": {c: patch_diff(case_dir, rec, c) for c in ("fix_A", "fix_B") if c in rec["sources"]}, "remeasure": remeasure,
+         "input_identity_verified": identity_verified, "evidence": rec.get("evidence")}
     F["untested"] = untested(F)
     F["n_untested"] = len(F["untested"])
     F["note_paragraphs"], F["note_short"] = reviewer_texts(F)
+    if not identity_verified:
+        warning = "HISTORICAL: audit-time input identity is unverified. "
+        F["note_short"] = warning + F["note_short"]
+        F["note_paragraphs"].insert(0, warning)
     return F
 
 
@@ -505,6 +516,7 @@ def remeasure(path: str | Path, case: str | None = None, repeat: int | None = No
     from sandbox import executor, factorial_stats
     case_dir, case_name, cand = locate(path, case, repeat, run, root)
     rec = cand["rec"]
+    evidence.verify(case_dir, rec)
     ex = executor.run_factorial(case_dir, {k: rec["sources"][k] for k in ("fix_A", "fix_B", "fix_both")}, seeds=(42, 43, 44), timeout=3000)
     if ex["status"] != "ok":
         return {"status": ex["status"], "stderr": ex.get("stderr", "")[-600:]}

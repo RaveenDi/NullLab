@@ -1,0 +1,24 @@
+{
+  "verdict": "flaw",
+  "factors": [
+    {
+      "id": "A",
+      "flaw": "Synthetic rare-class records enter validation before the split",
+      "evidence_line": "X, y = oversample(X, y, seed)",
+      "ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "oversample"
+        }
+      ]
+    }
+  ],
+  "predicted_drop_pp": {
+    "fix_all": 0
+  },
+  "culprit_ranking": [
+    "A"
+  ],
+  "reason": "Generate synthetic training records inside each training fold; evaluate only original held-out records."
+}

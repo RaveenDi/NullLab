@@ -197,7 +197,8 @@ def complete_ex(system, user, est_usd=0.02, max_tokens=llm.MIN_MAX_TOKENS, tag="
             cfg[k] = v
     model = model or llm.model_for(role)
     if llm.replaying():
-        return llm.live_complete_ex(system, user, est_usd, max_tokens, tag, role, model, temperature, response_format)
+        original = _ORIG.get("ex") or llm.live_complete_ex
+        return original(system, user, est_usd, max_tokens, tag, role, model, temperature, response_format)
     with llm._LOCK:  # identical gate to llm.live_complete_ex: cap, then spend check, then count the attempt BEFORE the request
         if llm.g8_phase():
             n8 = sum(1 for _ in llm.g8_log().open()) if llm.g8_log().exists() else 0

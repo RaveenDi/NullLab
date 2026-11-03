@@ -1,0 +1,8 @@
+{
+  "title": "Adhesive-batch acceptance screening",
+  "target": "event",
+  "intended_use": "Screen adhesive-batch acceptance before the final acceptance test. mix_* are available at that decision. downstream_status is produced after the final acceptance test and records its outcome; it is unavailable at the requested decision.",
+  "data_origin": "internal synthetic",
+  "metric": "accuracy",
+  "rows": 120
+}

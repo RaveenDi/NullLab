@@ -60,12 +60,13 @@ def test_below_threshold_or_ci_spanning_zero_passes(tree):
         r["stats"] = th.fake_stats(0.05, half=0.2)
         return r, "mock"
     out = ci_check.check_path(tree / "bad", threshold=0.01, measure=wide)
-    assert out["exit_code"] == 0 and out["rows"][0]["status"] == "UNRESOLVED"
+    assert out["exit_code"] == 2 and out["rows"][0]["status"] == "UNRESOLVED"
 
 
 def test_clean_case_no_rule_fired_is_not_reported_as_cleared(tree):
     out = ci_check.check_path(tree / "good", measure=meas(0.0))
-    assert out["exit_code"] == 0 and out["rows"][0]["status"] == "NO_RULE_FIRED"
+    assert out["exit_code"] == 2 and out["rows"][0]["status"] == "NO_RULE_FIRED"
+    assert ci_check.check_path(tree / "good", measure=meas(0.0), strict=False)["exit_code"] == 0
     assert "NOT CHECKED" in out["markdown"] and "Look-ahead features" in out["markdown"]
     assert out["rows"][0]["calls"] == 0 and out["rows"][0]["est_usd"] == 0.0
 
@@ -75,6 +76,15 @@ def test_no_case_found_exits_2(tmp_path):
     assert out["exit_code"] == 2 and "no case found" in out["messages"][0]
 
 
+def test_missing_information_cannot_pass_strict_ci(tree, monkeypatch):
+    from agent import engine
+
+    monkeypatch.setattr(engine, "run_audit", lambda c, *a, **kw: {"case": c.name, "mode": "live", "verdict": "NEEDS_INFORMATION", "summary": None, "ledger": {"calls": 0, "est_usd": 0}})
+    out = ci_check.check_path(tree / "good")
+    assert out["exit_code"] == 2
+    assert out["rows"][0]["status"] == "UNRESOLVED"
+
+
 def test_measurement_failure_is_not_a_pass_or_a_fail(tree):
     out = ci_check.check_path(tree / "bad", measure=lambda c: ({"status": "error", "stderr": "boom"}, "mock"))
     assert out["rows"][0]["status"] == "ERROR" and out["exit_code"] == 2
@@ -82,7 +92,8 @@ def test_measurement_failure_is_not_a_pass_or_a_fail(tree):
 
 
 def test_main_writes_job_summary_and_exit_code(tree, tmp_path, monkeypatch, capsys):
-    monkeypatch.setattr(hybrid, "default_measure", lambda c, fresh=False, root=ROOT: (fake_rule_rec(c, 0.2), "mock"))
+    from agent import engine
+    monkeypatch.setattr(engine, "run_audit", lambda c, *a, **kw: {"case":c.name,"mode":"rules","verdict":"INFLATED","summary":hybrid.summarize(fake_rule_rec(c,0.2)),"ledger":{"calls":0,"est_usd":0}})
     summ = tmp_path / "summary.md"
     code = ci_check.main([str(tree / "bad"), "--threshold", "0.05", "--summary", str(summ)])
     assert code == 1

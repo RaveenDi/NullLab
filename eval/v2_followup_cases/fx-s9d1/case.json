@@ -1,0 +1,8 @@
+{
+  "title": "Recycling-bale acceptance screening",
+  "target": "event",
+  "intended_use": "Screen recycling-bale acceptance using measurements available at the acceptance decision. Documentation does not establish when verification_index is recorded: it may be an intake sensor or a subsequent verification measurement. Its actual availability relative to the decision has not been supplied.",
+  "data_origin": "internal synthetic",
+  "metric": "accuracy",
+  "rows": 120
+}

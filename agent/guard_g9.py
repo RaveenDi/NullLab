@@ -108,6 +108,11 @@ def _worker(args):
 
     st = threading.local()
     events = []
+    # Exact sklearn implementations with documented row-preserving transforms.
+    # Equal output length alone cannot establish identity (FunctionTransformer
+    # and user subclasses may reorder rows).
+    from sklearn.preprocessing import StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, Normalizer, Binarizer
+    row_preserving = (StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler, Normalizer, Binarizer)
 
     def stack_names():
         out, f = [], sys._getframe(2)
@@ -201,7 +206,12 @@ def _worker(args):
                     rec(kind, type(obj).__name__, obj, X, yv is not None, params)
                 st.d = depth + 1
                 try:
-                    return bound(*[plain(x) for x in a], **{kk: plain(v) for kk, v in k.items()})
+                    result = bound(*[plain(x) for x in a], **{kk: plain(v) for kk, v in k.items()})
+                    if depth == 0 and meth in ("fit_transform", "transform") and type(obj) in row_preserving:
+                        ids = rids(X)
+                        if ids is not None and isinstance(result, np.ndarray) and result.ndim >= 1 and len(result) == len(ids):
+                            return TA(result, ids.copy())
+                    return result
                 finally:
                     st.d = depth
             return w
@@ -259,7 +269,10 @@ def _worker(args):
         keep = np.sort(np.concatenate([pos, rng.choice(rest, mr - len(pos), replace=False)]))
         df = df.iloc[keep]
     for nm in args.get("record_fns") or []:
-        if nm in mod.__dict__ and callable(mod.__dict__[nm]):
+        # Estimator classes are already observed at fit/score. Recording their
+        # constructor as a data-processing helper creates a spurious untracked
+        # event (constructors have no input rows).
+        if nm in mod.__dict__ and callable(mod.__dict__[nm]) and not isinstance(mod.__dict__[nm], type):
             orig = mod.__dict__[nm]
 
             def mk(orig, nm):
@@ -846,6 +859,8 @@ def behaviour_check(orig_trace, fix_trace, ops, orig_src, expect_resize=False, h
         U.append("row provenance of the returned evaluation rows was lost; fit/score rows cannot be verified")
     # MODEL
     s0, s1 = model_signature(a0), model_signature(a1)
+    if not s0 or not s1:
+        U.append("no provenance-linked scoring model events were observed; model fidelity cannot be verified")
     consts = _ctor_consts(orig_src)
     if set(s0) != set(s1):
         P.append(f"MODEL: scoring model class set changed {sorted(s0)} -> {sorted(s1)}")

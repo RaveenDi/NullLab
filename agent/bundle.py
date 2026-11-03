@@ -25,7 +25,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 sys.dont_write_bytecode = True
 
-from agent import audit, patch_export  # noqa: E402
+from agent import audit, patch_export, evidence  # noqa: E402
 
 SECRET_PATTERNS = [
     re.compile(r"MODEL_API_KEY\s*[=:]\s*\S+"),
@@ -178,6 +178,10 @@ def build_bundle(case_dir: str | Path, out_zip: str | Path, run: str | None = No
     """Build the zip. Returns {"path", "files", "redactions", "manifest"}."""
     case_dir, case_name, cand = audit.locate(case_dir, case=case, run=run, root=root)
     rec, kind = cand["rec"], cand["kind"]
+    try:
+        evidence.verify(case_dir, rec)
+    except evidence.EvidenceError as e:
+        raise BundleError(str(e)) from e
     if not all(k in (rec.get("sources") or {}) for k in ("fix_A", "fix_B", "fix_both")):
         raise BundleError("the run record has no stored patch sources: nothing to bundle")
     F = audit.build_finding(case_dir, case=case_name, run=cand["file"], root=root)
@@ -192,9 +196,10 @@ def build_bundle(case_dir: str | Path, out_zip: str | Path, run: str | None = No
         files["patches/fix_both.patch"] = patch_export.build_patch(case_dir, rec, kind, "fix_both", run_name=Path(cand["file"]).name).encode("utf-8")
     except patch_export.PatchError as e:
         files["patches/fix_both.patch"] = f"no patch: {e}\n".encode()
-    hashes = {n: hashlib.sha256(Path(case_dir, n).read_bytes()).hexdigest() for n in ("train.py", "excerpt.md", "data.csv") if Path(case_dir, n).exists()}
+    hashes = {n: v for n, v in rec["evidence"]["inputs"].items() if v is not None}
     files["prereg/INPUT_HASHES.json"] = json.dumps({"sha256": hashes, "patch_sources_sha256": F["sources_sha256"],
-                                                    "note": "hashes of the inputs as audited; recomputable with any sha256 tool"}, indent=1, sort_keys=True).encode()
+                                                    "evidence": rec["evidence"],
+                                                    "note": "audit-time input hashes verified before export; compare exported byte hashes separately"}, indent=1, sort_keys=True).encode()
     files["prereg/prereg_records.json"] = json.dumps(F["prereg"], indent=1, sort_keys=True).encode()
     for fn in ("PREREG.sha256", "PREREG.md"):
         p = Path(cand["dir"]) / fn
@@ -222,6 +227,11 @@ def build_bundle(case_dir: str | Path, out_zip: str | Path, run: str | None = No
         if n:
             files[k] = new.encode("utf-8")
             n_red += n
+    # Redaction may change code/data. Keep the original audit identity distinct
+    # from the bytes actually exported; never promise exact rerun after edits.
+    exported = {k: hashlib.sha256(v).hexdigest() for k, v in files.items() if k.startswith(("case/", "patches/"))}
+    files["prereg/EXPORTED_HASHES.json"] = json.dumps({"sha256": exported, "redactions": n_red,
+        "note": "hashes of exported bytes; redacted artifacts may not reproduce the audited result"}, indent=1, sort_keys=True).encode()
     readme = README.format(case=case_name, run_file=F["run_file"], provenance=F["source"] or "case built by NullLab, no external source",
                            badge=F["provenance"], sign=m["sign"], claimed=round(m["mean_claimed"], 4), controlled=round(m["mean_controlled"], 4),
                            metric=m["metric"], seeds=", ".join(seeds), model_note=model_note, redactions=n_red,

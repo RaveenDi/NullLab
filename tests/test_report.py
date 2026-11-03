@@ -57,19 +57,18 @@ def test_failed_repeat_is_an_empty_slot_not_a_number(data):
     assert r1["failed"] and "seeds" not in r1
 
 
-def test_banned_words_topic_and_hash_never_in_payload(data):
+def test_legacy_payload_does_not_conceal_provenance(data):
     txt = json.dumps(data).lower()
     for w in spa_data.BANNED:
         assert not re.search(r"\b" + re.escape(w) + r"\b", txt), w
-    for w in ("civil", "muchlinski", "neunhoeffer", "d1d7ffd0", "600a865e"):
-        assert w not in txt, w
+    assert spa_data._SCRUB == ()
 
 
 def test_page_has_no_external_requests_and_no_banned_text(data):
     html = spa.page(data)
     assert not re.search(r'(src|href)="https?://', html)
     low = html.lower()
-    assert "civil" not in low and "d1d7ffd0" not in low
+    assert spa_data._SCRUB == ()
     assert "dotmatrix" not in low and "#e8501f" not in low
     assert "Measuring it is the work." in html
 
@@ -124,12 +123,12 @@ def test_g9b_payload_has_no_banned_words():
     txt = json.dumps(spa_data.scrub(spa_data._g9() or {})).lower()
     for w in spa_data.BANNED:
         assert not re.search(r"\b" + re.escape(w) + r"\b", txt), w
-    assert "civil" not in txt
+    assert spa_data._SCRUB == ()  # No domain substitution is performed.
 
 
-def test_scrub_renames_topic_in_keys_and_values():
-    out = spa_data.scrub({"civilwar_x": ["Civil-war onset by Muchlinski"]})
-    assert "civil" not in json.dumps(out).lower() and "muchlinski" not in json.dumps(out).lower()
+def test_legacy_provenance_is_not_concealed():
+    original = {"civilwar_x": ["Civil-war onset by Muchlinski"]}
+    assert spa_data.scrub(original) == original
 
 
 NODE = shutil.which("node")

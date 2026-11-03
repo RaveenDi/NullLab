@@ -1,92 +1,29 @@
-# NullLab product features (Mon Nov 2, 2026)
+# Author workflow
 
-Four features that sit on top of the audit. All run offline by default, make no model call unless you pass `--live`, and spend nothing.
-Run every command from the NullLab folder with the repo venv (`.venv\Scripts\python.exe` on Windows, `python` below).
-A **case** is a folder with `train.py` (defining `load`, `feats`, `claimed_eval`), `data.csv` and, for reports, `excerpt.md` (the claim text).
+Start the localhost workspace using the README. Select a manufacturing example, or open **Prepare data or revise a study brief** to create a CSV case. Describe the decision, when it happens, which population the predictions must apply to, and whether the selected predictors are available then. Entity/time fields are metadata; exclude post-decision columns. These declarations are not independently verified facts. Review the claim and execution mode before running.
 
-Why this shape: EVAL-8 (docs/EVAL-8-RULEBASED.md) found that a free fixed rule library matches or beats the Spark loop on textbook and real cases,
-and that the loop wins only on look-ahead features, offsetting errors and label-conditioned imputation. So rules go first and the model is called only when needed.
+Unknown decision time, population or availability asks concrete questions before any fitting/model dispatch. A complete unseen-entity or future-record request is unsupported by the generated random-row adapter. Represented-entity baselines remain descriptive. Do not change the declared population merely to pass a gate: supply a separately validated pipeline when the real question needs group/time evaluation.
 
-## 1. Hybrid audit: rules first, Spark only when needed
+The review room shows actual deterministic checks and recorded model contributions. It does not simulate conversation or vote on scientific truth. Baseline-only outcomes show seed scores without implying a controlled effect. Saved audits can be reopened after reload, including by `?job=UUID`. Viewing an older result does not change the active audit being polled or cancelled.
 
-```
-python -m agent.hybrid corpus/leak_prescale --out out/hy --report out/hy.md
-python -m agent.hybrid factorial/g4_pump_inspection --live --out out/hy      # real Spark call, explicit flag, spend gate applies
-python -m agent.hybrid corpus/leak_prescale --live --referee                  # adds the Wonder veto referee (off by default)
-```
+Use **Answer questions** or revise the selected generated case's brief, then **Save a new case version**. The same CSV bytes are reused; parent input hashes, a linked audit manifest when available, reason and timestamp are recorded. Run the new case to evaluate it. Prior inputs and results remain unchanged. Custom Python is not silently regenerated. Comparison verifies saved identities and lists metadata differences; it does not compute a causal ranking or a new statistical test.
 
-Routing, with the tag each step carries in the report:
+For an existing trusted Python pipeline, the case folder contains `train.py`, `data.csv`, `excerpt.md`, optionally `case.json`/`contract.json`. A supplied `expected_score` and `score_tolerance` in case.json are checked before planning; mismatch stops attribution. Without a numerical reference, the baseline is an execution of supplied code, not verification of a published number. Required functions are `load(path)`, `feats(df)`, and `claimed_eval(df, seed)` returning one-dimensional equal-length true labels and predictions. AUC metrics require both classes as 0/1. The current instrument accepts at least 20 rows with five per class and a CSV up to 50 MB. Arbitrary project/notebook conversion is not automatic.
 
-| situation | what happens | tag |
-|---|---|---|
-| a rule fires and its fix, measured in the local sandbox, lowers the score (95% interval above 0) | verdict from the rules, $0 | `rules (no model)` |
-| a rule fires but the measurement does not confirm it (rules and the cheap consistency check disagree) | the model path is used | `Spark` |
-| no rule fires | the model path is used | `Spark` |
-| model path needed, offline, no recorded run of the case | verdict `NEEDS_MODEL`, nothing spent. Not a clean bill of health | `rules (no model)` |
-| a recorded Spark run of the same case exists in this repo | served from the file, no call | `Spark (recorded run, no new call)` |
-| `--referee` and the verdict is INFLATED | one Wonder call may veto it (verdict DISPUTED); it can never create a finding; max 10 calls | `Wonder` |
-
-Every verdict ships a **cost ledger** (calls, estimated tokens and USD per model) and a "who did what" table in the report, followed by the full audit report.
-Python API: `agent.hybrid.run_hybrid(case_dir, live=False, referee=False, measure=None, spark_runner=None, ...)` returns a dict; `render_report(res, case_dir)` returns the markdown.
-Tests mock the model and the sandbox through `measure=` and `spark_runner=`; `agent.llm.set_replay(traces.jsonl)` also works and books $0.
-
-Honest limits
-- The ledger USD is an **estimate** (the per-call figure this repo's spend gate uses, 0.10 per planner call). Real billing and Meta Model API pricing are UNVERIFIED here. Tokens are estimated at 4 characters per token.
-- Stored rule measurements (`runs_rulefix/`) are reused only for a case inside this repo whose generated patch hash is identical; the data hash is not stored (UNVERIFIED if `data.csv` changed). Use `--fresh` to re-measure.
-- The Wonder referee is untested live. Whether `muse-wonder-1.0` is a useful text referee is UNVERIFIED.
-- **What the rules cannot detect** (they recognise a fixed list): evaluating on training rows, scaler/selector/PCA fit on all rows, an id column repeated across the split, an unordered split when a time-named column exists, exact duplicate rows. They match code idioms of this benchmark (top-level `split` function, transformers fit in a top-level function); hashed column names defeat the time rule. Rule author had read the benchmark code, so the free baseline is optimistic.
-- **What needs a model**: look-ahead features, offsetting errors, label-conditioned imputation, and anything stated only in prose. No rule fired is not evidence of no leakage.
-
-## 2. CI check
-
-```
-python -m agent.ci_check path/to/repo --threshold 0.05 --summary "$GITHUB_STEP_SUMMARY"
+```powershell
+python -m agent.engine CASE --out out/audit
+python -m agent.engine CASE --preview
+python -m agent.engine CASE --live --critic --out out/live-audit
+python -m agent.intake DATA.csv --target defect --intended-use "Screen independent parts" --decision-time "Before final acceptance" --population independent_records --availability confirmed --entity-column part_id --exclude post_test_status --out examples/my-case
+python -m agent.ci_check examples/secom --threshold 0.05
 ```
 
-Audits every case folder under the path. Exit **1** when a case is INFLATED with the 95% interval above 0 and the mean inflation is over the threshold
-(0.05 = 5 percentage points for accuracy, 0.05 absolute units for PR-AUC); exit **2** when nothing was audited or a measurement failed; exit **0** otherwise.
-The message names the case, claimed and controlled scores, the inflation, the threshold and what found it. A markdown job summary is written to `--summary`.
+The CSV adapter accepts 30–20,000 rows, numeric selected predictors, a binary 0/1 target and a 5 MB file. Text metadata is allowed. At least five records per class and one predictor are required. It creates a new fixed Random Forest baseline with constant zero replacement of missing predictors, not a reproduction of a user's original model. Review whether zero is appropriate. Omitting the brief fields saves an unresolved case that will ask questions. The example CLI metadata/exclusion names must exist in your CSV. Generated-source AST matching enforces the complete template; edited code must use an explicit custom adapter with unverified roles.
 
-`.github/workflows/nulllab-audit.yml` runs it on pull requests and pushes. Default is **rules only: $0, no model, no secrets, no network** (the workflow references no secret).
-Set `AUDIT_PATH` or use the manual-run inputs to point it at your own case folders.
+No matching rule -> NOT TESTED. A model that proposes no flaw -> MODEL NO FLAW, without empirical clearance. Missing predictor timing or intended population can produce NEEDS INFORMATION with concrete questions. A known concern outside the edit list produces UNSUPPORTED with scope gaps. A consistent positive tested effect -> INFLATED. Mixed or failed measurements -> INCONCLUSIVE. Reviewer objection -> DISPUTED; unresolved objections survive an early no-flaw answer. A consistent score increase is CONTROL SCORE HIGHER, not no effect. No-effect results apply only to the tested controls.
 
-Honest limits
-- Cases where no rule fired are reported `NOT CHECKED`, exit 0: the build is not told the pipeline is clean.
-- It executes `train.py` of every case in a restricted subprocess (the runner is the sandbox; `NULLLAB_NO_DOCKER=1`). Do not point it at code you do not trust.
-- Spark mode (`--spark --live`) is optional and **not enabled in the workflow**. It needs `MODEL_API_KEY` as a repository secret and goes through `agent/llm.py`'s spend gate, which expects the owner's battle-station tooling: UNVERIFIED on a stock GitHub runner.
-- The workflow has not been run on GitHub (UNVERIFIED); the CLI path is tested locally.
+Every job writes `result.json` and immutable input snapshots. `agent.engine.export_bundle(path_to_result)` creates a ZIP for measured v2 results, verifying input/control identity and refusing credential-like text. The ZIP includes inputs, controls, patch, dependency versions and result. Inspect executable code before reproducing. The patch replaces the original file with the normalized compiled control; it is not a formatting-preserving small edit. The result records conditional intervals, not universal statistical coverage.
 
-## 3. Reproducibility bundle
+`agent.engine.export_assessment(path_to_result)` creates a separate assessment ZIP for terminal unmeasured outcomes with verified snapshots, including gated and baseline-only runs. It includes a readable assessment, exact inputs, result and dependency versions. It states that no counterfactual was measured. Both ZIP types contain data and executable source; review before sharing. Extra untracked files beside the snapshot are excluded. A failed run without an input identity cannot export an assessment.
 
-```
-python -m agent.bundle corpus/leak_prescale --run runs_rulefix/leak_prescale.json --out out/bundle.zip [--no-data]
-cd out && unzip bundle.zip -d b && cd b && python rerun.py && md5sum -c MANIFEST.md5
-```
-
-One zip: preregistration hash and input hashes, the executed patches and a unified `.patch`, traces (run record, plan, event log, raw planner reply when stored; never keys),
-the audit report, a standalone `rerun.py` (needs only python, pandas, numpy, scikit-learn), `MANIFEST.md5` (md5sum compatible) and a README with the limits. The zip is deterministic.
-Secrets: text files are scanned for `MODEL_API_KEY`, `sk-`/Bearer/AWS/GitHub-token shapes and your environment's key value; hits are replaced with `[REDACTED]` and counted in the README; the build is refused if anything key-looking remains.
-
-Honest limits
-- `rerun.py` recomputes **point estimates** for seeds 42/43/44 and compares them to the stored values (checked on `leak_prescale`: all three seeds match). It does not recompute bootstrap intervals (use `python -m agent.audit ... --remeasure` in the repo).
-- It is the case folder's code, not the authors' original pipeline. Library-version drift can change scores. `rerun.py` runs code on your machine: read it first.
-- The md5 manifest detects accidental change, not tampering. The scan finds key-looking strings, it cannot prove absence.
-
-## 4. Patch export
-
-```
-python -m agent.patch_export corpus/leak_prescale --run runs_rulefix/leak_prescale.json --out fix.patch --base-out train.normalized.py
-```
-
-Writes the stored fix as a unified diff. The header (ignored by `patch`/`git apply`) carries case, fix, provenance (`rules (no model)` or `Spark: <mode>`), metric,
-claimed and controlled score, inflation, seeds, n per seed, the per-seed 95% intervals, and the hash of the base it applies to.
-`--config fix_A|fix_B|fix_both` selects the factor. Refuses with exit 2 when the fix changed nothing.
-
-Honest limits
-- The diff is taken on the `ast.unparse`-normalised `train.py`, the form the sandbox executed. It applies to `train.normalized.py` (written by `--base-out`), **not** to a hand-formatted original; comments and layout are not preserved.
-- Rule R2 patches include the helper code the rule baseline adds (visible in the diff); read it before using the patch.
-- It is a proposed control that changes the score as shown, not a proof the authors' pipeline is wrong, and not a fix for leakage types outside the two factors tested.
-
-## Tests
-
-`python -m pytest tests/test_hybrid.py tests/test_ci.py tests/test_bundle.py -q` (offline; fixture numbers are hand-made, none is a measurement).
+CI returns 1 for a measured effect above threshold, 2 for failure or unchecked/disputed coverage, and 0 for completed checks below threshold. `--allow-unchecked` selects report-only coverage behavior. Legacy `agent.audit` is a historical report reader; historical results without an audit-time manifest cannot be exported as new evidence.

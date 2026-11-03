@@ -179,7 +179,7 @@ def test_provenance_badges(tmp_path):
 
 def test_rulefix_record_report_and_remeasure_roundtrip(tmp_path):
     """A rule-baseline record (tiny scratch case) is auditable, and --remeasure reproduces the stored drop exactly."""
-    from eval import run_rulefix as rr
+    from agent import rules_measure as rr
     case = tmp_path / "factorial" / "scratch_case"
     case.mkdir(parents=True)
     rng = np.random.default_rng(0)

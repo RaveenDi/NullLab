@@ -3,20 +3,17 @@
 # A "case" is a folder holding train.py + data.csv (see docs/USAGE.md). Set AUDIT_PATH to your case folder or a tree of them.
 #
 # OPTIONAL Spark mode (asks the Meta model about cases the rules cannot judge) is NOT enabled here. To use it you would add a repository
-# secret MODEL_API_KEY and run `python -m agent.ci_check <path> --spark --live` yourself; it also goes through agent/llm.py's spend gate,
-# which expects the owner's battle-station tooling, so it is UNVERIFIED on a stock GitHub runner. Rules-only needs none of that.
+# secret MODEL_API_KEY and run `python -m agent.ci_check <path> --spark --live` yourself. The v2 provider bounds each job;
+# no private workstation tooling is required. Hosted inference remains optional and is not enabled by this workflow.
 name: nulllab-audit
 
 on:
-  pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
     inputs:
       path:
         description: "Case folder (or tree of case folders) to audit"
         required: false
-        default: "corpus/clean_control"
+        default: "examples/secom"
       threshold:
         description: "Max tolerated inflation (0.05 = 5 pp accuracy, 0.05 PR-AUC units)"
         required: false
@@ -31,7 +28,7 @@ jobs:
     timeout-minutes: 30
     env:
       NULLLAB_NO_DOCKER: "1"      # the runner is already an ephemeral sandbox; the audit's own restricted subprocess is still used
-      AUDIT_PATH: ${{ github.event.inputs.path || 'corpus/clean_control' }}
+      AUDIT_PATH: ${{ github.event.inputs.path || 'examples/secom' }}
       AUDIT_THRESHOLD: ${{ github.event.inputs.threshold || '0.05' }}
     steps:
       - uses: actions/checkout@v4

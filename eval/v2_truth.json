@@ -1,0 +1,133 @@
+{
+  "schema": "nulllab.internal-pilot-truth.v1",
+  "provenance": "Internal AI-prepared synthetic capability-informed cases; not external discovery or human adjudication. Fixed cases retained regardless of measured effects.",
+  "construction_seeds": [
+    4701,
+    4702,
+    4703
+  ],
+  "metric": "accuracy",
+  "cases": {
+    "nl-q7v2": {
+      "family": "industrial-pump-screening",
+      "is_flawed": true,
+      "reference_ops": [
+        {
+          "op": "retrain_inside",
+          "step": "claimed_eval"
+        }
+      ],
+      "notes": "Model was fitted on all records before scoring validation folds. Acceptability concerns the planted mechanism only; no numerical effect is guaranteed.",
+      "matched_pair": [
+        "nl-q7v2",
+        "nl-m4c8"
+      ],
+      "inputs": {
+        "train.py": "576d709b785cbc0803e47114f9ec2cda1f58ed7aedbfefc8f90c54dcb9cdfb31",
+        "data.csv": "3dc9424cd524d051bc96a54b472f8e840edeb081e0524d29c465ba07a8a01369",
+        "excerpt.md": "cbf666b48750d1806bc3aba8696ae6d005ab3dca047f6c986418fe07d4f88517",
+        "case.json": "bd344396a390565152950696c1c21307b5b9812c19217f7c05d1d08944e6ed76"
+      }
+    },
+    "nl-m4c8": {
+      "family": "industrial-pump-screening",
+      "is_flawed": false,
+      "reference_ops": [],
+      "notes": "The same model class and hyperparameters are refitted using only each training fold. Acceptability concerns the planted mechanism only; no numerical effect is guaranteed.",
+      "matched_pair": [
+        "nl-q7v2",
+        "nl-m4c8"
+      ],
+      "inputs": {
+        "train.py": "b4144081bad8993c1c99f670fffde15ab11dce5903f543c99dc3eac4914a09dc",
+        "data.csv": "3dc9424cd524d051bc96a54b472f8e840edeb081e0524d29c465ba07a8a01369",
+        "excerpt.md": "cbf666b48750d1806bc3aba8696ae6d005ab3dca047f6c986418fe07d4f88517",
+        "case.json": "bd344396a390565152950696c1c21307b5b9812c19217f7c05d1d08944e6ed76"
+      }
+    },
+    "nl-t6n1": {
+      "family": "energy-inverter-screening",
+      "is_flawed": false,
+      "reference_ops": [],
+      "notes": "Supervised screening is estimated using training labels separately in each fold. Acceptability concerns the planted mechanism only; no numerical effect is guaranteed.",
+      "matched_pair": [
+        "nl-t6n1",
+        "nl-b9r3"
+      ],
+      "inputs": {
+        "train.py": "b39fff854162c8980c29993ea39c5d8230daa337473ad85aba7ccec4025606ee",
+        "data.csv": "e5bdf8f946ee8cac5689a33a3a715672b2579effbd2ccbc44cdd3a9e9b80a0bb",
+        "excerpt.md": "8037a5e37fe1469b464b23461b32e74627c27c94da96687d4dcb689f36ce5f65",
+        "case.json": "7cb7a8527982be8752ea1ab00a90c291db00268342520ec019133c99a0a2bec5"
+      }
+    },
+    "nl-b9r3": {
+      "family": "energy-inverter-screening",
+      "is_flawed": true,
+      "reference_ops": [
+        {
+          "op": "move_into_fold",
+          "step": "claimed_eval",
+          "call": "screen"
+        }
+      ],
+      "notes": "Supervised screening sees every evaluation label before cross-validation. Acceptability concerns the planted mechanism only; no numerical effect is guaranteed.",
+      "matched_pair": [
+        "nl-t6n1",
+        "nl-b9r3"
+      ],
+      "inputs": {
+        "train.py": "b61e65a1f4cfed9dafc85c1b98e5ae62ec497a7b99e27c16ebcde9eaee2568a9",
+        "data.csv": "e5bdf8f946ee8cac5689a33a3a715672b2579effbd2ccbc44cdd3a9e9b80a0bb",
+        "excerpt.md": "8037a5e37fe1469b464b23461b32e74627c27c94da96687d4dcb689f36ce5f65",
+        "case.json": "7cb7a8527982be8752ea1ab00a90c291db00268342520ec019133c99a0a2bec5"
+      }
+    },
+    "nl-h2s5": {
+      "family": "logistics-parcel-screening",
+      "is_flawed": true,
+      "reference_ops": [
+        {
+          "op": "replace_split",
+          "step": "partition",
+          "kind": "random"
+        }
+      ],
+      "notes": "The evaluation scores exactly the same records used to train the model. Acceptability concerns the planted mechanism only; no numerical effect is guaranteed.",
+      "matched_pair": [
+        "nl-h2s5",
+        "nl-w8k4"
+      ],
+      "inputs": {
+        "train.py": "2a797958b23b5ffa7afb8ea6d7a11d99be9102db6ff3294628944cc290cc4549",
+        "data.csv": "22aaf9453f8564026aa0d106bd3dd53767002a2296a292afbda394c23fb5ff0c",
+        "excerpt.md": "0c0aa4832f6660b64ce7982dd98f18535563028390188eb9f68d01723fd6c1a9",
+        "case.json": "958d6c264568a730aa2e934c34bff9a7441ba4a4b56f457c28b695e5b0a2418a"
+      }
+    },
+    "nl-w8k4": {
+      "family": "logistics-parcel-screening",
+      "is_flawed": false,
+      "reference_ops": [],
+      "notes": "Training and evaluation records are disjoint under a stratified random holdout. Acceptability concerns the planted mechanism only; no numerical effect is guaranteed.",
+      "matched_pair": [
+        "nl-h2s5",
+        "nl-w8k4"
+      ],
+      "inputs": {
+        "train.py": "222eea631c86495039befc0afc527b4f81ba288d8419086a0eb4edb1d2e2b68c",
+        "data.csv": "22aaf9453f8564026aa0d106bd3dd53767002a2296a292afbda394c23fb5ff0c",
+        "excerpt.md": "0c0aa4832f6660b64ce7982dd98f18535563028390188eb9f68d01723fd6c1a9",
+        "case.json": "958d6c264568a730aa2e934c34bff9a7441ba4a4b56f457c28b695e5b0a2418a"
+      }
+    }
+  },
+  "scheduled_ids": [
+    "nl-q7v2",
+    "nl-m4c8",
+    "nl-t6n1",
+    "nl-b9r3",
+    "nl-h2s5",
+    "nl-w8k4"
+  ]
+}

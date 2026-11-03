@@ -1,0 +1,699 @@
+{
+  "schema": "nulllab.internal-pilot-score.v1",
+  "scored_at_utc": "2026-11-03T08:13:16.591638+00:00",
+  "score_status": "original_frozen_runs_adjudicated_without_rerunning_or_rescoring",
+  "evidence_tier": "Internal AI-prepared synthetic cases designed from instrument capabilities, evaluated before truth was unblinded; not external independent validation.",
+  "cohort_status": "Development evidence after frozen contract bug was inspected and repaired. Any subsequent same-case run is regression evidence, not fresh prospective evidence.",
+  "denominators": {
+    "scheduled_cases_per_mode": 6,
+    "case_families": 3,
+    "matched_pairs": 3,
+    "flawed_cases": 3,
+    "mechanism_matched_clean_cases": 3,
+    "rows_per_case": 120,
+    "seeds_per_case": [
+      42,
+      43,
+      44
+    ],
+    "seeds_are_independent_projects": false,
+    "scheduled_code_variants": 6,
+    "distinct_synthetic_data_families": 3,
+    "independent_external_projects": 0
+  },
+  "protocol": "eval/V2-PROSPECTIVE-PROTOCOL.md",
+  "frozen_instrument": "eval/v2_protocol_freeze.json",
+  "configuration_deviation": {
+    "frozen_defaults": {
+      "timeout_s": 90,
+      "retries": 1,
+      "engine_max_usd": 1.0,
+      "engine_max_calls": 4
+    },
+    "actual_runner_overrides": {
+      "timeout_s": 120,
+      "retries": 0,
+      "max_reserved_usd_per_case": 0.8,
+      "max_attempts_per_case": 4,
+      "total_reserved_usd_cap": 4.8,
+      "total_attempts_cap": 24,
+      "n_boot": 300
+    },
+    "note": "Runner overrides were set before inference but differ from the provider defaults in the instrument freeze. No matched no-critic/no-execution arm was run."
+  },
+  "modes": {
+    "offline": {
+      "scheduled": 6,
+      "baseline_executed": 6,
+      "flawed_cases": 3,
+      "clean_cases": 3,
+      "first_exact_reference_matches_on_flawed": 1,
+      "retained_exact_reference_matches_on_flawed": 1,
+      "flawed_controls_accepted": 0,
+      "flawed_controls_measured": 0,
+      "measured_results_total": 0,
+      "model_only_no_flaw_on_clean": 0,
+      "flaw_proposals_on_clean": 0,
+      "no_test_outcomes": 5,
+      "contract_rejections": 1,
+      "final_critic_reviews": 0,
+      "median_intake_to_finish_s": 4.295393,
+      "max_intake_to_finish_s": 4.436295,
+      "provider_attempts": 0,
+      "attempt_status_counts": {},
+      "role_counts": {},
+      "model_counts": {},
+      "usage": {
+        "prompt_tokens": 0,
+        "completion_tokens": 0,
+        "total_tokens": 0
+      },
+      "reserved_estimate_usd_from_attempt_rows": "0",
+      "sum_of_rounded_job_estimates_usd": "0",
+      "billing_note": "Reserved estimates, not billed cost. The original totals sum per-job rounded estimates.",
+      "case_rows": [
+        {
+          "id": "nl-b9r3",
+          "family": "energy-inverter-screening",
+          "is_flawed": true,
+          "baseline_executed": true,
+          "baseline_score": 0.6583333333333333,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "flaw",
+            "reason": "Label-based screening occurs before evaluation folds; test a fold-local control.",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "Whole-data label-based feature screening",
+                "evidence_line": "chosen = screen(X, y)",
+                "ops": [
+                  {
+                    "op": "move_into_fold",
+                    "step": "claimed_eval",
+                    "call": "screen"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0
+            },
+            "culprit_ranking": [
+              "A"
+            ]
+          },
+          "retained_plan": {
+            "verdict": "flaw",
+            "reason": "Label-based screening occurs before evaluation folds; test a fold-local control.",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "Whole-data label-based feature screening",
+                "evidence_line": "chosen = screen(X, y)",
+                "ops": [
+                  {
+                    "op": "move_into_fold",
+                    "step": "claimed_eval",
+                    "call": "screen"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0
+            },
+            "culprit_ranking": [
+              "A"
+            ]
+          },
+          "first_exact_reference_ops_match": true,
+          "retained_exact_reference_ops_match": true,
+          "proposed_flaw": true,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "UNSUPPORTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [
+            "R-USE-REQUIRED: the excerpt states a forecasting use ('chronolog') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (the step that chooses the scored rows)"
+          ],
+          "intake_to_finish_s": 4.326521,
+          "provider_attempts": 0,
+          "per_job_reserved_estimate_usd": 0
+        },
+        {
+          "id": "nl-h2s5",
+          "family": "logistics-parcel-screening",
+          "is_flawed": true,
+          "baseline_executed": true,
+          "baseline_score": 1.0,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": null,
+          "retained_plan": null,
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "NOT_TESTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 4.193966,
+          "provider_attempts": 0,
+          "per_job_reserved_estimate_usd": 0
+        },
+        {
+          "id": "nl-m4c8",
+          "family": "industrial-pump-screening",
+          "is_flawed": false,
+          "baseline_executed": true,
+          "baseline_score": 0.5805555555555556,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": null,
+          "retained_plan": null,
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "NOT_TESTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 4.264265,
+          "provider_attempts": 0,
+          "per_job_reserved_estimate_usd": 0
+        },
+        {
+          "id": "nl-q7v2",
+          "family": "industrial-pump-screening",
+          "is_flawed": true,
+          "baseline_executed": true,
+          "baseline_score": 1.0,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": null,
+          "retained_plan": null,
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "NOT_TESTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 4.261453,
+          "provider_attempts": 0,
+          "per_job_reserved_estimate_usd": 0
+        },
+        {
+          "id": "nl-t6n1",
+          "family": "energy-inverter-screening",
+          "is_flawed": false,
+          "baseline_executed": true,
+          "baseline_score": 0.5111111111111111,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": null,
+          "retained_plan": null,
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "NOT_TESTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 4.436295,
+          "provider_attempts": 0,
+          "per_job_reserved_estimate_usd": 0
+        },
+        {
+          "id": "nl-w8k4",
+          "family": "logistics-parcel-screening",
+          "is_flawed": false,
+          "baseline_executed": true,
+          "baseline_score": 0.5111111111111111,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": null,
+          "retained_plan": null,
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "NOT_TESTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 4.340427,
+          "provider_attempts": 0,
+          "per_job_reserved_estimate_usd": 0
+        }
+      ],
+      "families": {
+        "energy-inverter-screening": {
+          "cases": 2,
+          "flawed": 1,
+          "clean": 1,
+          "measured_flawed_controls": 0
+        },
+        "industrial-pump-screening": {
+          "cases": 2,
+          "flawed": 1,
+          "clean": 1,
+          "measured_flawed_controls": 0
+        },
+        "logistics-parcel-screening": {
+          "cases": 2,
+          "flawed": 1,
+          "clean": 1,
+          "measured_flawed_controls": 0
+        }
+      }
+    },
+    "live": {
+      "scheduled": 6,
+      "baseline_executed": 6,
+      "flawed_cases": 3,
+      "clean_cases": 3,
+      "first_exact_reference_matches_on_flawed": 2,
+      "retained_exact_reference_matches_on_flawed": 3,
+      "flawed_controls_accepted": 0,
+      "flawed_controls_measured": 0,
+      "measured_results_total": 0,
+      "model_only_no_flaw_on_clean": 3,
+      "flaw_proposals_on_clean": 0,
+      "no_test_outcomes": 0,
+      "contract_rejections": 3,
+      "final_critic_reviews": 0,
+      "median_intake_to_finish_s": 24.731553,
+      "max_intake_to_finish_s": 38.207134,
+      "provider_attempts": 15,
+      "attempt_status_counts": {
+        "completed": 15
+      },
+      "role_counts": {
+        "critic": 6,
+        "planner": 9
+      },
+      "model_counts": {
+        "muse-wonder-1.0": 6,
+        "muse-spark-1.3": 9
+      },
+      "usage": {
+        "prompt_tokens": 21856,
+        "completion_tokens": 14411,
+        "total_tokens": 36267
+      },
+      "reserved_estimate_usd_from_attempt_rows": "2.07031500",
+      "sum_of_rounded_job_estimates_usd": "2.070313",
+      "billing_note": "Reserved estimates, not billed cost. The original totals sum per-job rounded estimates.",
+      "case_rows": [
+        {
+          "id": "nl-b9r3",
+          "family": "energy-inverter-screening",
+          "is_flawed": true,
+          "baseline_executed": true,
+          "baseline_score": 0.6583333333333333,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "flaw",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "supervised feature selection before CV: screen uses labels on all rows to choose features scored later",
+                "evidence_line": "chosen = screen(X, y)",
+                "ops": [
+                  {
+                    "op": "move_into_fold",
+                    "step": "claimed_eval",
+                    "call": "screen"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0.07
+            },
+            "culprit_ranking": [
+              "A"
+            ],
+            "reason": "SelectKBest with f_classif sees test-fold labels before evaluate CV; must be re-run inside each fold on training rows only."
+          },
+          "retained_plan": {
+            "verdict": "flaw",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "supervised feature selection before CV: screen uses labels on all rows to choose features scored later",
+                "evidence_line": "chosen = screen(X, y)",
+                "ops": [
+                  {
+                    "op": "move_into_fold",
+                    "step": "claimed_eval",
+                    "call": "screen"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0.07
+            },
+            "culprit_ranking": [
+              "A"
+            ],
+            "reason": "SelectKBest with f_classif sees test-fold labels before evaluate CV; must be re-run inside each fold on training rows only. No temporal/group structure asserted, so no split replacement is required."
+          },
+          "first_exact_reference_ops_match": true,
+          "retained_exact_reference_ops_match": true,
+          "proposed_flaw": true,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "UNSUPPORTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [
+            "R-USE-REQUIRED: the excerpt states a forecasting use ('chronolog') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (the step that chooses the scored rows)"
+          ],
+          "intake_to_finish_s": 27.205042,
+          "provider_attempts": 3,
+          "per_job_reserved_estimate_usd": 0.384356
+        },
+        {
+          "id": "nl-h2s5",
+          "family": "logistics-parcel-screening",
+          "is_flawed": true,
+          "baseline_executed": true,
+          "baseline_score": 1.0,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "flaw",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "train-test overlap: partition returns same rows for fit and scoring, so scored rows were fit",
+                "evidence_line": "    return rows, rows",
+                "ops": [
+                  {
+                    "op": "replace_split",
+                    "step": "claimed_eval",
+                    "kind": "random"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 25
+            },
+            "culprit_ranking": [
+              "A"
+            ],
+            "reason": "partition returns (rows,rows) so claimed_eval fits and scores on identical rows; random replace_split in claimed_eval enforces disjoint fit/score rows without changing model, features or metric."
+          },
+          "retained_plan": {
+            "verdict": "flaw",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "train-test overlap: partition returns identical rows for fit and scoring, so every scored row was fit",
+                "evidence_line": "    return rows, rows",
+                "ops": [
+                  {
+                    "op": "replace_split",
+                    "step": "partition",
+                    "kind": "random"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0.25
+            },
+            "culprit_ranking": [
+              "A"
+            ],
+            "reason": "partition returns (rows,rows) so claimed_eval fits and scores on identical rows; random replace_split in partition enforces disjoint fit/score rows. No temporal/group structure asserted, population is independent records from same population, and no time-like column exists, so random is the required split without changing model, features or metric."
+          },
+          "first_exact_reference_ops_match": false,
+          "retained_exact_reference_ops_match": true,
+          "proposed_flaw": true,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "UNSUPPORTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [
+            "R-USE-REQUIRED: the excerpt states a forecasting use ('chronolog') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (['partition'])"
+          ],
+          "intake_to_finish_s": 38.207134,
+          "provider_attempts": 3,
+          "per_job_reserved_estimate_usd": 0.37147
+        },
+        {
+          "id": "nl-m4c8",
+          "family": "industrial-pump-screening",
+          "is_flawed": false,
+          "baseline_executed": true,
+          "baseline_score": 0.5805555555555556,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "no_flaw",
+            "factors": [],
+            "predicted_drop_pp": {},
+            "culprit_ranking": [],
+            "reason": "claimed_eval does StratifiedKFold shuffle split and fits DecisionTree inside each fold on training rows only, scoring only held-out rows. No resampler/selector/transformer before the loop, no pre-fit model, no group/temporal structure asserted, so no op from frozen list applies."
+          },
+          "retained_plan": {
+            "verdict": "no_flaw",
+            "factors": [],
+            "predicted_drop_pp": {},
+            "culprit_ranking": [],
+            "reason": "claimed_eval does StratifiedKFold shuffle split and fits DecisionTree inside each fold on training rows only, scoring only held-out rows. No resampler/selector/transformer before the loop, no pre-fit model, no group/temporal structure asserted, so no op from frozen list applies."
+          },
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": true,
+          "status": "completed",
+          "verdict": "MODEL_NO_FLAW",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 22.258064,
+          "provider_attempts": 2,
+          "per_job_reserved_estimate_usd": 0.310847
+        },
+        {
+          "id": "nl-q7v2",
+          "family": "industrial-pump-screening",
+          "is_flawed": true,
+          "baseline_executed": true,
+          "baseline_score": 1.0,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "flaw",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "model fitted once on full data before CV loop then reused for predictions inside folds; test rows were already fit",
+                "evidence_line": "model.fit(X, y)",
+                "ops": [
+                  {
+                    "op": "retrain_inside",
+                    "step": "claimed_eval"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0.3
+            },
+            "culprit_ranking": [
+              "A"
+            ],
+            "reason": "Single independent-records task with random CV; only flaw is pre-fit model reused in folds, fixed by refitting inside each fold on training rows only."
+          },
+          "retained_plan": {
+            "verdict": "flaw",
+            "factors": [
+              {
+                "id": "A",
+                "flaw": "model fitted once on full data before CV loop then reused for predictions inside folds; test rows were already fit",
+                "evidence_line": "model.fit(X, y)",
+                "ops": [
+                  {
+                    "op": "retrain_inside",
+                    "step": "claimed_eval"
+                  }
+                ]
+              }
+            ],
+            "predicted_drop_pp": {
+              "fix_all": 0.3
+            },
+            "culprit_ranking": [
+              "A"
+            ],
+            "reason": "Single independent-records task with random CV; only flaw is pre-fit model reused in folds, fixed by refitting inside each fold on training rows only. R-USE-REQUIRED does not apply: excerpt asserts independent records from same population with no group or chronological structure and no forecasting/future-period use, and no time-like column exists, so no temporal replace_split is required or permitted."
+          },
+          "first_exact_reference_ops_match": true,
+          "retained_exact_reference_ops_match": true,
+          "proposed_flaw": true,
+          "model_only_no_flaw": false,
+          "status": "inconclusive",
+          "verdict": "UNSUPPORTED",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [
+            "R-USE-REQUIRED: the excerpt states a forecasting use ('chronolog') and the original hold-out is not temporal, but no factor is a temporal replace_split of the hold-out step (the step that chooses the scored rows)"
+          ],
+          "intake_to_finish_s": 27.503045,
+          "provider_attempts": 3,
+          "per_job_reserved_estimate_usd": 0.371798
+        },
+        {
+          "id": "nl-t6n1",
+          "family": "energy-inverter-screening",
+          "is_flawed": false,
+          "baseline_executed": true,
+          "baseline_score": 0.5111111111111111,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "no_flaw",
+            "factors": [],
+            "reason": "evaluate() runs SelectKBest via screen(X[tr],y[tr]) inside each StratifiedKFold fold on training rows only and refits LogisticRegression per-fold; split is random which matches stated independent-records use with no group/temporal structure."
+          },
+          "retained_plan": {
+            "verdict": "no_flaw",
+            "factors": [],
+            "reason": "evaluate() runs SelectKBest via screen(X[tr],y[tr]) inside each StratifiedKFold fold on training rows only and refits LogisticRegression per-fold; split is random which matches stated independent-records use with no group/temporal structure."
+          },
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": true,
+          "status": "completed",
+          "verdict": "MODEL_NO_FLAW",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 14.404394,
+          "provider_attempts": 2,
+          "per_job_reserved_estimate_usd": 0.321058
+        },
+        {
+          "id": "nl-w8k4",
+          "family": "logistics-parcel-screening",
+          "is_flawed": false,
+          "baseline_executed": true,
+          "baseline_score": 0.5111111111111111,
+          "baseline_is_external_reference_validation": false,
+          "first_proposal": {
+            "verdict": "no_flaw",
+            "factors": [],
+            "reason": "claimed_eval does stratified random hold-out with model fit on train rows only and scored on held-out rows; no resampler/selector/transformer at top level before split, no reused model across folds, no group/temporal structure asserted so random split satisfies postcondition. Population is independent records from same synthetic population."
+          },
+          "retained_plan": {
+            "verdict": "no_flaw",
+            "factors": [],
+            "reason": "claimed_eval does stratified random hold-out with model fit on train rows only and scored on held-out rows; no resampler/selector/transformer at top level before split, no reused model across folds, no group/temporal structure asserted so random split satisfies postcondition. Population is independent records from same synthetic population."
+          },
+          "first_exact_reference_ops_match": null,
+          "retained_exact_reference_ops_match": null,
+          "proposed_flaw": false,
+          "model_only_no_flaw": true,
+          "status": "completed",
+          "verdict": "MODEL_NO_FLAW",
+          "control_accepted": false,
+          "control_measured": false,
+          "final_critic_review": null,
+          "contract_rejection_problems": [],
+          "intake_to_finish_s": 19.108335,
+          "provider_attempts": 2,
+          "per_job_reserved_estimate_usd": 0.310784
+        }
+      ],
+      "families": {
+        "energy-inverter-screening": {
+          "cases": 2,
+          "flawed": 1,
+          "clean": 1,
+          "measured_flawed_controls": 0
+        },
+        "industrial-pump-screening": {
+          "cases": 2,
+          "flawed": 1,
+          "clean": 1,
+          "measured_flawed_controls": 0
+        },
+        "logistics-parcel-screening": {
+          "cases": 2,
+          "flawed": 1,
+          "clean": 1,
+          "measured_flawed_controls": 0
+        }
+      }
+    }
+  },
+  "interpretation": {
+    "empirical_specificity": null,
+    "empirical_specificity_reason": "All three clean outcomes are either NOT_TESTED or MODEL_NO_FLAW; no clean counterfactual control was measured.",
+    "critic_benefit": null,
+    "critic_benefit_reason": "Initial critic assessments exist, but no matched no-critic ablation or final measured-evidence critic reviews exist.",
+    "model_execution_increment": null,
+    "model_execution_increment_reason": "Every flawed live plan was rejected before control execution; no measured effects can be compared to predictions.",
+    "generalization": "No estimate of performance on real independent projects or external users."
+  },
+  "source_artifact_sha256": {
+    "out/prospective-offline-results/schedule.json": "2825d3b4fde999030512468eb3a93f089a2a30814b60e8a3f3e2466de0901c3a",
+    "out/prospective-offline-results/totals.json": "ab7bc12c33cfbe52e968e0e96e1d58451756e3501d485a1bf479efe8c5ad49f1",
+    "out/prospective-offline-results/adjudication-input.json": "277aa9b83f4eea35d58c10bcbb8604fe8cdb4320e3e0bab775eef6727a2b0fe4",
+    "out/prospective-offline-results/nl-b9r3/result.json": "1d1980b49eee6a3a185ec6c3147c4f1052fe782bac9514321c1cf5432790bcbe",
+    "out/prospective-offline-results/nl-h2s5/result.json": "6e5d5b394745ee82786af5bd726074f55e8df2f1ec868d3aeb2f239e4f9e8ce3",
+    "out/prospective-offline-results/nl-m4c8/result.json": "ebad1ef8f105cdb99f745724a1d8dd45563bcb8cd2bc62ff33304fd44860271c",
+    "out/prospective-offline-results/nl-q7v2/result.json": "4929a0525db5597e75c2daff362dd978a609a2a09979623ce2e2c72030cd9005",
+    "out/prospective-offline-results/nl-t6n1/result.json": "4684805d27d82f2fbf1ba93275cc79fd6474b0be2449f7abd567339dda12ccdf",
+    "out/prospective-offline-results/nl-w8k4/result.json": "05ffe69dc45dafa56e7f30857298f5c35f644c61b5ac49fde03927a550a901e5",
+    "out/prospective-live-results/schedule.json": "e779e9526b25d725df989a05795fba2d6571242c75d504af9cc741e0db3ef939",
+    "out/prospective-live-results/totals.json": "ac0c2a1623bc5e2db5ac797dac6319513fcc005b9ece1b95f113e594e0397dc2",
+    "out/prospective-live-results/adjudication-input.json": "1505f11997732cef3b93f01fcf0d94eca7d6530e30baebac6aabd0c7895dbae1",
+    "out/prospective-live-results/nl-b9r3/result.json": "36e739a28ece220be14f607d1cc6e8dbb8f1bb4fd6221c94af95a13d072dfb3c",
+    "out/prospective-live-results/nl-b9r3/provider-traces.jsonl": "9f3793312433c11a607cc21d717dfd63a43c0443a50f66e8862a49cb9f56cdbf",
+    "out/prospective-live-results/nl-b9r3/provider-ledger.json": "075a142a9d22e59511e4ac61bff312f4122a4f2660b681be2b569536c356674b",
+    "out/prospective-live-results/nl-h2s5/result.json": "60cf2dd1f2296343d12af1315e4c44ba992f5e0272421fff77e695c00268c097",
+    "out/prospective-live-results/nl-h2s5/provider-traces.jsonl": "eec7efd1a66737ae9f1c104c21563a1a8b1e7f39f638a66e91e38c35246d03a9",
+    "out/prospective-live-results/nl-h2s5/provider-ledger.json": "f33ab46d7baf9f0b53dd25f0f2e095d4adda1c104227396f244758a14ac2ba6b",
+    "out/prospective-live-results/nl-m4c8/result.json": "ee94483fd561c1ddbf63f20a883fce026cfbcd392d6c75e28285b2c6a3db9453",
+    "out/prospective-live-results/nl-m4c8/provider-traces.jsonl": "c396d052f71919104bf2bbb997e46f11b7f0494b27a4876c67341710fc7da37a",
+    "out/prospective-live-results/nl-m4c8/provider-ledger.json": "660858f762d4a22ec03452bd0a61052a8fbdfdf9ae5d60c9dbd2728403c9ee2e",
+    "out/prospective-live-results/nl-q7v2/result.json": "500dc13e01c03dca7e69bc39f63935ac8923cd672b0444987fd00e2bbddb4eae",
+    "out/prospective-live-results/nl-q7v2/provider-traces.jsonl": "f59d2619df1e594eedf78ec69bb3f378c7793e5b9214b5a02a580bcde0f1614d",
+    "out/prospective-live-results/nl-q7v2/provider-ledger.json": "d01ca0939e9548ffafe925c8e3d0e4366b161ea8254cb10a4d860ccd02e3f47c",
+    "out/prospective-live-results/nl-t6n1/result.json": "6434e3a2944ada849499c8873d5c755d8af16452dfbf1f956cfdb7402732647e",
+    "out/prospective-live-results/nl-t6n1/provider-traces.jsonl": "5415c070d853473babea5e23404b237b6e54e045566e217b4eb5c06d04d2dea8",
+    "out/prospective-live-results/nl-t6n1/provider-ledger.json": "6e3a30bfcdd9bf7e0b205a0fc3bb88c832a8937f7bdfcbaeccf129d5103efae7",
+    "out/prospective-live-results/nl-w8k4/result.json": "18cd31b661f1931dcb725f31541f04ed3df450a95b8ad8eeb28645e5aaf41fca",
+    "out/prospective-live-results/nl-w8k4/provider-traces.jsonl": "1a257a554ecabc4666adad54e1493c236e573f0abbe229dca4a278234bcf79ec",
+    "out/prospective-live-results/nl-w8k4/provider-ledger.json": "72ac48e1cb96708733cd3ca5c3bb04dec1724e6f0009176297761c46bae8c864"
+  },
+  "input_and_snapshot_hashes_verified": true,
+  "original_result_paths": [
+    "out/prospective-offline-results",
+    "out/prospective-live-results"
+  ],
+  "later_regression_path": "out/prospective-regression-results (separate; not scored here)"
+}

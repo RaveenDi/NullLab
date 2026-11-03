@@ -9,13 +9,14 @@ Default mode is RULES ONLY: the fixed rule library plus the local sandbox. It co
 Exit codes:  0 = no case exceeds the threshold   1 = at least one case is INFLATED beyond the threshold (95% interval above 0)
              2 = nothing audited / measurement failed / usage error.
 A case where no rule fired is reported as NO_RULE_FIRED (not a pass): the rules cannot see look-ahead features, offsetting errors or
-label-conditioned imputation. Spark mode (--spark --live) asks the model for those cases; it needs MODEL_API_KEY in the environment, the
-repository's spend gate, and is optional and OFF in the shipped workflow.
+label-conditioned imputation. Spark mode (--spark --live) asks the model for those cases; it needs MODEL_API_KEY in the environment, a
+configured per-job provider, and is optional and OFF in the shipped workflow.
 
 Threshold units: percentage points for accuracy cases (--threshold 0.05 means 5 pp), absolute metric units for PR-AUC/ROC-AUC."""
 import argparse
 import os
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -48,6 +49,8 @@ def judge(res: dict, threshold: float) -> tuple[str, str]:
     """-> (status, message). status in PASS | FAIL | NO_RULE_FIRED | UNRESOLVED | ERROR. FAIL only if the 95% interval is above 0
     (sign '+') AND the mean inflation exceeds the threshold, in the metric's own units (pp for accuracy)."""
     s, v = res.get("summary"), res.get("verdict")
+    if v in ("DISPUTED", "INCONCLUSIVE", "MODEL_NO_FLAW", "NOT_TESTED", "UNSUPPORTED", "NEEDS_INFORMATION"):
+        return "UNRESOLVED", f"{res['case']}: {v}; no scientific clearance"
     if v in ("INFLATED", "DISPUTED") and s:
         over = s["inflation"] > threshold * (100.0 if s["unit"] == "pp" else 1.0)
         if v == "INFLATED" and over:
@@ -55,7 +58,7 @@ def judge(res: dict, threshold: float) -> tuple[str, str]:
                             f"(claimed {s['claimed']}, controlled {s['controlled']}; 95% interval above 0 in {s['per_seed_sign'].count('+')} of {len(s['per_seed_sign'])} seeds, per seed {''.join(s['per_seed_sign'])}), "
                             f"above the threshold of {threshold * (100.0 if s['unit'] == 'pp' else 1.0):g} {s['unit']}; found by {res['source']}")
         return "PASS", (f"{res['case']}: inflation {s['inflation']:+} {s['unit']} " + ("is within the threshold" if v == "INFLATED" else "was disputed by the referee"))
-    if v == "NOT INFLATED":
+    if v in ("NOT INFLATED", "NO_EFFECT_DETECTED", "CONTROL_SCORE_HIGHER") and s and s.get("sign") != "mixed":
         return "PASS", f"{res['case']}: no inflation measured ({s['inflation']:+} {s['unit']}, sign {s['sign']})" if s else f"{res['case']}: not inflated"
     if v == "NEEDS_MODEL":
         return "NO_RULE_FIRED", f"{res['case']}: no rule fired. NOT a clean bill of health: rules cannot detect look-ahead features, offsetting errors or label-conditioned imputation"
@@ -65,7 +68,7 @@ def judge(res: dict, threshold: float) -> tuple[str, str]:
 
 
 def check_path(path: str | Path, threshold: float = 0.05, measure: Any = None, fresh: bool = True, spark: bool = False,
-               live: bool = False, detector: Any = None, spark_runner: Any = None) -> dict:
+               live: bool = False, detector: Any = None, spark_runner: Any = None, strict: bool = True) -> dict:
     """Audit every case under path. Returns {"exit_code", "rows", "messages", "markdown"}. `measure`/`detector`/`spark_runner` are test hooks."""
     cases = discover_cases(path)
     rows, msgs = [], []
@@ -74,8 +77,14 @@ def check_path(path: str | Path, threshold: float = 0.05, measure: Any = None, f
         return {"exit_code": EXIT_ERROR, "rows": [], "messages": [msg], "markdown": render_summary([], threshold, [msg], spark)}
     for c in cases:
         try:
-            res = hybrid.run_hybrid(c, live=spark and live, measure=measure, detector=detector, fresh=fresh, allow_recorded=False,
-                                    spark_runner=spark_runner if spark else None)
+            if measure or detector or spark_runner:
+                res = hybrid.run_hybrid(c, live=spark and live, measure=measure, detector=detector, fresh=fresh, allow_recorded=False,
+                                        spark_runner=spark_runner if spark else None)
+            else:
+                from agent.engine import run_audit
+                with tempfile.TemporaryDirectory(prefix="nulllab_ci_") as directory:
+                    res = run_audit(c, directory, live=spark and live)
+                res["source"] = res["mode"]
             if not spark and res["verdict"] in ("UNRESOLVED", "NEEDS_MODEL"):
                 pass  # rules-only: the model branch was refused offline; reported as such
         except Exception as e:  # noqa: BLE001
@@ -84,7 +93,7 @@ def check_path(path: str | Path, threshold: float = 0.05, measure: Any = None, f
         rows.append({"case": c.name, "path": str(c), "status": status, "verdict": res["verdict"], "source": res["source"], "summary": res.get("summary"),
                      "calls": res["ledger"]["calls"], "est_usd": res["ledger"]["est_usd"], "rules": res.get("rules_fired", []), "message": msg})
         msgs.append(msg)
-    code = EXIT_INFLATED if any(r["status"] == "FAIL" for r in rows) else (EXIT_ERROR if any(r["status"] == "ERROR" for r in rows) else EXIT_OK)
+    code = EXIT_INFLATED if any(r["status"] == "FAIL" for r in rows) else (EXIT_ERROR if any(r["status"] == "ERROR" or (strict and r["status"] in ("NO_RULE_FIRED", "UNRESOLVED")) for r in rows) else EXIT_OK)
     return {"exit_code": code, "rows": rows, "messages": msgs, "markdown": render_summary(rows, threshold, msgs, spark)}
 
 
@@ -95,6 +104,7 @@ def render_summary(rows: list, threshold: float, msgs: list, spark: bool = False
     L = ["## NullLab audit", "", f"Mode: **{'rules + Spark (optional)' if spark else 'rules only (no model, $0, no secrets)'}**. "
          f"Threshold: {threshold:g} (percentage points for accuracy as a fraction, e.g. 0.05 = 5 pp; absolute units for PR-AUC). "
          f"Model calls: {total_calls}; estimated spend ${total_usd:.2f}.", ""]
+    L += [f"Completed checks: {sum(r['status'] in ('PASS', 'FAIL') for r in rows)}/{len(rows)}. Unchecked/disputed cases fail strict coverage by default.", ""]
     if not rows:
         return "\n".join(L + [msgs[0] if msgs else "Nothing audited.", ""])
     icon = {"PASS": "PASS", "FAIL": "FAIL", "NO_RULE_FIRED": "NOT CHECKED", "UNRESOLVED": "UNRESOLVED", "ERROR": "ERROR"}
@@ -121,11 +131,12 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--fresh", action="store_true", default=True, help=argparse.SUPPRESS)
     ap.add_argument("--spark", action="store_true", help="ALSO ask the model for cases the rules cannot judge (needs --live and MODEL_API_KEY)")
     ap.add_argument("--live", action="store_true", help="allow real model calls with --spark")
+    ap.add_argument("--allow-unchecked", action="store_true", help="report-only coverage policy; permit unchecked cases without a green scientific clearance")
     a = ap.parse_args(argv)
-    if a.spark and not (a.live and os.environ.get("MODEL_API_KEY")):
-        print("ci_check: --spark needs --live and MODEL_API_KEY in the environment; refusing (rules-only is the default and needs neither).", file=sys.stderr)
+    if a.spark and not a.live:
+        print("ci_check: --spark needs --live and a configured provider (MODEL_API_KEY for remote inference); refusing.", file=sys.stderr)
         return EXIT_ERROR
-    out = check_path(a.path, a.threshold, spark=a.spark, live=a.live)
+    out = check_path(a.path, a.threshold, spark=a.spark, live=a.live, strict=not a.allow_unchecked)
     for m in out["messages"]:
         print(("::error::" if "inflated by" in m and os.environ.get("GITHUB_ACTIONS") else "") + m)
     if a.summary:

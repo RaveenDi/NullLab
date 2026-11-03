@@ -1,0 +1,11 @@
+# V2 synthetic pilot cohort
+
+This repository copy was prepared after the original frozen rules-only and Meta inference schedules completed and truth was unblinded. `v2_cases/` contains six internal synthetic case variants in three matched pairs; `v2_truth.json` is separate from their source, CSV, excerpt and metadata. Do not place truth into model contexts when rerunning experiments.
+
+The cases were prepared by an AI reviewer using known typed-edit capabilities. They are not naturally occurring research errors, independent human adjudication, external-user evidence or a representative estimate of real-project performance. Data are generated numeric fixtures; no real individual, organization or operational record is represented. Construction uses fixed seeds 4701, 4702 and 4703, with 120 records per data family. Matched variants share data and task wording; only the relevant evaluation code differs. No case was selected or altered to obtain a preferred measured score drop.
+
+`v2_protocol_freeze.json` retains the raw-byte source hashes before case creation and the recorded formatting-only transition before inference. Actual runner settings differed from the provider defaults captured in that freeze; see `../docs/EVAL-V2-PILOT.md` and `v2_pilot_score.json` for the explicit settings and original outcome counts. The broader design remains in `V2-PROSPECTIVE-PROTOCOL.md`; this small cohort omits ambiguous and unsupported families and does not provide a matched model/critic ablation.
+
+The original score retains all failures, including the frozen contract's erroneous chronology requirement. The cases became development evidence once that failure was inspected and fixed. Stored-plan reruns under the repaired instrument belong in a separate regression record and do not change the original pilot score. Original model replies, ledgers, schedules and result snapshots remain under the local ignored `out/prospective-*-results` directories; their hashes and scored fields are retained in `v2_pilot_score.json`.
+
+Inspect executable source before running. A model no-flaw answer is not empirical scientific clearance. No credentials, private environment files or provider authentication values are included in this cohort copy. This is local release preparation; no commit, push, hosted publication or submission is performed by creating these files.

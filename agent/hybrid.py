@@ -23,6 +23,7 @@ import json
 import os
 import sys
 import tempfile
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -32,6 +33,7 @@ if str(ROOT) not in sys.path:
 sys.dont_write_bytecode = True
 
 from agent import audit  # noqa: E402
+from agent import evidence
 from baselines import rulefix  # noqa: E402
 
 TAG_RULES = "rules (no model)"
@@ -45,6 +47,8 @@ MAX_REFEREE_CALLS = 10
 SEEDS = (42, 43, 44)
 PRICING_NOTE = ("USD is an ESTIMATE (the per-call figure this repo's spend gate uses), not a billed amount; real Meta Model API "
                 "pricing is UNVERIFIED here. Tokens are estimated at 4 characters per token.")
+_LEGACY_LOCK = threading.RLock()
+_LEGACY_SCOPE = threading.local()
 
 
 class NeedsModel(RuntimeError):
@@ -101,16 +105,23 @@ def recording_llm(ledger: Any, role: str, live: bool) -> Any:
             raise NeedsModel("a live model call is needed but --live was not given")
         ledger.check(r_)
         mdl = model or llm.model_for(role or "")
+        ledger.add(r_, mdl, tag, (len(system) + len(user)) / 4, 0, est_usd, replayed=replay)
         reply = orig(system, user, est_usd=est_usd, max_tokens=max_tokens or llm.MIN_MAX_TOKENS, tag=tag, role=role, model=model, temperature=temperature, **kw)
-        ledger.add(r_, mdl, tag, (len(system) + len(user)) / 4, len(reply or "") / 4, est_usd, replayed=replay)
+        ledger.calls[-1]["tokens_out_est"] = int(len(reply or "") / 4)
         return reply
 
     role_name = role
-    llm.live_complete = proxy
-    try:
-        yield
-    finally:
-        llm.live_complete = orig
+    with _LEGACY_LOCK:
+        if getattr(_LEGACY_SCOPE, "active", False):
+            raise RuntimeError("Overlapping legacy provider scopes are unsupported; use agent.engine")
+        orig = llm.live_complete
+        _LEGACY_SCOPE.active = True
+        llm.live_complete = proxy
+        try:
+            yield
+        finally:
+            llm.live_complete = orig
+            _LEGACY_SCOPE.active = False
 
 
 # ---------------- helpers ----------------
@@ -141,8 +152,7 @@ def summarize(rec: dict) -> dict | None:
 
 
 def default_measure(case_dir: str | Path, fresh: bool = False, root: str | Path = ROOT) -> tuple[dict, str]:
-    """Measure the rule fix. Returns (record, how). A stored runs_rulefix record is reused ONLY for a case that lives in this
-    repository AND whose generated patch hash equals the stored one (the data hash is not stored: UNVERIFIED if data.csv changed)."""
+    """Measure the rule fix. Returns (record, how). A stored rule record is reused only when audit-time input, patch and instrument identity match. Legacy records without manifests are refused."""
     case_dir = Path(case_dir)
     built = rulefix.build_configs(case_dir)
     stored = Path(root) / "runs_rulefix" / f"{case_dir.name}.json"
@@ -151,6 +161,7 @@ def default_measure(case_dir: str | Path, fresh: bool = False, root: str | Path 
             rec = json.loads(stored.read_text(encoding="utf-8"))
             same = all(rec["configs"][c]["src_sha256"] == hashlib.sha256(built["configs"][c]["src"].encode()).hexdigest()
                        for c in ("fix_A", "fix_B", "fix_both"))
+            evidence.verify(case_dir, rec, current_instrument=True)
             if same and rec.get("status") == "ok":
                 return rec, "stored measurement (runs_rulefix, patch hash identical)"
         except (OSError, ValueError, KeyError):
@@ -172,7 +183,11 @@ def find_recorded_spark(case_dir: str | Path, root: str | Path = ROOT) -> tuple[
                 continue
             rec = (j.get("loop") or {}).get(name) if isinstance(j, dict) else None
             if isinstance(rec, dict) and rec.get("status") == "ok" and rec.get("stats") and rec.get("sources"):
-                return rec, f.relative_to(root).as_posix()
+                try:
+                    evidence.verify(case_dir, rec, current_instrument=True)
+                    return rec, f.relative_to(root).as_posix()
+                except evidence.EvidenceError:
+                    continue
     return None
 
 
@@ -268,7 +283,9 @@ def _step(steps, step, by, detail=""):
 
 
 def _verdict_from(summary):
-    return "INFLATED" if summary and summary["sign"] == "+" else "NOT INFLATED"
+    if not summary or summary["sign"] == "mixed":
+        return "INCONCLUSIVE"
+    return "INFLATED" if summary["sign"] == "+" else "NO_EFFECT_DETECTED"
 
 
 def run_hybrid(case_dir: str | Path, *, live: bool = False, referee: bool = False, referee_fn: Any = None, measure: Any = None,
@@ -324,7 +341,7 @@ def run_hybrid(case_dir: str | Path, *, live: bool = False, referee: bool = Fals
             if live or llm.replaying() or spark_runner is not None:
                 spark_rec = runner(case_dir, ledger, live)
                 got = TAG_SPARK if live else (TAG_SPARK + " (replayed traces, no new call)" if llm.replaying() else TAG_SPARK + " (injected runner, no live call)")
-            elif allow_recorded and (rec := find_recorded_spark(case_dir, root)):
+            elif allow_recorded and not fresh and (rec := find_recorded_spark(case_dir, root)):
                 spark_rec, src_file = rec
                 got = TAG_SPARK_REC
                 _step(steps, "plan and fix", got, f"served from {src_file}; no call made")
@@ -431,6 +448,12 @@ def render_report(res: dict, case_dir: str | Path | None = None, detail: bool = 
 
 def main(argv: list[str] | None = None) -> int:
     """Command line: audit one case folder and write the hybrid record."""
+    from agent.engine import main as current_main
+    return current_main(argv)
+
+
+def historical_main(argv: list[str] | None = None) -> int:
+    """Legacy command retained only to read historical experiments."""
     ap = argparse.ArgumentParser(prog="python -m agent.hybrid", description=__doc__.split("\n")[0])
     ap.add_argument("case_dir")
     ap.add_argument("--live", action="store_true", help="allow real model calls (still passes the spend gate); default is offline")

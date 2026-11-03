@@ -11,3 +11,16 @@
 *.pdf binary
 *.woff binary
 *.woff2 binary
+
+# Audit input identities bind exact bytes, including supplied line endings.
+eval/v2_cases/** -text whitespace=cr-at-eol
+eval/v2_followup_cases/** -text whitespace=cr-at-eol
+examples/secom/** -text whitespace=cr-at-eol
+examples/secom_clean/** -text whitespace=cr-at-eol
+
+# Historical experiments are not part of the v2 source release.
+real/civilwar_*/** export-ignore
+runs*/** export-ignore
+report/** export-ignore
+docs/EVAL-[0-9]*.md export-ignore
+docs/reviews/** export-ignore

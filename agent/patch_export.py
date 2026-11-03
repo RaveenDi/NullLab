@@ -18,7 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 sys.dont_write_bytecode = True
 
-from agent import audit  # noqa: E402
+from agent import audit, evidence  # noqa: E402
 
 
 class PatchError(RuntimeError):
@@ -42,6 +42,10 @@ def provenance_of(kind: str, rec: dict, override: str | None = None) -> str:
 def build_patch(case_dir: str | Path, rec: dict, kind: str, cfg: str = "fix_both", provenance: str | None = None,
                 run_name: str | None = None) -> str:
     """-> patch text (header + unified diff). Raises PatchError when the config changed nothing."""
+    try:
+        evidence.verify(case_dir, rec)
+    except evidence.EvidenceError as e:
+        raise PatchError(str(e)) from e
     if cfg not in (rec.get("sources") or {}):
         raise PatchError(f"record has no source for {cfg}")
     diff = audit.patch_diff(case_dir, rec, cfg)

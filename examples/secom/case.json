@@ -1,0 +1,15 @@
+{
+  "title": "Semiconductor quality: evaluation stress test",
+  "target": "defect",
+  "variant": "resampling",
+  "intended_use": "Same-process retrospective pass/fail screening",
+  "source": "https://archive.ics.uci.edu/dataset/179/secom",
+  "license": "CC BY 4.0",
+  "constructed_benchmark": true,
+  "rows": 1567,
+  "sensor_columns": 590,
+  "raw_missing_cells": 41951,
+  "preprocessing": "Fixed zero replacement before CSV export; no learned statistics",
+  "positives": 104,
+  "zip_sha256": "eea568baf3c2229096d7d294cf0b096b5502bd96d92c0b80a65b84714059be8e"
+}

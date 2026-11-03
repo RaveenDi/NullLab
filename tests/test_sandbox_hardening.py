@@ -9,7 +9,6 @@ Part (h) compares a legitimate pipeline byte-for-byte (ignoring elapsed times) w
 tests/fixtures/sandbox_baseline/ (verbatim copies of the baseline run.py / run_factorial.py).
 """
 import json
-import os
 import shutil
 import socket
 import subprocess
@@ -197,7 +196,7 @@ def test_preload_heavy_does_not_import_train(tmp_path):
     d.mkdir()
     shutil.copy(ROOT / "sandbox" / "run.py", d / "run.py")
     (d / "train.py").write_text("raise SystemExit('train imported')\n", encoding="utf-8")
-    r = subprocess.run([sys.executable, "-I", "-c", code], cwd=str(d), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=90)
+    r = subprocess.run([sys.executable, "-I", "-c", code], check=False, cwd=str(d), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=90)
     assert r.returncode == 0 and r.stdout.split() == ["False", "True", "True"], r.stderr[-400:]
 
 
@@ -221,7 +220,7 @@ def old_single(case, patch_src, tmp, seeds, n_boot):
     shutil.copy(BASELINE / "run.py", tmp / "run.py")
     (tmp / "patch.py").write_text(patch_src, encoding="utf-8")
     cmd = [sys.executable, "-I", "run.py", "--seeds", ",".join(map(str, seeds)), "--n-boot", str(n_boot), "--out", "result.json"]
-    r = subprocess.run(cmd, cwd=str(tmp), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=600)
+    r = subprocess.run(cmd, check=False, cwd=str(tmp), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=600)
     assert r.returncode == 0, r.stderr[-800:]
     return json.loads((tmp / "result.json").read_text())
 
@@ -235,7 +234,7 @@ def old_factorial(case, patches, tmp, seeds):
     for k, v in patches.items():
         (tmp / f"{k}.py").write_text(v, encoding="utf-8")
     cmd = [sys.executable, "-I", "run_factorial.py", "--seeds", ",".join(map(str, seeds)), "--out", "result.json"]
-    r = subprocess.run(cmd, cwd=str(tmp), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=900)
+    r = subprocess.run(cmd, check=False, cwd=str(tmp), env=executor._scrubbed_env(), capture_output=True, text=True, timeout=900)
     assert r.returncode == 0, r.stderr[-800:]
     return json.loads((tmp / "result.json").read_text())
 

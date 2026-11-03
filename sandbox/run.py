@@ -53,6 +53,7 @@ def _block_network():
     # renames and new ctypes library/symbol lookups are refused too (they would bypass the open hook).
     def _real(p):
         return os.path.normcase(os.path.realpath(p))
+    work_root = _real(os.getcwd())
     roots = {_real(r) for r in (os.getcwd(), sys.prefix, sys.base_prefix, sys.exec_prefix) if r}
     blocked = ("subprocess.Popen", "os.system", "os.startfile", "os.spawn", "os.exec", "os.posix_spawn",
                "_winapi.CreateProcess", "os.link", "os.symlink", "os.rename", "os.replace", "ctypes.dlopen",
@@ -62,12 +63,30 @@ def _block_network():
         rp = _real(path)
         return any(rp == r or rp.startswith(r.rstrip("\\/") + os.sep) for r in roots)
 
+    def _writable(path):
+        rp = _real(path)
+        return rp == work_root or rp.startswith(work_root.rstrip("\\/") + os.sep)
+
     def _audit(event, args):  # defence in depth: the experiment may not open evaluator-only files
         if event == "open" and args and isinstance(args[0], (str, bytes, os.PathLike)):
             p = os.fsdecode(args[0])
             low = p.replace("\\", "/").lower()
             if "ground_truth" in low or "/nulllab/eval/" in low or not _allowed(p):
                 raise PermissionError("path outside the sandbox allow-list is off limits")
+            mode = args[1] if len(args) > 1 else None
+            flags = args[2] if len(args) > 2 else 0
+            writing = (isinstance(mode, str) and any(c in mode for c in "wax+")) or (
+                isinstance(flags, int) and bool(flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)))
+            if writing and not _writable(p):
+                raise PermissionError("sandbox dependencies are read-only")
+        if event in ("os.remove", "os.rmdir", "os.mkdir", "os.truncate", "os.chmod", "os.chown", "os.utime"):
+            if not args or not isinstance(args[0], (str, bytes, os.PathLike)) or not _writable(args[0]):
+                raise PermissionError("filesystem mutation outside sandbox workspace is off limits")
+            # Relative *at operations could otherwise resolve against a different directory.
+            if event in ("os.remove", "os.rmdir") and len(args) > 1 and args[1] not in (-1, None):
+                raise PermissionError("directory-relative mutation is disabled")
+            if event == "os.mkdir" and len(args) > 2 and args[2] not in (-1, None):
+                raise PermissionError("directory-relative mutation is disabled")
         if event in ("socket.connect", "socket.bind"):
             raise OSError("network disabled in NullLab sandbox")
         if event in blocked:
@@ -108,8 +127,8 @@ def main():
     df = train.load("data.csv")
     out = {"seeds": {}, "t0": time.time()}
     for s in [int(x) for x in a.seeds.split(",")]:
-        y1, p1 = train.claimed_eval(df, s)
-        y2, p2 = patch.controlled_eval(df, s)
+        y1, p1 = train.claimed_eval(df.copy(deep=True), s)
+        y2, p2 = patch.controlled_eval(df.copy(deep=True), s)
         out["seeds"][str(s)] = paired_bootstrap(y1, p1, y2, p2, a.n_boot, s)
     out["elapsed_s"] = time.time() - out.pop("t0")
     with open(a.out, "w") as f:

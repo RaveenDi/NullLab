@@ -48,7 +48,7 @@ metric = getattr(train, "METRIC", "accuracy")
 conv = int if metric == "accuracy" else float
 out = {"metric": metric, "res": {}}
 for c, s in jobs:
-    y, p = train.claimed_eval(df, s) if c == "orig" else mods[c].controlled_eval(df, s)
+    y, p = train.claimed_eval(df.copy(deep=True), s) if c == "orig" else mods[c].controlled_eval(df.copy(deep=True), s)
     out["res"][c + "|" + str(s)] = {"y": [int(v) for v in y], "p": [conv(v) for v in p]}
 json.dump(out, open(sys.argv[2], "w"))
 '''
@@ -73,7 +73,8 @@ def _sha(b):
 def cache_key(train_src, data_bytes, seed, versions=None, runner_sha=None):
     payload = {"train_py": _sha(train_src if isinstance(train_src, bytes) else train_src.encode("utf-8")), "data": _sha(data_bytes), "seed": int(seed),
                "versions": versions or library_versions(), "runner": runner_sha or _sha((ROOT / "sandbox" / "run_factorial.py").read_bytes()),
-               "env": {"PYTHONHASHSEED": "0", "OMP_NUM_THREADS": "1"}, "kind": "orig_v1"}
+               "worker": _sha(WORKER.encode()), "sandbox": _sha((ROOT / "sandbox" / "run.py").read_bytes()),
+               "env": {"PYTHONHASHSEED": "0", "OMP_NUM_THREADS": "1"}, "kind": "orig_v2"}
     return _sha(json.dumps(payload, sort_keys=True).encode())
 
 

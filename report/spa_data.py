@@ -251,12 +251,11 @@ def _scalar(v):
 from datetime import timedelta, UTC  # noqa: E402
 
 BANNED = ("first", "beats reading", "reproduces published", "proves", "found it anyway", "combined")
-_SCRUB = ((re.compile(r"civil[ -]?war", re.I), "famous"), (re.compile(r"Muchlinski|Neunhoeffer|Sternberg|Kapoor|Narayanan"), "the authors"),
-          (re.compile(r"conflict onset|war onset|onset", re.I), "event"))
+_SCRUB = ()  # Retired display anonymization: provenance must never be concealed.
 
 
 def scrub(x: Any) -> Any:
-    """The page never names the real study's topic or its authors (hackathon anti-project list). Applied to keys and values."""
+    """Legacy identity traversal. No domain or author replacement is performed."""
     if isinstance(x, str):
         for rx, rep in _SCRUB:
             x = rx.sub(rep, x)

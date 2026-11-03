@@ -1,0 +1,8 @@
+{
+  "title": "Inverter screening protocol",
+  "target": "event",
+  "intended_use": "Classify inverter electrical measurements for a diagnostic screening event using measurements available during the same diagnostic examination. The evaluation population consists of independent inverter records drawn from the same synthetic population.",
+  "data_origin": "internal synthetic",
+  "metric": "accuracy",
+  "rows": 120
+}

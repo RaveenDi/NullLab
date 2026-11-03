@@ -1,0 +1,8 @@
+{
+  "title": "Ceramic-firing inspection screening",
+  "target": "event",
+  "intended_use": "Classify independent ceramic-firing records for a cosmetic inspection event. Measurements are available at inspection. The target evaluation population is the original unsampled record population; label-based training-set balancing is permitted, but artificial records are not new real inspection outcomes.",
+  "data_origin": "internal synthetic",
+  "metric": "accuracy",
+  "rows": 120
+}

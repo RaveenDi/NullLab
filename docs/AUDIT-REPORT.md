@@ -1,3 +1,5 @@
+> Historical reviewer-format documentation. The supported v2 workflow and evidence rules are in USAGE.md and ARCHITECTURE.md. This document does not describe the current UI.
+
 # NullLab reviewer report: `python -m agent.audit` (Mon Nov 2, 2026, SLT with ET alongside)
 
 One command turns finished run files into one self-contained page a reviewer can read, check and paste from.

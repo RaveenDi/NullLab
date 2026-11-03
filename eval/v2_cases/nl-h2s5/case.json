@@ -1,0 +1,8 @@
+{
+  "title": "Parcel exception screening protocol",
+  "target": "event",
+  "intended_use": "Classify parcel handling measurements for an exception screening event using measurements available at that handling decision. The evaluation population consists of independent parcel records drawn from the same synthetic population.",
+  "data_origin": "internal synthetic",
+  "metric": "accuracy",
+  "rows": 120
+}

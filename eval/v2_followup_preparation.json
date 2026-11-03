@@ -1,0 +1,148 @@
+{
+  "schema": "nulllab.followup-v2-preparation.v1",
+  "prepared_at_utc": "2026-11-03T08:31:51.567447+00:00",
+  "scope": "Fixed eight-case AI-prepared internal synthetic capability-informed cohort. Resampling is already demo-exposed; not all mechanism families are unseen.",
+  "design": {
+    "scheduled_cases": 8,
+    "construction_policy": "Two fixed matched pairs plus four fixed scope/ambiguity cases; all retained regardless of later outcomes.",
+    "source_rows_per_case": 120
+  },
+  "readiness": "All eight sources parse, import safely, load their fixed CSV and expose numeric predictors. No claimed_eval, training, guard runtime, control measurements, bootstrap, model calls or outcome selection occurred.",
+  "preflight_policy": "Intake was checked without execution. Per-case expected capability/intake interpretation is held only in the separate truth file until all scheduled inference completes; a rejection is a retained scheduled outcome.",
+  "truth_is_outside_case_folders": true,
+  "frozen_actual_source_files": 36,
+  "settings": {
+    "planner_model": "muse-spark-1.3",
+    "critic_model": "muse-wonder-1.0",
+    "base_url": "https://api.meta.ai/v1",
+    "reasoning_effort": "low",
+    "max_tokens": 12000,
+    "timeout_s": 120,
+    "retries": 0,
+    "max_usd_per_case": 1.0,
+    "max_calls_per_case": 4,
+    "n_boot": 300,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "workers": 2,
+    "scheduled_cases": 8,
+    "max_reserved_usd_total": 8.0,
+    "max_attempts_total": 32,
+    "credential_values": "excluded"
+  },
+  "checks": [
+    {
+      "id": "fx-v5q8",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "e62be2f48c3ee071e6a1c775f731c120a08f18e25737ddda49c0355944ae425a",
+        "data.csv": "d0deeabd5d23d44b046b577d1b4302edc02d279a45a44ddf481049f9f5c0033a",
+        "excerpt.md": "cf59d5e726324d97946b819bdce6adf9a08801a8eabdf424fb3ae6fd1fe09e4b",
+        "case.json": "db586f5bcb95823c86a18c098869b51e0a2d99f702231bafd28bfc830e6e2403"
+      }
+    },
+    {
+      "id": "fx-c7m2",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "c7484912c49efe8b68f259ffd26eef91a44ba78fdb42e9d1996d8a28956b8e4f",
+        "data.csv": "d0deeabd5d23d44b046b577d1b4302edc02d279a45a44ddf481049f9f5c0033a",
+        "excerpt.md": "cf59d5e726324d97946b819bdce6adf9a08801a8eabdf424fb3ae6fd1fe09e4b",
+        "case.json": "db586f5bcb95823c86a18c098869b51e0a2d99f702231bafd28bfc830e6e2403"
+      }
+    },
+    {
+      "id": "fx-n4r9",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "c62bf73bf238dfd9359342d7b04077543124dde34fcb67c505b1676fcdbb2549",
+        "data.csv": "4a9a1778eabb040e378ea55c9c948c2eef48f27f97e23a56777f21d0b62326f9",
+        "excerpt.md": "5897fefb51e8df4bf42e348c85ad64c7c0ece80f81f409936532f0d4a49a552d",
+        "case.json": "63462cdf2bab703a2f000669bb57d8b2a7d7ad63e576d0967b3787dc89351053"
+      }
+    },
+    {
+      "id": "fx-b8w3",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "24b43611b0cdcfa552403ddad71c84b3a68ab3aaef565d2b0a7fb2ae5d7d94b4",
+        "data.csv": "4a9a1778eabb040e378ea55c9c948c2eef48f27f97e23a56777f21d0b62326f9",
+        "excerpt.md": "5897fefb51e8df4bf42e348c85ad64c7c0ece80f81f409936532f0d4a49a552d",
+        "case.json": "63462cdf2bab703a2f000669bb57d8b2a7d7ad63e576d0967b3787dc89351053"
+      }
+    },
+    {
+      "id": "fx-h3p6",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "7b5e5f3a35dad7a483f85c18b9840c5d428030b81fc06df1ffe95e5ed688b0db",
+        "data.csv": "6f53c909e40b2c8f832ebe29bc5d35a9ef6dfb580eb49b1ee9e875d9b45a752c",
+        "excerpt.md": "bbd20107fc7611dafc7b0a4368d81acacedc76616c6d8d4eda50190099d04860",
+        "case.json": "f65fe9d73248fe09ac6ccf30e6e74c9298b04b38c2ea3596c7fd370d1ba707fa"
+      }
+    },
+    {
+      "id": "fx-s9d1",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "d0509e65cca026fbb658d1eeeccff678d02c010714cfe362ab14b29edab083e5",
+        "data.csv": "e441b57c0faee8a18f43a51beddddfad51945b43486bc98947a19ebbb0d4d7ba",
+        "excerpt.md": "257a1ce20d68b8d7d94a72f4b0432677977601dde1938433cbfa27dafa5067b6",
+        "case.json": "743771d9814f3012e2414dae8b79da53bb4a13e0a90c9dea6197eb074d23741c"
+      }
+    },
+    {
+      "id": "fx-k2t7",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "d0509e65cca026fbb658d1eeeccff678d02c010714cfe362ab14b29edab083e5",
+        "data.csv": "1530b50da0aabc6923a4c6b9ac5fb468e12b0a6bafd347db500169529ba71a0a",
+        "excerpt.md": "f935801ea9387966ffe9d7d6af9f1d55fdb5871e1cbb5dcc7a4ec8071fd84e85",
+        "case.json": "09c452f1a94de54ee49b767eb9f491c2225edbb9d67dec1d7ad20890f021e4d2"
+      }
+    },
+    {
+      "id": "fx-f6j4",
+      "syntax": "passed",
+      "safe_import": "passed",
+      "load_and_feats": "passed",
+      "source_rows": 120,
+      "case_files": {
+        "train.py": "3395b8acb851713cfac48c54ad058a0f8a614909f0514424c9be4428d12b3bab",
+        "data.csv": "6ada93d2726f207b698521b07e6a89b0efa1f970c53e0230b715e46aaaee122a",
+        "excerpt.md": "45288590f6409cb00b390ef68d9f28c90d77eb56d8aa0d2b3d393bdddca41f0e",
+        "case.json": "a9fa462aff36c879e689a92bd4e83b8d9f7d81c6e958c746a29055d9f0128c98"
+      }
+    }
+  ],
+  "environment": {
+    "python": "3.12.1",
+    "numpy": "2.5.4",
+    "pandas": "3.1.0",
+    "scikit-learn": "1.9.1"
+  }
+}

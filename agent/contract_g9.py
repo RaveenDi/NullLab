@@ -69,7 +69,19 @@ def contract_sha256():
 
 def forecast_claim(excerpt):
     low = excerpt.lower()
-    return [w for w in FORECAST_WORDS if w in low]
+    signals = []
+    # Scope negation to a short coordinated phrase, not an entire sentence.
+    # 'no group or chronological structure' is negative; 'not X, but forecast Y' is positive.
+    coordination = r"(?:a|an|any|group|grouped|entity|spatial|temporal|chronological|forecast|forecasting|prospective|future|or|and|time|based|use)"
+    negative = re.compile(r"\b(?:no|not|never|without)\s+(?:" + coordination + r"[\s/-]+){0,6}$")
+    for word in FORECAST_WORDS:
+        for match in re.finditer(r"\b" + re.escape(word), low):
+            prefix = re.split(r"[.;\n]|\b(?:but|however|yet)\b", low[:match.start()])[-1]
+            if negative.search(prefix) and not re.search(r"\bnot\s+only\s+", prefix):
+                continue
+            signals.append(word)
+            break
+    return signals
 
 
 def _case(case_dir):

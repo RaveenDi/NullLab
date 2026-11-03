@@ -34,10 +34,10 @@ def main():
     out, t0 = {"seeds": {}, "metric": metric}, time.time()
     for s in [int(x) for x in a.seeds.split(",")]:
         res = {}
-        y, p = train.claimed_eval(df, s)
+        y, p = train.claimed_eval(df.copy(deep=True), s)
         res["orig"] = {"y": [int(v) for v in y], "p": [conv(v) for v in p]}
         for c in CONFIGS:
-            y, p = mods[c].controlled_eval(df, s)
+            y, p = mods[c].controlled_eval(df.copy(deep=True), s)
             res[c] = {"y": [int(v) for v in y], "p": [conv(v) for v in p]}
         out["seeds"][str(s)] = res
     out["elapsed_s"] = time.time() - t0

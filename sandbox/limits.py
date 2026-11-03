@@ -17,7 +17,6 @@ the file / network / spawn bans live in sandbox/run.py::_block_network; this mod
 import os
 import subprocess
 import sys
-import warnings
 
 DEFAULT_MEM_MB = 6144
 
@@ -121,23 +120,24 @@ if sys.platform == "win32":
         job = None
         try:
             job = _make_job(mem, max_procs or _max_procs())
-        except OSError as e:
-            if os.environ.get("NULLLAB_SANDBOX_REQUIRE_LIMITS"):
-                raise
-            warnings.warn(f"sandbox resource limits NOT applied: {e}")
-        flags = _CREATE_SUSPENDED if job else 0
+        except OSError:
+            # Resource controls are part of the execution contract, never optional.
+            raise
+        flags = _CREATE_SUSPENDED
         proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=flags)
         applied = False
         try:
             if job:
                 if _K32.AssignProcessToJobObject(job, int(proc._handle)):
                     applied = True
-                elif os.environ.get("NULLLAB_SANDBOX_REQUIRE_LIMITS"):
-                    proc.kill()
-                    raise OSError(ctypes.get_last_error(), "AssignProcessToJobObject failed")
                 else:
-                    warnings.warn("sandbox resource limits NOT applied: AssignProcessToJobObject failed")
-                _NT.NtResumeProcess(int(proc._handle))
+                    proc.kill()
+                    proc.communicate()
+                    raise OSError(ctypes.get_last_error(), "AssignProcessToJobObject failed")
+                if _NT.NtResumeProcess(int(proc._handle)) < 0:
+                    proc.kill()
+                    proc.communicate()
+                    raise OSError("NtResumeProcess failed")
             try:
                 out, err = proc.communicate(timeout=timeout)
             except subprocess.TimeoutExpired:
@@ -172,7 +172,6 @@ else:
             return None
 
     def run_limited(cmd, cwd=None, env=None, timeout=None, mem_mb=None, max_procs=None):
-        import resource
         import signal
         mem = _mem_limit(mem_mb)
         nproc = None
@@ -182,14 +181,15 @@ else:
             nproc = int(os.environ["NULLLAB_SANDBOX_NPROC"])
         else:  # RLIMIT_NPROC is per user and counts threads: allow the current load + headroom for BLAS / joblib threads only
             cur = _user_procs()
-            nproc = cur + 256 if cur is not None else None
+            nproc = cur + 256 if cur is not None else 256
 
-        def _pre():
-            os.setsid()  # own process group: the timeout kills the whole tree
-            resource.setrlimit(resource.RLIMIT_AS, (mem * 1024 * 1024, mem * 1024 * 1024))
-            if nproc:
-                resource.setrlimit(resource.RLIMIT_NPROC, (nproc, nproc))
-        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, preexec_fn=_pre)
+        # Set limits in a fresh interpreter, not preexec_fn inside a threaded parent.
+        launcher = ("import os,resource,sys; m=int(sys.argv[1]); n=int(sys.argv[2]); "
+                    "resource.setrlimit(resource.RLIMIT_AS,(m,m)); "
+                    "resource.setrlimit(resource.RLIMIT_NPROC,(n,n)); "
+                    "os.execvpe(sys.argv[3],sys.argv[3:],os.environ)")
+        limited_cmd = [sys.executable, "-I", "-c", launcher, str(mem * 1024 * 1024), str(nproc), *cmd]
+        proc = subprocess.Popen(limited_cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, start_new_session=True)
         try:
             out, err = proc.communicate(timeout=timeout)
         except subprocess.TimeoutExpired:

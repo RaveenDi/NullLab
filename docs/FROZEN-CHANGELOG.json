@@ -61,6 +61,66 @@
       "new_sha256": "51c1ac104302cacb69e3a60d350dd4be75199a66490641871f04155e23196589",
       "reason": "security: the guard worker now preloads libraries, then installs sandbox/run._block_network() before exec of the compiled source (it had no sandbox at all), and is launched via sandbox/limits.run_limited. Trace content unchanged. Second change after the 2026-11-02 speed change: old_sha256 is again the hash in the manifest / frozen doc.",
       "date": "2026-11-02"
+    },
+    {
+      "path": "agent/cached_exec.py",
+      "old_sha256": "5b5e82a45b3815bc57c88b1b0d579e147267e45426843aab98c795798375eef8",
+      "new_sha256": "51277afe839529baf6b44abcce6d6ddf752d782f562002339a228422478d8acb",
+      "reason": "Authorized v2 rebuild: validate result vectors, isolate execution/data frames, correct negated intended use and replay; historical runs retain original instrument identity. See docs/reviews/2026-11-03-architecture-completion.md.",
+      "date": "2026-11-03",
+      "old_sha256_crlf": "50aa6347d38ca27c60143154827318f97ec00643582195b8ebaf7a717828f11b"
+    },
+    {
+      "path": "agent/contract_g9.py",
+      "old_sha256": "99c3117dc9b592810d02489a30e9952969bc05092ae18b6430928339db91b011",
+      "new_sha256": "7da895a5af54a20436c8009320908641dccea2f11cc75ba74382a36bfb953ba4",
+      "reason": "Authorized v2 rebuild: validate result vectors, isolate execution/data frames, correct negated intended use and replay; historical runs retain original instrument identity. See docs/reviews/2026-11-03-architecture-completion.md.",
+      "date": "2026-11-03"
+    },
+    {
+      "path": "agent/transport.py",
+      "old_sha256": "ddee7ac6af710640f19299af7df3ff0115aeef364d715bc70e3e8a4295c1aefa",
+      "new_sha256": "bc847789808884a4beac78e796f6a8d9a30ca427e5abd744a3cd3ae39e9327ad",
+      "reason": "Authorized v2 rebuild: validate result vectors, isolate execution/data frames, correct negated intended use and replay; historical runs retain original instrument identity. See docs/reviews/2026-11-03-architecture-completion.md.",
+      "date": "2026-11-03"
+    },
+    {
+      "path": "sandbox/factorial_stats.py",
+      "old_sha256": "fcc8223659535bad0581ebd5eeb9bc2eb8b10f10e98c42137fb39f2d55a82495",
+      "new_sha256": "552a56f1ffb4c4fb9047082b2a7e9dbc88f7ff9d114c8cb6b3f992dc7c909b08",
+      "reason": "Authorized v2 rebuild: validate result vectors, isolate execution/data frames, correct negated intended use and replay; historical runs retain original instrument identity. See docs/reviews/2026-11-03-architecture-completion.md.",
+      "date": "2026-11-03",
+      "old_sha256_crlf": "cc95a68df58d58b601182f145b189a7fd753a1320f565ce1405d054b9bcb960d"
+    },
+    {
+      "path": "sandbox/run.py",
+      "old_sha256": "3628a795cee96b1d4d7b5691f002980986465a8b0e9430e6793033d4a6149ad8",
+      "new_sha256": "a69e4eb67aed58c263362909b7478bf273f3a0440dc203f31d25ad5745e29ac9",
+      "reason": "Authorized v2 rebuild: validate result vectors, isolate execution/data frames, correct negated intended use and replay; historical runs retain original instrument identity. See docs/reviews/2026-11-03-architecture-completion.md.",
+      "date": "2026-11-03",
+      "old_sha256_crlf": "7d1cb92ddeccd5ec06f686c323dd056fac3e6694ac982423bda8eefa689a2a20"
+    },
+    {
+      "path": "sandbox/run_factorial.py",
+      "old_sha256": "0eb2130abbea85e38420d353eec4c99368e99d9ea5953b9a04c91d92d0e819cb",
+      "new_sha256": "fabddfc8b168b905494fe1c8dd5c177f331b1d82afccf8434ba3800790100ddf",
+      "reason": "Authorized v2 rebuild: validate result vectors, isolate execution/data frames, correct negated intended use and replay; historical runs retain original instrument identity. See docs/reviews/2026-11-03-architecture-completion.md.",
+      "date": "2026-11-03",
+      "old_sha256_crlf": "68fdaf3ddf0e9600df4a3e3e3a9d6496e64010310bd3581182f45bdee0971f4f"
+    },
+    {
+      "path": "agent/contract_g9.py",
+      "old_sha256": "99c3117dc9b592810d02489a30e9952969bc05092ae18b6430928339db91b011",
+      "new_sha256": "d319c638dd4ca2074e4f06af9e8dffdaef00a2fa182b867ee04171e222c9f81f",
+      "reason": "Post-pilot repair: recognize coordinated negated forecasting language while preserving affirmative contrast/not-only claims. Original frozen six-case pilot remains scored with its original instrument; reused plans are separate development regression evidence.",
+      "date": "2026-11-03"
+    },
+    {
+      "path": "agent/guard_g9.py",
+      "old_sha256": "4a084a1c466b1e8ff53ce3da94307796dc7475c275e0fdb889888f182fa17dba",
+      "new_sha256": "cc8773aa11e58dea4dcd68f4c2843bab9ef4271c353e03c3b4b2a32f70a1ad99",
+      "date": "2026-11-03",
+      "reason": "Post-follow-up repair: preserve row provenance only for exact known row-preserving sklearn transformers; skip constructor-as-helper traces; refuse missing scoring-model identity. Original fixed follow-up instrument/outcomes remain captured unchanged; subsequent checks are development evidence."
     }
   ]
 }

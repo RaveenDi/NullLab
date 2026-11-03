@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 os.environ["NULLLAB_NO_DOCKER"] = "1"
 
-from agent import hybrid, llm  # noqa: E402
+from agent import hybrid, llm, evidence  # noqa: E402
 from baselines import rulefix  # noqa: E402
 
 LEAKY = ROOT / "corpus" / "leak_prescale"      # rule R2 fires (runs_rulefix/leak_prescale.json)
@@ -36,20 +36,24 @@ def fake_stats(drop, half=0.04):
 
 def fake_rule_rec(case_dir, drop):
     b = rulefix.build_configs(case_dir)
-    return {"case": Path(case_dir).name, "tool": "rulefix (no LLM)", "seeds": [42, 43, 44], "n_boot": 1000, "bootstrap": "unpaired",
+    rec = {"case": Path(case_dir).name, "tool": "rulefix (no LLM)", "seeds": [42, 43, 44], "n_boot": 1000, "bootstrap": "unpaired",
             "fired": b["det"]["fired"], "not_applied": b["det"]["not_applied"], "split_fn": b["det"]["split_fn"],
             "configs": {k: {"rules_applied": v["rules_applied"], "steps": v["steps"], "notes": v["notes"],
                             "src_sha256": hashlib.sha256(v["src"].encode()).hexdigest()} for k, v in b["configs"].items()},
             "sources": {k: b["configs"][k]["src"] for k in ("fix_A", "fix_B", "fix_both")}, "status": "ok",
             "stats": fake_stats(drop), "metric": "accuracy"}
+    rec["evidence"] = evidence.capture(case_dir, sources=rec["sources"], context={"fixture":True})
+    return rec
 
 
 def fake_loop_rec(case_dir, drop):
     b = rulefix.build_configs(case_dir)
-    return {"retries": 0, "status": "ok", "stats": fake_stats(drop), "metric": "accuracy",
+    rec = {"retries": 0, "status": "ok", "stats": fake_stats(drop), "metric": "accuracy",
             "final_plan": {"mode": "MOCK spark (test fixture)", "A": "mock A", "B": "mock B"}, "log": [],
             "fidelity": {"fix_both": "only step(s) prep_full changed (fit_scope)"},
             "sources": {k: b["configs"][k]["src"] for k in ("fix_A", "fix_B", "fix_both")}}
+    rec["evidence"] = evidence.capture(case_dir, sources=rec["sources"], context={"fixture":True})
+    return rec
 
 
 @pytest.fixture
@@ -144,7 +148,7 @@ def test_referee_off_by_default_and_veto_only(leaky):
     # veto only: a referee is never consulted on, and can never create, an inflation finding
     r2 = hybrid.run_hybrid(leaky, measure=lambda c: (fake_rule_rec(c, 0.0), "mock"), referee=True, referee_fn=ref,
                            spark_runner=lambda c, led, lv: fake_loop_rec(c, 0.0), allow_recorded=False)
-    assert r2["verdict"] == "NOT INFLATED" and r2["referee"] is None and len(called) == 1
+    assert r2["verdict"] == "NO_EFFECT_DETECTED" and r2["referee"] is None and len(called) == 1
 
 
 def test_ledger_caps_and_replay_costs_zero():
@@ -190,7 +194,7 @@ def test_cli_offline_default_makes_no_model_call(leaky, tmp_path, monkeypatch, c
     monkeypatch.setattr(llm, "live_complete", boom)
     monkeypatch.setattr(hybrid, "default_measure", lambda c, fresh=False, root=ROOT: (fake_rule_rec(c, 0.2), "mock"))
     rep = tmp_path / "r.md"
-    assert hybrid.main([str(leaky), "--out", str(tmp_path / "o"), "--report", str(rep), "--no-recorded"]) == 0
+    assert hybrid.historical_main([str(leaky), "--out", str(tmp_path / "o"), "--report", str(rep), "--no-recorded"]) == 0
     out = capsys.readouterr().out
     assert "INFLATED" in out and "rules (no model)" in out and "est $0.00" in out
     assert rep.exists() and "Full audit report" in rep.read_text(encoding="utf-8")

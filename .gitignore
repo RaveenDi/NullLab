@@ -57,3 +57,7 @@ logs_*/
 htmlcov/
 .pytest_cache/
 *.tmp
+
+# Private data-only user adapters
+examples/user-*/
+examples/.intake-*/
