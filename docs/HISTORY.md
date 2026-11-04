@@ -1,10 +1,10 @@
 # Current product and retained history
 
-The current product is the v2 author workspace described in [README](../README.md), [usage](USAGE.md), [architecture](ARCHITECTURE.md), [deployment](DEPLOYMENT.md) and [release status](RELEASE-STATUS.md). The [documentation index](README.md) is the starting point. Dated research notes do not override those guides or describe every subsequent UI change.
+The current product is the question/upload-first Research Workdesk around the v2 engine, described in [README](../README.md), [usage](USAGE.md), [architecture](ARCHITECTURE.md), [deployment](DEPLOYMENT.md) and [release status](RELEASE-STATUS.md). The [documentation index](README.md) is the starting point. Dated research notes do not override those guides or describe every subsequent UI change.
 
 ## Active implementation
 
-- agent.engine, agent.study, agent.intake, agent.provider, agent.evidence, agent.assessment and agent.storage implement supported audits and evidence handling.
+- agent.engine, agent.study, agent.intake, agent.provider, agent.evidence, agent.assessment and agent.storage implement supported audits and evidence handling. agent.workdesk and app/workdesk_api.py add persistent investigation orchestration.
 - app/server.py and app/static implement the local workspace and recorded frontend.
 - agent.edit_dsl, agent.contract_g9, agent.guard_g9 and the current sandbox modules remain active dependencies. Their older names do not make them unused code.
 - The supported CLI is nulllab / python -m agent.engine; nulllab_cli.py audit routes to the same engine. agent.ci_check defaults to that engine.
@@ -19,6 +19,7 @@ The current product is the v2 author workspace described in [README](../README.m
 | agent/factorial generation runners, generation entry modules, historical evaluation builders | Earlier research runners and compatibility paths. Some tests still import them; they are not the advertised author workflow. |
 | report/ and historical real/ or runs directories | Earlier presentation/research artifacts. They are not the current app or submission hero. The curated release excludes retired domain data/results. |
 | Old builder briefs and killed-idea plans | Development history, not current implementation requirements. Private briefs remain ignored. |
+| app/static/workspace.js, workspace.css and workspace-shell.js | Earlier case-led/fullscreen UI, retained for compatibility tests and historical reconstruction. The active landing, Workdesk, Evidence Lab and Architecture pages load their own clients/styles. |
 
 These files were not all deleted. Frozen records require their original paths and hashes; other historical modules remain imported by compatibility/tests. Removing or moving them without dependency and provenance work would break reproducibility. [Frozen-file rules](FROZEN-FILES.md) and the changelog govern deliberate changes. The original hash manifest is not regenerated to hide changes.
 

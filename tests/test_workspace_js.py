@@ -69,6 +69,22 @@ load();await settle();assert(!el('bundleLink').hidden);assert(el('assessmentLink
 ''')
 
 
+def test_running_checkpoint_does_not_present_default_verdict_as_final():
+    run_node(r'''
+history=[{id:'running-control',case:'secom',status:'running'}];activeIds=['running-control'];
+const pending={case:'secom',status:'running',verdict:'NOT_TESTED',mode:'rules',baseline:{score:0.983,metric:'pr_auc',per_seed_scores:{42:0.983}},plan:{reason:'Move resampling inside training folds'},events:[],limitations:[]};
+states['running-control']={id:'running-control',case:'secom',status:'running',result:pending};
+load();await settle();
+assert.equal(content(el('resultTitle')),'Audit in progress');
+assert(content(el('resultExplanation')).includes('still running'));
+assert(content(el('baselineDetail')).includes('not yet available'));
+assert(el('bundleLink').hidden);assert(el('assessmentLink').hidden);
+states['running-control']={id:'running-control',case:'secom',status:'inconclusive',result:{...pending,status:'inconclusive'}};
+await tick();assert.equal(content(el('resultTitle')),'No supported control was tested');
+assert(content(el('baselineDetail')).includes('No counterfactual or empirical clearance'));
+''')
+
+
 def test_history_recovers_active_audit_and_viewing_other_job_keeps_cancel_target():
     run_node(r'''
 history=[{id:'saved-active',case:'secom',title:'Active',status:'running'},{id:'saved-old',case:'secom',title:'Old',status:'completed'}];activeIds=['saved-active'];

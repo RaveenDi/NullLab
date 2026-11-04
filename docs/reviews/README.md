@@ -2,6 +2,8 @@
 
 Use [current release status](../RELEASE-STATUS.md) for what is implemented and verified now, and [remaining priorities](../FINAL-PRIORITIES.md) for open gates.
 
+- [Question/upload-first Workdesk validation](2026-11-04-workdesk-validation.md) records the current local rebuild, actual browser acceptance, retained intermediate failures and package checks.
+- [Researcher walkthrough repairs](2026-11-04-researcher-repairs.md) records the subsequent pre-spend compatibility, reviewed-draft and evidence-presentation repairs, with retained failed engineering checks and separate acceptance scopes.
 - [CI repair, evaluation and video-plan completion](2026-11-04-ci-evaluation-video.md) records the current publication checkpoint and retained outcomes.
 - [Responsive layout review](2026-11-04-responsive-layout.md) records the viewport/pane update and its original checks.
 - The [compact-shell/fullscreen review](2026-11-04-shell-validation.md) records the subsequent animation, focus, menu and deployment checks.

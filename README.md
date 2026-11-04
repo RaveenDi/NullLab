@@ -2,9 +2,11 @@
 
 [![CI](https://github.com/RaveenDi/NullLab/actions/workflows/ci.yml/badge.svg)](https://github.com/RaveenDi/NullLab/actions/workflows/ci.yml)
 
-**Put the evaluation behind a machine-learning score to the test.** NullLab helps an ML author reproduce a supported pipeline, challenge one evaluation assumption, run a constrained control, and export input-bound evidence.
+**Your question. Your experiment. Your evidence.** NullLab is a local Research Workdesk for investigating the evaluation behind a machine-learning result. Start with your own question and materials, review the study brief and plan, then follow real experiments into input-bound evidence.
 
-The current author workspace runs real local experiments. It supports binary numeric Python/sklearn cases and a guided CSV baseline adapter. Muse Spark proposes typed interventions; an optional Muse Wonder critic independently challenges the methodology. Deterministic code checks and measures the experiment. The free rules path handles a deliberately small set of patterns.
+The workdesk saves investigations, original uploads, clarification threads, brief revisions, plans and run history. It supports binary numeric Python/sklearn cases and a guided CSV baseline adapter. Muse Spark proposes typed interventions; an optional Muse Wonder critic independently challenges the methodology. Deterministic code checks and measures the experiment. The free rules path handles a deliberately small set of patterns; its study guide provides structured local guidance rather than general model conversation.
+
+Explicit answers can become source-quoted brief suggestions; the author reviews and saves them. Concrete plans expose the target, metric, fixed seeds and required split candidates before execution. Known group/time adapter and numeric-metadata incompatibilities stop before training or model spend. Static applicability is not runtime acceptance, and group/time comparisons retain their descriptive-inference limit. See the [researcher walkthrough repairs](docs/reviews/2026-11-04-researcher-repairs.md) for actual checks and preserved failures.
 
 NullLab does not train or fine-tune a language model. It runs the supplied classifier's training/evaluation code, then reruns that code under a checked evaluation control. The Meta agents investigate the evaluation method; the executed classifier supplies the predictions being measured.
 
@@ -28,7 +30,11 @@ python -m venv .venv
 
 The public manufacturing cases are included; regeneration is optional development work, not a setup prerequisite.
 
-Open http://127.0.0.1:8099 . Use **Fullscreen** to focus the author workspace; use the exit button or Escape to return. Browsers without native fullscreen use a viewport focus view. Prepare a study brief and CSV baseline, inspect recorded review contributions, answer questions through a new case version, reopen saved audits and compare their metadata. Download a measured control bundle or an explicitly unmeasured assessment ZIP. No key is needed for the rules/local-execution path. Keep the service on localhost.
+Open http://127.0.0.1:8099 and choose **Go to Workdesk**. Enter your question, attach a CSV and optional compatible Python/notes, then review **Study brief → Save brief & prepare plan → Review & run**. The default rules/local-execution mode needs no key. Results show actual progress, uncertainty and objections; reload restores saved work. See the [step-by-step guide](docs/USAGE.md). Keep the service on localhost.
+
+For a complete hands-on check, follow the [38-step product test guide](docs/TESTING-WORKDESK.md) with the bundled [synthetic test materials](test-materials/workdesk/README.md). It covers missing-information gates, CSV and supplied-code runs, history/revisions/exports, optional Meta, errors and mobile behavior.
+
+The landing page explains the method and scope. **[Research Workdesk](http://127.0.0.1:8099/workdesk)** is the actual product. **[Evidence Lab](http://127.0.0.1:8099/evidence)** separates the recorded manufacturing study and saved audits from new work. **[Architecture](http://127.0.0.1:8099/architecture)** is an interactive explanation of Meta reasoning and deterministic execution. Neither explanatory animation represents live model activity.
 
 ```powershell
 python -m agent.engine examples/secom --out out/my-audit
@@ -46,7 +52,9 @@ The prepared public evidence demo can be hosted as static files on AWS Amplify a
 
 ## Your inputs
 
-In the UI, open **Prepare data or revise a study brief**. Supply a binary 0/1 target, intended use, decision time, population and predictor availability. Mark entity/time columns as metadata and exclude post-decision inputs. Selected predictors must be numeric; metadata may be text. This creates a fixed Random Forest/CV baseline, not a reproduction of existing research code. Missing information and unsupported unseen-entity/future designs stop before fitting or model calls. Your answers are declarations, not verified facts. Clarifications create a new case; earlier evidence remains unchanged.
+In the Workdesk, start with a question and attach your materials. The supported CSV path accepts up to 5 MB, 30–20,000 rows, numeric selected predictors and a binary 0/1 target. Optional UTF-8 text/Markdown notes and compatible Python files are limited to 256 KB each. PDFs, notebooks and arbitrary repositories are not imported automatically. Original bytes and hashes are preserved.
+
+In **Study brief**, supply intended use, decision time, population and predictor availability. Mark entity/time columns as metadata and exclude post-decision inputs. The CSV-only path creates a fixed Random Forest/CV baseline, not a reproduction of existing research code. Supplied Python requires explicit local-execution trust. Missing information and unsupported generated unseen-entity/future designs stop before fitting or model calls. Your answers are declarations, not verified facts. Changed inputs/briefs require a new reviewed plan; earlier evidence remains unchanged.
 
 For trusted existing code, create a case with `train.py` defining `load`, `feats`, and `claimed_eval(df, seed)`, `data.csv`, and `excerpt.md`; optionally add `case.json` with `target`, `intended_use` and preprocessing provenance. `claimed_eval` returns labels and predictions; use module `METRIC = "pr_auc"`, `"roc_auc"` or `"accuracy"`. Custom-code column roles need independent review. See [usage](docs/USAGE.md) and the [researcher roadmap](docs/RESEARCHER-ROADMAP.md).
 
@@ -73,9 +81,13 @@ python -m pytest -m "not live" -q
 python scripts/freeze_check.py verify --allow-missing-data
 node --check app/static/workspace.js
 node --check app/static/workspace-shell.js
+node --check app/static/workdesk.js
+node --check app/static/landing.js
+node --check app/static/evidence.js
+node --check app/static/architecture.js
 ```
 
-The [documentation index](docs/README.md) lists the active guides. [Historical protocols and run records](docs/HISTORY.md) are retained for reproducibility at their original paths. Deliberate instrument changes are recorded in `docs/FROZEN-CHANGELOG.json`; historical results are not rescored under the new engine. Browser walkthrough is excluded by the owner's instruction. The fresh-clone flag permits only known unredistributed historical data to be missing; use strict verification without it when those inputs are present. The first pushed CI run had a historical G9b runner failure caused by a mocked test reading absent gitignored data. That test now uses deliberately nonexistent case paths with an explicit input-view stub, preserving its scheduling/scoring assertions. The CI badge links to actual remote status; dated runs and their distinct validation scopes are retained in release status.
+The [documentation index](docs/README.md) lists the active guides. [Historical protocols and run records](docs/HISTORY.md) are retained for reproducibility at their original paths. Deliberate instrument changes are recorded in `docs/FROZEN-CHANGELOG.json`; historical results are not rescored under the new engine. The owner authorized desktop/mobile browser checks for this Workdesk rebuild; earlier reports remain accurate about their own excluded browser scope. The fresh-clone flag permits only known unredistributed historical data to be missing; use strict verification without it when those inputs are present. The first pushed CI run had a historical G9b runner failure caused by a mocked test reading absent gitignored data. That test now uses deliberately nonexistent case paths with an explicit input-view stub, preserving its scheduling/scoring assertions. The CI badge describes the published source, while the latest Workdesk changes are local until separately published. Dated validation scopes are retained in release status.
 
 ## Built during the hackathon
 

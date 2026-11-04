@@ -1,0 +1,51 @@
+{
+  "purpose": "Known synthetic engineering recovery fixture, not a new scientific cohort",
+  "origin": "Internal AI-operated researcher session on 2026-11-04; original UNSUPPORTED outcome retained",
+  "original_project_id": "b55538e3-ed4a-478d-8c18-6b47ea5ed7ac",
+  "original_job_id": "3bd55513-5c67-4568-bc9b-04d9339029f7",
+  "transformation": "Extract the unchanged CV body into cv_eval(X,y,seed,groups); claimed_eval explicitly passes the device_id vector. Original random-row folds, features, model, hyperparameters and metric are retained. This is a separate author-reviewable material revision.",
+  "expected_control_candidate": {
+    "op": "replace_split",
+    "step": "cv_eval",
+    "kind": "group",
+    "col": "device_id"
+  },
+  "baseline_equivalence": {
+    "status": "passed",
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "comparison": "Exact truth and prediction vectors, not only aggregate scores",
+    "verification": "tests/test_workdesk_protocol.py::test_known_adapter_preserves_original_baseline_vectors_on_every_seed",
+    "checked_on": "2026-11-04",
+    "result": "Exact truth and prediction vector equality on all three fixed seeds; classifier constructor AST equality. Engineering adapter check only, not a new audit or scientific cohort score."
+  },
+  "control_measurement": "Not run by fixture preparation; no original audit rerun or score replacement",
+  "model_calls_by_preparation": 0,
+  "files": {
+    "data.csv": "dc49aee9d6124eba3b495bb56278111a43641200883fc0aebaa0cded5f0e1437",
+    "original_pipeline.py": "b5f4b5c9349d7e0d9f5482176fc5727c46232418e9bcafe65f071dc0b2390fe2",
+    "train.py": "9697c8ba074415e003e31f8fb356c4e3271a752888bbf4564584cbaece782c86",
+    "notes.md": "10ed12b9bcbddf347ee10294cbea66a82c8a2b721207a3e5f4024f25f7d7e929"
+  },
+  "focused_suite": {
+    "passed": 17,
+    "duration_seconds": 5.8,
+    "junit": "out/pytest-workdesk-protocol.xml",
+    "model_calls": 0,
+    "grouped_counterfactual_measured": false
+  },
+  "runtime_guard_acceptance": {
+    "status": "REJECT",
+    "checked_on": "2026-11-04",
+    "attempts": 1,
+    "seed": 42,
+    "provider_calls": 0,
+    "artifact_directory": "out/researcher-repairs-20261104/guard-acceptance",
+    "reason": "Frozen guard could not serialize string device_id metadata as floats: ValueError on 'rig-18'. Original and compiled trace workers produced no trace result.",
+    "scope": "Deterministic engineering acceptance only. Baseline vector equality remains passed; AST applicability does not imply runtime support. No scientific control measurement or original-audit rerun.",
+    "rerolled": false
+  }
+}

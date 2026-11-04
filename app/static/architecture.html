@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="description" content="Trace how NullLab turns a research question into a guarded experiment, with Meta planning, independent critique and inspectable evidence."/>
+  <meta name="theme-color" content="#f6f4ee"/>
+  <title>Inside NullLab · Architecture</title>
+  <link rel="stylesheet" href="/static/site.css"/>
+  <link rel="stylesheet" href="/static/architecture.css"/>
+  <link rel="preload" href="/static/fonts/space-mono-latin-bold.woff2" as="font" type="font/woff2" crossorigin/>
+  <link rel="preload" href="/static/fonts/inter-latin-variable.woff2" as="font" type="font/woff2" crossorigin/>
+  <script defer src="/static/site.js"></script>
+  <script defer src="/static/architecture.js"></script>
+</head>
+<body>
+  <a class="arch-skip" href="#architecture-content">Skip to architecture</a>
+  <header class="site-header" data-menu-open="false">
+    <button class="site-menu" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="siteNav">Menu</button>
+    <a class="site-brand" href="/" aria-label="NullLab home">
+      <svg viewBox="0 0 36 36" aria-hidden="true" fill="none"><circle cx="18" cy="18" r="11" stroke="currentColor" stroke-width="2.4"/><path d="M8 28 28 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      <span>NullLab</span>
+    </a>
+    <nav class="site-nav" id="siteNav" aria-label="Primary"><a href="/workdesk">Research Workdesk</a><a href="/#method">The method</a><a href="/evidence">Evidence Lab</a><a href="/architecture" aria-current="page">Architecture</a></nav>
+  <a class="button primary header-action" href="/workdesk">Workdesk &#8599;</a>
+  </header>
+
+  <main class="architecture-page" id="architecture-content" data-motion="playing">
+    <section class="arch-intro" aria-labelledby="architecture-title">
+      <div>
+        <p class="arch-eyebrow">INSIDE NULLLAB / THE ARCHITECTURE</p>
+        <h1 id="architecture-title">Reason with models.<br/><span>Verify with experiments.</span></h1>
+        <p class="arch-lede">A question becomes a checked experiment through a sequence you can inspect. Follow the handoffs between your materials, Meta reasoning and measured evidence.</p>
+      </div>
+      <a class="arch-link" href="/workdesk">Bring your own question <span aria-hidden="true">↗</span></a>
+    </section>
+
+    <section class="architecture-explorer" aria-label="Interactive architecture explorer">
+      <div class="arch-explorer-toolbar">
+        <div class="arch-legend" aria-label="Stage types"><span><i class="legend-local" aria-hidden="true"></i>Local checks</span><span><i class="legend-meta" aria-hidden="true"></i>Meta reasoning</span><span><i class="legend-evidence" aria-hidden="true"></i>Evidence</span></div>
+        <button class="arch-motion-button" type="button" id="architectureMotion" aria-pressed="false"><span class="arch-motion-icon" aria-hidden="true"></span><span id="architectureMotionLabel">Pause motion</span></button>
+      </div>
+      <p class="arch-explainer"><span class="arch-live-dot" aria-hidden="true"></span>Follow steps 01–08 from top to bottom. Select a step to open its explanation below. Explanatory animation · no live audit or model calls.</p>
+
+      <div class="arch-explorer-grid">
+        <div class="arch-map-column">
+          <div class="arch-stage-map" id="architectureMap" role="group" aria-label="Experiment stages in order. Use up and down arrow keys to explore.">
+            <svg class="arch-connections" id="architectureConnections" aria-hidden="true" focusable="false"></svg>
+            <div class="arch-step"><button class="arch-node" type="button" data-stage="inputs" aria-expanded="true" aria-pressed="true" aria-controls="architectureDetail" tabindex="0"><span class="arch-node-top"><span class="arch-node-number">01</span><span class="arch-node-kind">YOUR RESEARCH</span></span><strong>Materials &amp; brief</strong><span class="arch-node-description">Question, data and intended use</span></button>
+        <aside class="arch-detail" id="architectureDetail" aria-labelledby="architectureDetailTitle" tabindex="-1">
+          <div class="arch-detail-heading"><span class="arch-detail-index" id="architectureDetailIndex">01 / 08</span><span class="arch-detail-tag" id="architectureDetailTag">YOUR RESEARCH</span></div>
+          <p class="arch-eyebrow" id="architectureDetailKicker">THE STARTING POINT</p>
+          <h2 id="architectureDetailTitle">Define what the score should mean.</h2>
+          <p class="arch-detail-summary" id="architectureDetailSummary">Start with your question, dataset and intended decision. A supported pipeline supplies the evaluation to inspect; a CSV-only path creates a clearly labelled generated baseline.</p>
+          <dl class="arch-detail-facts"><div><dt>Receives</dt><dd id="architectureDetailInput">Research question, supported data/code and the author's study declarations.</dd></div><div><dt>Produces</dt><dd id="architectureDetailOutput">A reviewed input version: target, metric, population, timing and column roles.</dd></div><div><dt>Boundary</dt><dd id="architectureDetailBoundary">The author's declaration is recorded as a declaration. Missing facts remain questions.</dd></div></dl>
+          <div class="arch-artifact"><span class="arch-artifact-label" id="architectureArtifactLabel">INSPECTABLE ARTIFACT</span><code id="architectureArtifact">Question + material versions + study brief</code></div>
+          <div class="arch-detail-navigation"><button type="button" class="arch-step-button" id="architecturePrevious" disabled>↑ Previous step</button><button type="button" class="arch-step-button" id="architectureNext">Next step ↓</button></div>
+        </aside>
+            </div>
+            <div class="arch-step"><button class="arch-node" type="button" data-stage="baseline" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">02</span><span class="arch-node-kind">LOCAL CHECKS</span></span><strong>Reproduce a baseline</strong><span class="arch-node-description">Run the supplied protocol</span></button></div>
+            <div class="arch-step"><button class="arch-node arch-node-meta" type="button" data-stage="independent" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">03</span><span class="arch-node-kind">MUSE WONDER</span></span><strong>Review independently</strong><span class="arch-node-description">Challenge the original method</span></button></div>
+            <div class="arch-step"><button class="arch-node arch-node-meta" type="button" data-stage="planner" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">04</span><span class="arch-node-kind">MUSE SPARK</span></span><strong>Propose a control</strong><span class="arch-node-description">A precise, typed intervention</span></button></div>
+            <div class="arch-step"><button class="arch-node" type="button" data-stage="guard" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">05</span><span class="arch-node-kind">LOCAL CHECKS</span></span><strong>Check the change</strong><span class="arch-node-description">Contract and behavioral guard</span></button></div>
+            <div class="arch-step"><button class="arch-node" type="button" data-stage="measurement" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">06</span><span class="arch-node-kind">LOCAL EXECUTION</span></span><strong>Run &amp; measure</strong><span class="arch-node-description">Predictions, scores and intervals</span></button></div>
+            <div class="arch-step"><button class="arch-node arch-node-meta" type="button" data-stage="critique" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">07</span><span class="arch-node-kind">MUSE WONDER</span></span><strong>Challenge the reading</strong><span class="arch-node-description">Keep objections beside the result</span></button></div>
+            <div class="arch-step"><button class="arch-node arch-node-evidence" type="button" data-stage="evidence" aria-expanded="false" aria-pressed="false" aria-controls="architectureDetail" tabindex="-1"><span class="arch-node-top"><span class="arch-node-number">08</span><span class="arch-node-kind">EVIDENCE</span></span><strong>Pin &amp; export</strong><span class="arch-node-description">Exact inputs and tested artifacts</span></button></div>
+          </div>
+          <div class="arch-map-note"><span class="arch-path-symbol" aria-hidden="true">↓</span><p>Questions and scope gaps can stop an experiment before measurement. Every route keeps its actual outcome.</p></div>
+        </div>
+
+
+      </div>
+      <p class="arch-sr-only" id="architectureAnnouncement" role="status" aria-live="polite" aria-atomic="true"></p>
+    </section>
+
+    <section class="arch-roles" aria-labelledby="architecture-roles-title">
+      <div class="arch-section-heading"><p class="arch-eyebrow">THREE RESPONSIBILITIES</p><h2 id="architecture-roles-title">A clear division of work.</h2><p>The models reason about an evaluation. The experiment supplies the numbers.</p></div>
+      <div class="arch-role-grid">
+        <article class="arch-role-card arch-role-model"><span class="arch-role-number">01 / PROPOSE</span><h3>Muse Spark</h3><p>Proposes a change using the allowed intervention vocabulary. Optional workdesk clarification is a separate task: it helps frame the brief for the author to review.</p><span class="arch-model-id">muse-spark-1.3</span></article>
+        <article class="arch-role-card arch-role-model"><span class="arch-role-number">02 / CHALLENGE</span><h3>Muse Wonder</h3><p>Independently reviews the original methodology. After a measured control, it can challenge whether the interpretation answers the intended question.</p><span class="arch-model-id">muse-wonder-1.0 · optional critic</span></article>
+        <article class="arch-role-card"><span class="arch-role-number">03 / VERIFY</span><h3>Local experiment</h3><p>Validates the edit, runs the classifier, checks prediction vectors and computes scores. A model's confidence never replaces the experiment.</p><span class="arch-model-id">Guard + executor + statistics</span></article>
+      </div>
+    </section>
+
+    <section class="arch-boundaries" aria-labelledby="architecture-boundaries-title">
+      <div class="arch-section-heading"><p class="arch-eyebrow">WHAT STAYS VISIBLE</p><h2 id="architecture-boundaries-title">The limits travel with the result.</h2></div>
+      <div class="arch-boundary-grid">
+        <article><span class="arch-boundary-mark" aria-hidden="true">01</span><h3>No test, no clearance.</h3><p>A reproduced baseline, a model's no-flaw assessment and a measured control are different evidence states. Unsupported questions remain explicit.</p></article>
+        <article><span class="arch-boundary-mark" aria-hidden="true">02</span><h3>Disagreement survives.</h3><p>A critic's objection stays beside the result. Agreement does not establish scientific truth, and group/time measurements remain descriptive.</p></article>
+        <article><span class="arch-boundary-mark" aria-hidden="true">03</span><h3>You review what leaves.</h3><p>Audit prompts include source, claims, declarations, column names and aggregate diagnostics. CSV rows are not sampled into those prompts. Review private text before a model call.</p></article>
+      </div>
+      <div class="arch-close"><div><h3>Follow the evidence in your own study.</h3><p>Start with a question and the materials you actually have.</p></div><a class="arch-primary" href="/workdesk">Go to workdesk <span aria-hidden="true">↗</span></a><a class="arch-link" href="/evidence">Inspect the evidence lab <span aria-hidden="true">→</span></a></div>
+    </section>
+  </main>
+  <footer class="arch-footer"><span>Built during the Meta Global AI Developer Hackathon.</span><a href="https://github.com/RaveenDi/NullLab" target="_blank" rel="noreferrer">Source <span aria-hidden="true">↗</span></a></footer>
+</body>
+</html>

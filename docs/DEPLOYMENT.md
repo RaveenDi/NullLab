@@ -8,8 +8,8 @@ Owner steering on 4 November: keep cloud deployment and domain purchase off the 
 
 | Delivery | Current behavior | Hosting fit |
 |---|---|---|
-| Local author workspace | Fresh supported audits, CSV intake, revision/history, manual Meta calls | Python 3.12 on the owner's workstation |
-| Public evidence demo | Interactive inspection of recorded public SECOM evidence; no uploads or new audits | Amplify Hosting, or private S3 plus CloudFront |
+| Local Research Workdesk | Persistent question/uploads/thread, reviewed brief/plan, fresh supported audits, saved results and acknowledged Meta calls | Python 3.12 on the owner's workstation |
+| Public evidence demo | Read-only public SECOM Evidence Lab and explanatory Architecture; no uploads, private history or new audits | Amplify Hosting, or private S3 plus CloudFront |
 | Public fresh-audit service | Proposed; authentication, per-user state, execution isolation and account quotas remain unfinished | AWS control plane plus isolated Fargate jobs, or a separately tested Modal design |
 
 `localhost:8099` is accessible from this machine. Buying a domain does not make it a public service. The current server checks loopback clients/hosts and uses local shared job files. The repository Dockerfile is a sandbox image, not a verified public web-service deployment image. A reverse proxy that bypasses the local boundary is not the proposed hosted architecture.
@@ -21,7 +21,7 @@ Owner steering on 4 November: keep cloud deployment and domain purchase off the 
 1. Build locally with `python scripts/package_demo.py`.
 2. Use out/nulllab-public-demo.zip, not the project/source/evaluation ZIP or the entire working directory. It contains only explicitly public recordings and UI assets.
 3. In Amplify Hosting, create an app, choose **Deploy without Git**, select the ZIP/manual-deployment route, and choose a branch such as production. This is a publication action; no AWS resources have been created by this research task.
-4. Inspect the generated HTTPS URL, recorded-mode labels, both manufacturing examples, fullscreen/focus controls and mobile layout. Fresh-audit controls must remain unavailable and no model/API request may occur.
+4. Inspect the generated HTTPS URL, recorded-mode labels, both manufacturing examples, architecture controls and mobile layout. The Workdesk link explains how to run locally; fresh-audit controls remain unavailable and no backend/model request may occur.
 5. Add the custom domain and the DNS records Amplify supplies. A domain from another registrar is supported; moving registration to AWS is unnecessary. Amplify offers a default amplifyapp.com URL and managed TLS. The domain can be connected after the initial public URL works. See [custom domains](https://docs.aws.amazon.com/amplify/latest/userguide/custom-domains.html).
 
 A custom domain is optional for obtaining a public URL. DNS/certificate verification can take time. No hosting cost, partner-credit entitlement or production uptime is guaranteed here; check the account's current terms before creating resources. No paid cloud resources or domain purchases were performed.
@@ -58,6 +58,6 @@ Fargate supplies task-level isolated environments; containers within one task sh
 
 Run `python -m uvicorn app.server:app --host 127.0.0.1 --port 8099` with Python 3.12. Configure hosted inference through explicit environment variables or a gitignored .env based on .env.example. The local UI additionally needs NULLLAB_ALLOW_WEB_LIVE=1 and outbound acknowledgement. No key is required for rules/local execution or an appropriately configured unauthenticated loopback inference server.
 
-Ignored out/jobs contains UUID job state and ledgers. The local queue admits four jobs with two workers; cancellation is cooperative. A restart marks interrupted jobs failed. Generated cases under examples/user-* and all input/export contents remain private unless deliberately shared. Provider timeouts do not establish remote cancellation or final billing.
+Ignored out/jobs contains UUID job state and ledgers. Ignored out/workdesk holds SQLite investigations, messages, immutable uploaded materials, brief revisions and run links. The local queue admits four jobs with two workers; cancellation is cooperative. A restart marks interrupted jobs failed. Generated cases under examples/user-* and all input/export contents remain private unless deliberately shared. Provider timeouts do not establish remote cancellation or final billing. The portable static ZIP deliberately excludes this state and cannot offer the actual Workdesk.
 
 The saved submission guide lists a public repository and public three-minute video; the currently accessible event detail page still requires authenticated verification. I recommend a public clickable demo for judge access, without claiming an independently reverified mandatory live-URL rule. Final video, public deployment, current rule checks and submission remain separate release tasks. This document researches and prepares the route; it does not deploy or submit anything.

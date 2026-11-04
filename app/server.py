@@ -8,6 +8,8 @@ import json
 import csv
 import math
 import os
+import sys
+import time
 import threading
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -21,7 +23,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field
 
-from agent.storage import write_json
+from agent.storage import publish_directory, write_json
 
 ROOT = Path(__file__).resolve().parent.parent
 WORKSPACE = Path(os.environ.get("NULLLAB_WORKSPACE", Path.cwd())).resolve()
@@ -42,12 +44,23 @@ def _write(path: Path, value: dict):
 
 
 def _read(path: Path):
-    try:
-        if path.is_symlink():
+    # Windows indexers/sync can briefly deny reads while an atomic checkpoint
+    # replacement completes. Retry only sharing/access failures, not corruption
+    # or a genuinely missing record. Total backoff is bounded to 0.31 seconds.
+    delays = (0.01, 0.02, 0.04, 0.08, 0.16)
+    for attempt in range(len(delays) + 1):
+        try:
+            if path.is_symlink():
+                return None
+            return json.loads(path.read_text(encoding="utf-8"))
+        except OSError as exc:
+            transient = isinstance(exc, PermissionError) or getattr(exc, "winerror", None) in {5, 32, 33}
+            if not transient or attempt == len(delays):
+                return None
+            time.sleep(delays[attempt])
+        except ValueError:
             return None
-        return json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
-        return None
+    return None
 
 
 def _job_path(job_id: str):
@@ -147,8 +160,32 @@ def _new_generated_case(csv_text, target, intended_use, study, lineage=None):
         config["lineage"] = lineage
         _write(staging / "case.json", config)
     examples.mkdir(parents=True, exist_ok=True)
-    staging.rename(examples / name)
+    publish_directory(staging, examples / name)
     return {"case": name, **detail, "lineage": lineage}
+
+
+def _result_integrity(job, result):
+    """Read-time provenance projection; never rewrite historical result bytes."""
+    finalized = job.get("status") in _TERMINAL and isinstance(result, dict) and result.get("status") == job.get("status")
+    view = {"result_finalized": finalized, "evidence_verified": False, "evidence_error": None}
+    if job.get("status") not in _TERMINAL:
+        return view
+    if not finalized:
+        view["evidence_error"] = "The saved checkpoint was not finalized. No completed measurement is established."
+        return view
+    try:
+        from agent.evidence import verify
+
+        verify(_job_path(job["id"]) / "inputs", result)
+        record = result.get("record")
+        if result.get("summary") and not isinstance(record, dict):
+            raise ValueError("Missing measured control identity")
+        if record is not None and (not isinstance(record, dict) or record.get("evidence") != result.get("evidence") or record.get("sources") != result.get("sources")):
+            raise ValueError("Nested measured control identity differs")
+        view["evidence_verified"] = True
+    except (OSError, ValueError, TypeError, KeyError):
+        view["evidence_error"] = "Saved input/control identity could not be verified. No numerical conclusion or verified export is supplied."
+    return view
 
 
 def _job_summary(job):
@@ -164,6 +201,8 @@ def _job_summary(job):
     ledger = result.get("ledger")
     ledger = ledger if isinstance(ledger, dict) else {}
     checkpoint_only = job.get("status") in _TERMINAL and bool(result) and result.get("status") != job.get("status")
+    integrity = _result_integrity(job, result)
+    verified = integrity["evidence_verified"]
 
     def number(value):
         return value if isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value) else None
@@ -172,14 +211,15 @@ def _job_summary(job):
         **{name: job.get(name) for name in ("id", "case", "status", "created_at", "updated_at", "live", "critic")},
         "title": config.get("title", job.get("title", job.get("case"))),
         "lineage": config.get("lineage", job.get("lineage")),
-        "verdict": "INCONCLUSIVE" if checkpoint_only else result.get("verdict"),
+        "verdict": "INCONCLUSIVE" if checkpoint_only else result.get("verdict") if verified else None,
+        **integrity,
         "checkpoint_only": checkpoint_only,
         "mode": result.get("mode", "live" if job.get("live") else "rules"),
         "metric": summary.get("metric", baseline.get("metric")),
         "seeds": summary.get("seeds", baseline.get("seeds", (evidence.get("context") or {}).get("seeds"))),
-        "baseline_score": number(baseline.get("score")),
-        "controlled_score": None if checkpoint_only else number(summary.get("controlled")),
-        "measured": bool(summary) and not checkpoint_only,
+        "baseline_score": number(baseline.get("score")) if verified else None,
+        "controlled_score": number(summary.get("controlled")) if verified else None,
+        "measured": bool(summary) and verified,
         "evidence": {name: evidence.get(name) for name in ("inputs", "sources", "instruments", "environment", "context")},
         "ledger": {name: number(ledger.get(name, 0)) for name in ("calls", "est_usd")},
     }
@@ -274,8 +314,24 @@ app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
 @app.get("/")
-def index():
-    return FileResponse(STATIC / "index.html")
+def index(request: Request):
+    # Preserve previously shared saved-job links after separating the pages.
+    return FileResponse(STATIC / ("evidence.html" if request.query_params.get("job") else "index.html"))
+
+
+@app.get("/workdesk")
+def workdesk_page():
+    return FileResponse(STATIC / "workdesk.html")
+
+
+@app.get("/evidence")
+def evidence_page():
+    return FileResponse(STATIC / "evidence.html")
+
+
+@app.get("/architecture")
+def architecture_page():
+    return FileResponse(STATIC / "architecture.html")
 
 
 @app.get("/api/cases")
@@ -519,9 +575,12 @@ def compare_jobs(left: str, right: str):
 def get_job(job_id: str):
     directory = _job_path(job_id)
     job = _read(directory / "job.json")
-    if job is None:
+    if not isinstance(job, dict):
         raise HTTPException(404, "Unknown audit")
-    return {**job, "result": _read(directory / "result.json")}
+    if job.get("id") != job_id:
+        raise HTTPException(409, "Stored audit metadata does not match its identifier")
+    result = _read(directory / "result.json")
+    return {**job, "result": result, **_result_integrity(job, result)}
 
 
 @app.post("/api/jobs/{job_id}/cancel")
@@ -542,12 +601,12 @@ def download_bundle(job_id: str):
     from agent import engine
 
     directory = _job_path(job_id)
-    job = _read(directory / "job.json")
-    if job is None:
-        raise HTTPException(404, "Unknown audit")
+    job = get_job(job_id)
     if job["status"] not in {"completed", "inconclusive"}:
         raise HTTPException(409, "Finish the audit before exporting evidence.")
-    result = _read(directory / "result.json")
+    if not job["result_finalized"] or not job["evidence_verified"]:
+        raise HTTPException(409, job["evidence_error"] or "No finalized verified evidence is available")
+    result = job["result"]
     if isinstance(result, dict) and not result.get("record"):
         raise HTTPException(409, "No controlled experiment was measured. Download the assessment memo instead.")
     try:
@@ -564,11 +623,11 @@ def download_assessment(job_id: str):
     from agent import engine
 
     directory = _job_path(job_id)
-    job = _read(directory / "job.json")
-    if not isinstance(job, dict):
-        raise HTTPException(404, "Unknown audit")
+    job = get_job(job_id)
     if job.get("status") not in _TERMINAL:
         raise HTTPException(409, "Finish the audit before exporting its assessment")
+    if not job["result_finalized"] or not job["evidence_verified"]:
+        raise HTTPException(409, job["evidence_error"] or "No finalized verified assessment is available")
     try:
         target = Path(engine.export_assessment(directory / "result.json"))
         if not target.resolve().is_relative_to(directory.resolve()) or not target.is_file():
@@ -576,3 +635,9 @@ def download_assessment(job_id: str):
     except (OSError, ValueError, RuntimeError) as exc:
         raise HTTPException(409, "This assessment has no verified input identity available for export") from exc
     return FileResponse(target, filename=f"nulllab-assessment-{job_id}.zip", media_type="application/zip")
+
+
+# The workdesk composes the existing local job/measurement service.
+from app.workdesk_api import create_router  # noqa: E402
+
+app.include_router(create_router(sys.modules[__name__]))

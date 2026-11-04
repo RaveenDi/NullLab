@@ -269,3 +269,32 @@ def test_interrupted_checkpoint_cannot_be_reported_as_final_measured_evidence(wo
         assert not comparison["comparable"]
         assert any("unfinished checkpoint" in reason for reason in comparison["reasons"])
         assert client.get(f"/api/jobs/{right}/bundle").status_code == 409
+        assert client.get(f"/api/jobs/{right}/assessment").status_code == 409
+        raw = client.get(f"/api/jobs/{right}").json()
+        assert not raw["result_finalized"] and not raw["evidence_verified"]
+
+
+@pytest.mark.parametrize("mutation", ["input", "nested_record"])
+def test_saved_result_projection_revokes_unverifiable_conclusions_without_rewriting_record(workspace, mutation):
+    job_id, result = stored_job(generated(workspace))
+    directory = server.JOBS_ROOT / job_id
+    with TestClient(server.app) as client:
+        valid = client.get(f"/api/jobs/{job_id}").json()
+        assert valid["evidence_verified"] and valid["result_finalized"]
+        if mutation == "input":
+            with (directory / "inputs" / "data.csv").open("ab") as handle:
+                handle.write(b"\n")
+        else:
+            result["record"]["sources"]["fix_A"] = "# changed nested control"
+            server._write(directory / "result.json", result)
+        retained = (directory / "result.json").read_bytes()
+        invalid = client.get(f"/api/jobs/{job_id}").json()
+        assert invalid["result_finalized"] and not invalid["evidence_verified"]
+        assert "could not be verified" in invalid["evidence_error"]
+        assert invalid["result"]["summary"] == result["summary"]  # diagnostic record remains intact
+        row = next(item for item in client.get("/api/jobs").json()["jobs"] if item["id"] == job_id)
+        assert row["verdict"] is None and not row["measured"]
+        assert row["baseline_score"] is None and row["controlled_score"] is None
+        assert client.get(f"/api/jobs/{job_id}/bundle").status_code == 409
+        assert client.get(f"/api/jobs/{job_id}/assessment").status_code == 409
+        assert (directory / "result.json").read_bytes() == retained

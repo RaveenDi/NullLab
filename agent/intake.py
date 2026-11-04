@@ -7,11 +7,11 @@ Existing trusted Python cases use agent.engine directly.
 import io
 import hashlib
 import json
-import os
 from pathlib import Path
 import uuid
 
 from agent import study as study_contract
+from agent.storage import publish_directory
 
 TEMPLATE = """import numpy as np
 import pandas as pd
@@ -95,7 +95,7 @@ def prepare(csv_text, target, intended_use, destination, study=None):
         ),
         encoding="utf-8",
     )
-    os.replace(staging, d)
+    publish_directory(staging, d)
     review = study_contract.review(declaration, generated=True, predictor_columns=selected, facts=facts)
     return {
         "rows": len(df),

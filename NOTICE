@@ -33,3 +33,8 @@ This repository's code and documents are MIT licensed (see LICENSE). The items b
 CURRENT V2 MANUFACTURING EXAMPLE
 SECOM: Michael McCann and Adrian Johnston (2008), UCI Machine Learning Repository, DOI 10.24432/C54305, CC BY 4.0. https://archive.ics.uci.edu/dataset/179/secom
 Fixed-zero preprocessing and constructed leaky/clean evaluation variants are ours. No allegation is made about dataset authors. Prior dataset notes above describe retired historical experiments.
+
+CURRENT V2 TYPOGRAPHY
+Space Mono and Inter font files are distributed under the SIL Open Font License 1.1.
+Complete copyright/license notices and source identities are in app/static/fonts/.
+The fonts were obtained unmodified from the official Google Fonts distribution.

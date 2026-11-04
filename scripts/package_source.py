@@ -13,6 +13,8 @@ for name in ("README.md", "LICENSE", "requirements.txt", "requirements-dev.txt",
     files.add(ROOT / name)
 for directory in ("agent", "app", "sandbox", "baselines"):
     files.update(p for p in (ROOT / directory).rglob("*") if p.is_file() and "__pycache__" not in p.parts and p.suffix in (".py", ".html", ".css", ".js"))
+files.update(p for p in (ROOT / "app/static/fonts").iterdir() if p.is_file())
+files.update(p for p in (ROOT / "test-materials/workdesk").rglob("*") if p.is_file() and p.suffix in (".csv", ".py", ".md", ".json"))
 # The package manifest declares this legacy Python package; include code, never
 # its generated historical reports, recordings or assets.
 files.update((ROOT / "report").glob("*.py"))
@@ -25,10 +27,18 @@ for name in ("DECISIONS.md", "researcher-workflows.md", "methodology.md"):
 files.add(ROOT / "docs" / "reviews" / "2026-11-04-responsive-layout.md")
 files.add(ROOT / "docs" / "reviews" / "2026-11-04-shell-validation.md")
 files.add(ROOT / "docs" / "reviews" / "2026-11-04-ci-evaluation-video.md")
+files.add(ROOT / "docs" / "reviews" / "2026-11-04-workdesk-validation.md")
+files.add(ROOT / "docs" / "reviews" / "workdesk-transition.json")
+files.add(ROOT / "docs" / "reviews" / "2026-11-04-researcher-repairs.md")
+files.add(ROOT / "docs" / "reviews" / "researcher-repairs-transition.json")
 files.add(ROOT / "docs" / "reviews" / "README.md")
+files.add(ROOT / "docs" / "plans" / "RESEARCH-WORKDESK.md")
+files.add(ROOT / "docs" / "TESTING-WORKDESK.md")
 for name in ("build_manufacturing.py", "package_demo.py", "package_source.py", "package_evaluation.py", "run_prospective_pilot.py", "regress_prospective_plans.py", "run_followup_pilot.py", "score_followup_pilot.py", "regress_followup_pilot.py", "run_release_evaluation.py", "run_release_confirmation.py"):
     files.add(ROOT / "scripts" / name)
-for name in ("test_provider_v2.py", "test_app_v2.py", "test_engine_v2.py", "test_workspace_js.py", "test_guard_transform_v2.py", "test_study_v2.py", "test_workspace_api.py", "test_storage_v2.py"):
+for name in ("test_provider_v2.py", "test_app_v2.py", "test_engine_v2.py", "test_workspace_js.py", "test_guard_transform_v2.py", "test_study_v2.py", "test_workspace_api.py", "test_storage_v2.py", "test_workdesk_api.py", "test_workdesk_js.py", "test_checkpoint_reads.py", "test_architecture_page.py", "test_site_experience.py"):
+    files.add(ROOT / "tests" / name)
+for name in ("test_workdesk_protocol.py", "test_workdesk_preflight.py", "test_workdesk_clarifications.py", "test_workdesk_experience.py"):
     files.add(ROOT / "tests" / name)
 files.update(p for p in (ROOT / "submission").glob("*.md"))
 files.add(ROOT / "submission" / "transcript.txt")
@@ -46,7 +56,7 @@ with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
     for p in sorted(files):
         z.write(p, p.relative_to(ROOT))
     z.writestr("SOURCE-MANIFEST.json", json.dumps(manifest, indent=2))
-    z.writestr("NOTICE", "SECOM: McCann and Johnston (2008), UCI Machine Learning Repository, DOI 10.24432/C54305, CC BY 4.0. https://archive.ics.uci.edu/dataset/179/secom\nConstructed evaluation variants and fixed-zero preprocessing are ours. Third-party libraries/services retain their terms.\n")
+    z.writestr("NOTICE", "SECOM: McCann and Johnston (2008), UCI Machine Learning Repository, DOI 10.24432/C54305, CC BY 4.0. https://archive.ics.uci.edu/dataset/179/secom\nConstructed evaluation variants and fixed-zero preprocessing are ours. Third-party libraries/services retain their terms.\nSpace Mono and Inter font files are licensed under the SIL Open Font License 1.1; their complete licenses and source identities are included in app/static/fonts/.\n")
     z.writestr("tests/__init__.py", "")
-    z.writestr("SOURCE-README.md", "# Current product source subset\n\nThis archive builds the supported v2 CLI and localhost workspace. It includes the public manufacturing examples and synthetic evaluation fixtures. Legacy Python modules remain for package compatibility; their historical datasets, generated reports and archived experiments are excluded. The full historical freeze suite described in the repository README requires the full local repository and is not part of this subset.\n\nInstall with `python -m pip install .`; install development dependencies with `python -m pip install -r requirements-dev.txt`. Check the included product tests with `python -m pytest tests/test_engine_v2.py tests/test_provider_v2.py tests/test_app_v2.py tests/test_workspace_js.py tests/test_study_v2.py tests/test_workspace_api.py -q`. The JavaScript check requires Node. `nulllab-v2-evaluation.zip` is a separate, input-bound evidence archive. See docs/RELEASE-STATUS.md for actual results and open gates.\n")
+    z.writestr("SOURCE-README.md", "# Current product source subset\n\nThis archive builds the supported v2 CLI and local question/upload-first Research Workdesk. The app separates the landing page, /workdesk investigations, /evidence worked example and saved audits, and /architecture model/execution explanation. It includes public manufacturing examples and synthetic evaluation fixtures; personal investigations are excluded. Legacy Python modules remain for package compatibility; their historical datasets, generated reports and archived experiments are excluded. The full historical freeze suite described in the repository README requires the full local repository and is not part of this subset.\n\nInstall with `python -m pip install .`; install development dependencies with `python -m pip install -r requirements-dev.txt`. Check all included product tests, including the workdesk workflow and failure-boundary acceptance, with `python -m pytest tests -q`. The JavaScript check requires Node. `nulllab-v2-evaluation.zip` is a separate, input-bound evidence archive. See docs/RELEASE-STATUS.md for actual results and open gates.\n")
 print(out)

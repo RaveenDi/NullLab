@@ -1,0 +1,13 @@
+{
+  "purpose": "Manual engineering acceptance only, not a new evaluation cohort",
+  "baseline": "60 deterministic synthetic rows, one numeric predictor and balanced 0/1 outcome",
+  "supplied_pipeline": {
+    "source": "eval/v2_confirmation/cases/cn-b4m8",
+    "known_reused_fixture": true,
+    "files": {
+      "data.csv": "84055e0c50a2acedbd65398665d6e4f4225226b0b2d3d5bde605b79ea0cc762a",
+      "train.py": "ac4c44b5c94611a36f53bb7f15f631b20ebd502f7a4e836b78e117f41b429b5a"
+    }
+  },
+  "model_calls_by_preparation": 0
+}

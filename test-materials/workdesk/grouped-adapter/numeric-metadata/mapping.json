@@ -1,0 +1,30 @@
+{
+  "column": "device_id",
+  "encoding": "One-to-one metadata-only coding; original strings retained in parent data.csv",
+  "mapping": {
+    "rig-01": 0,
+    "rig-02": 1,
+    "rig-03": 2,
+    "rig-04": 3,
+    "rig-05": 4,
+    "rig-06": 5,
+    "rig-07": 6,
+    "rig-08": 7,
+    "rig-09": 8,
+    "rig-10": 9,
+    "rig-11": 10,
+    "rig-12": 11,
+    "rig-13": 12,
+    "rig-14": 13,
+    "rig-15": 14,
+    "rig-16": 15,
+    "rig-17": 16,
+    "rig-18": 17,
+    "rig-19": 18,
+    "rig-20": 19,
+    "rig-21": 20,
+    "rig-22": 21,
+    "rig-23": 22,
+    "rig-24": 23
+  }
+}

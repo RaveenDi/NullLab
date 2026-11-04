@@ -15,7 +15,7 @@ dynamic = ["dependencies"]
 nulllab = "agent.engine:main"
 
 [tool.setuptools.package-data]
-app = ["static/*"]
+app = ["static/*", "static/fonts/*"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
@@ -68,6 +68,8 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# Exact known synthetic fixture copy; retain its original bytes/provenance.
+"test-materials/workdesk/supplied-pipeline/train.py" = ["F401"]
 # FROZEN files: hash-pinned by the preregistrations (docs/FROZEN-FILES.md). Exempt from linting rather than edited.
 "agent/factorial_g9.py" = ["ALL"]
 "agent/factorial_ehg.py" = ["ALL"]

@@ -1,0 +1,54 @@
+{
+  "purpose": "Explicit new numeric-metadata input revision after retained string-ID guard failure; known synthetic engineering recovery, not a scientific cohort",
+  "parent": "../PROVENANCE.json",
+  "original_job_unchanged": "3bd55513-5c67-4568-bc9b-04d9339029f7",
+  "changes": [
+    "device_id metadata only: one-to-one mapping saved in mapping.json",
+    "notes disclose mapping revision"
+  ],
+  "unchanged": [
+    "row order",
+    "every predictor value",
+    "every target label",
+    "adapter train.py bytes",
+    "features",
+    "model and hyperparameters",
+    "metric",
+    "random-row folds"
+  ],
+  "baseline_equivalence": {
+    "status": "passed",
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "comparison": "Exact truth/prediction arrays against original string-ID pipeline/data",
+    "verification": "tests/test_workdesk_protocol.py::test_explicit_numeric_revision_preserves_all_baseline_vectors_and_identities",
+    "checked_on": "2026-11-04",
+    "result": "Exact truth/prediction arrays match original on all three seeds. All nonmetadata cells/order unchanged; 24-to-24 identity mapping; adapter bytes identical."
+  },
+  "runtime_guard_acceptance": {
+    "status": "ACCEPT",
+    "checked_on": "2026-11-04",
+    "attempts": 1,
+    "seed": 42,
+    "provider_calls": 0,
+    "duration_seconds": 15.765,
+    "artifact_directory": "out/researcher-repairs-20261104/guard-acceptance-numeric",
+    "scope": "Frozen contract and runtime provenance/model-fidelity guard acceptance on one seed. Not a scientific effect/uncertainty estimate or general reliability claim. Original categorical-ID failure retained.",
+    "scientific_measurement": false
+  },
+  "files": {
+    "data.csv": "c2f483efb7668c62972737052a52f975e28ba494d9daff849f60d96c516cac53",
+    "train.py": "9697c8ba074415e003e31f8fb356c4e3271a752888bbf4564584cbaece782c86",
+    "notes.md": "b32591315003e3b5e92049b458708e3b4c26a52aa6b2aa550d7a39e4f258a077",
+    "mapping.json": "15569138930ee585b1c1d9b2f67aa49045a5ac2ba4a696e1288c0abcd2639d19"
+  },
+  "focused_suite": {
+    "passed": 27,
+    "duration_seconds": 5.1,
+    "junit": "out/pytest-workdesk-protocol-numeric.xml",
+    "provider_calls": 0
+  }
+}
