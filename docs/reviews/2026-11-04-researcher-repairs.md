@@ -1,5 +1,7 @@
 # Researcher walkthrough repairs — 4 November 2026
 
+Publication checkpoint: implementation [530196b](https://github.com/RaveenDi/NullLab/commit/530196b9fbc25aff15baf0d0685b86b9ebabcf9f) records this tested rebuild. The owner subsequently requested its push. The local/uncommitted labels in the freeze sections are historical checkpoint boundaries; see repository history and actual CI for current publication state. Git attributes preserve the exact tested engine/server/UI and upload-fixture bytes; the engine's Git change aligns line endings only, with no semantic engine edit. All 35 recording core blobs and 21 fixture blobs match the tested local bytes. Upstream font licenses remain verbatim. An EOF-only test cleanup passed 28 protocol checks.
+
 This follow-up addresses problems observed during visible, AI-operated researcher-style use. It is local engineering work and internal acceptance, not an outside-researcher study, a held-out scientific cohort or evidence of broad reliability. Current source remains local until explicitly published. The video is still a recording plan at this document checkpoint.
 
 ## Preserved first outcome
