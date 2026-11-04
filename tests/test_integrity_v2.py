@@ -7,7 +7,6 @@ import shutil
 import pytest
 
 from agent import evidence, hybrid, transport, llm
-from agent.bundle import BundleError, build_bundle
 from sandbox.factorial_stats import factorial_stats, CONFIGS
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -15,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_evidence_refuses_changed_inputs_and_patch(tmp_path):
     case = tmp_path / "case"
-    shutil.copytree(ROOT / "corpus" / "leak_prescale", case)
+    shutil.copytree(ROOT / "examples" / "secom_clean", case)
     rec = {"sources": {"fix": "source"}}
     rec["evidence"] = evidence.capture(case, sources=rec["sources"], context={"seeds": [42]})
     assert evidence.verify(case, rec)
@@ -26,13 +25,6 @@ def test_evidence_refuses_changed_inputs_and_patch(tmp_path):
     (case / "data.csv").write_text((case / "data.csv").read_text() + "\n")
     with pytest.raises(evidence.EvidenceError, match="input mismatch"):
         evidence.verify(case, rec)
-
-
-def test_legacy_export_refuses_to_invent_audit_identity(tmp_path):
-    case = tmp_path / "leak_prescale"
-    shutil.copytree(ROOT / "corpus" / "leak_prescale", case)
-    with pytest.raises((BundleError, evidence.EvidenceError), match="audit-time"):
-        build_bundle(case, tmp_path / "export.zip", run=str(ROOT / "runs_rulefix" / "leak_prescale.json"))
 
 
 @pytest.mark.parametrize("y,p", [([0, 1], [1]), ([[0], [1]], [0, 1]), ([0, 1], [0, float("nan")]), ([], [])])

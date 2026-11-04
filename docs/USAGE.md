@@ -1,6 +1,6 @@
 # Research Workdesk workflow
 
-For a guided test with exact files, field values and expected behavior, use the [full product test checklist](TESTING-WORKDESK.md) and [synthetic test kit](../test-materials/workdesk/README.md).
+Synthetic files to try are in the [test kit](../test-materials/workdesk/README.md).
 
 Start the localhost service using the README, open http://127.0.0.1:8099 and choose **Go to Workdesk**. The landing explains the method and scope; **Evidence Lab** contains the recorded worked example and saved audits; **Architecture** explains the actual handoffs. New research starts at `/workdesk`.
 

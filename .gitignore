@@ -61,3 +61,11 @@ htmlcov/
 # Private data-only user adapters
 examples/user-*/
 examples/.intake-*/
+
+# local-only working material
+submission/
+docs/reviews/
+docs/plans/
+*.mp4
+*.wav
+*.srt

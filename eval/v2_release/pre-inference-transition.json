@@ -1,8 +1,0 @@
-{
-  "file": "scripts/run_release_evaluation.py",
-  "before_sha256": "eacb11dae13ad2046b6b61375eff480917de59f096a45b89ceab3e9866e120b2",
-  "after_sha256": "43d554f2133acbff28cc596a47f5b21bcf5d059e5d4be576928f1207b0a74378",
-  "time_utc": "2026-11-03T20:22:07.705047+00:00",
-  "reason": "Before any execution/model outcome: lint-only datetime.UTC alias and explicit closure default binding. Product instrument, case bytes and truth unchanged. Original preparation runner and manifest retained.",
-  "model_attempts_before_transition": 0
-}

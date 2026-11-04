@@ -1,8 +1,0 @@
-{
-  "title": "Factory-cart record screening",
-  "target": "event",
-  "intended_use": "Screen factory-cart records. Cart identifiers repeat because several readings belong to one cart. The desired deployment population has not been chosen: it may consist of additional records from already represented carts or records from previously unseen carts. The population choice needs to be resolved before making an unconditional generalization claim.",
-  "data_origin": "internal synthetic",
-  "metric": "accuracy",
-  "rows": 120
-}

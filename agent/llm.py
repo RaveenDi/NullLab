@@ -1,6 +1,7 @@
 """Meta Model API adapter (OpenAI-compatible chat completions, stdlib only).
 Modes: "mock" (default; deterministic stub, NEVER a model result) | "live" (muse-spark-1.3, gated by bs.py spend check).
-The key is read from C:\\dev\\bs\\.env (or env) at call time and is never printed, logged or stored."""
+The key is read from the MODEL_API_KEY environment variable, or from a local .env file (NULLLAB_ENV_FILE overrides its path),
+at call time and is never printed, logged or stored."""
 import hashlib
 import json
 import os
@@ -13,8 +14,9 @@ from pathlib import Path
 
 BASE_URL = "https://api.meta.ai/v1"
 MODEL = "muse-spark-1.3"
-ENV_FILE = Path(os.environ.get("NULLLAB_ENV_FILE", r"C:\dev\bs\.env"))
-BS = Path(__file__).resolve().parent.parent.parent / "battle-station" / "bs.py"
+ENV_FILE = Path(os.environ.get("NULLLAB_ENV_FILE") or Path(__file__).resolve().parent.parent / ".env")
+# Optional external spend ledger. When the script is absent (every fresh clone) the per-phase call caps still apply.
+BS = Path(os.environ.get("NULLLAB_SPEND_TOOL") or Path(__file__).resolve().parent.parent.parent / "battle-station" / "bs.py")
 CALL_LOG = Path(__file__).resolve().parent.parent / "runs" / "live_calls.jsonl"
 # Per-phase call log + hard cap. Spike (G2+G3) used runs/live_calls_spike4.jsonl with cap 14 (4 used).
 # G4 phase: runs/live_calls_g4.jsonl, cap 70 (43 used).
@@ -46,6 +48,8 @@ def _key():
 
 
 def spend_ok(est_usd: float) -> bool:
+    if not BS.is_file():
+        return True
     r = subprocess.run([sys.executable, str(BS), "spend", "check", "meta", str(est_usd)], capture_output=True, text=True)
     return r.returncode == 0 and r.stdout.strip().startswith("ok")
 
@@ -198,7 +202,8 @@ def live_complete_ex(system: str, user: str, est_usd: float = 0.02, max_tokens: 
             data = json.loads(r.read())
     finally:  # log spend even if the request failed mid-way
         with _LOCK:
-            subprocess.run([sys.executable, str(BS), "spend", "add", "meta", model, "1", str(est_usd), "nulllab"], capture_output=True)
+            if BS.is_file():
+                subprocess.run([sys.executable, str(BS), "spend", "add", "meta", model, "1", str(est_usd), "nulllab"], capture_output=True)
     usage = data.get("usage") or {}
     finish = data["choices"][0].get("finish_reason")
     usage_log = (g8_log() if g8_phase() else g7_log() if g7_phase() else SPIKE_LOG).with_suffix(".usage.jsonl")

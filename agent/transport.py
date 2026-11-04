@@ -74,6 +74,8 @@ def transport_log():
 def _spend_add(model, est_usd):
     import subprocess
     import sys
+    if not llm.BS.is_file():
+        return
     subprocess.run([sys.executable, str(llm.BS), "spend", "add", "meta", model, "1", str(est_usd), "nulllab"], capture_output=True)
 
 

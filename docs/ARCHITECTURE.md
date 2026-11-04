@@ -1,6 +1,6 @@
 # NullLab v2 architecture
 
-The Research Workdesk is implemented as an investigation and review layer around `agent.engine.run_audit`. It stores the research question, materials, author-reviewed brief revisions, prepared plans and links to existing engine jobs. It does not introduce a second scorer or derive scientific verdicts from chat. The [workdesk implementation record](plans/RESEARCH-WORKDESK.md) separates this supported slice from deferred design goals.
+The Research Workdesk is implemented as an investigation and review layer around `agent.engine.run_audit`. It stores the research question, materials, author-reviewed brief revisions, prepared plans and links to existing engine jobs. It does not introduce a second scorer or derive scientific verdicts from chat.
 
 | Route | Purpose | Execution boundary |
 |---|---|---|
@@ -9,7 +9,7 @@ The Research Workdesk is implemented as an investigation and review layer around
 | `/evidence` | Read-only Evidence Lab: “From claim to evidence”, curated recordings and saved job history | Recordings stay labelled; opening evidence never reruns it or calls Meta. |
 | `/architecture` | Inspectable explanation of model, guard, execution and evidence responsibilities | Steps 01–08 run in one vertical sequence; the selected explanation opens directly underneath. Downward connectors and Up/Down/Previous/Next navigation preserve that order. Animation is explanatory, not live agent activity. |
 
-Existing `/?job=UUID` links open Evidence Lab. Shared navigation uses locally bundled Space Mono and Inter. Landing and architecture animations have pause/reduced-motion behavior. Workdesk content can scroll and does not require fullscreen. Desktop and mobile share the investigation state through Research, Study brief, Results and Materials views. The [Workdesk validation record](reviews/2026-11-04-workdesk-validation.md) reports actual current-source checks; publication remains separate.
+Existing `/?job=UUID` links open Evidence Lab. Shared navigation uses locally bundled Space Mono and Inter. Landing and architecture animations have pause/reduced-motion behavior. Workdesk content can scroll and does not require fullscreen. Desktop and mobile share the investigation state through Research, Study brief, Results and Materials views.
 
 ```mermaid
 flowchart TD
@@ -112,8 +112,6 @@ Evidence Lab review-room panels project deterministic checks, recorded planner/c
 
 ## Validation boundary and extensions
 
-Earlier runners/results do not automatically validate v2 or this intake layer. The [six-case pilot](EVAL-V2-PILOT.md), [eight-case follow-up](EVAL-V2-FOLLOWUP.md) and [release/confirmation](EVAL-V2-RELEASE.md) retain original failures separately from repairs. The original ten-case 0/3 supported-control outcome remains distinct from the separate six-case confirmation. Workdesk UI checks do not change scientific scores, prove critic benefit or establish general accuracy.
-
-Internal API/minimal-DOM checks and AI discussion are development evidence, not outside researcher interviews or measured time savings. See the [current Workdesk validation](reviews/2026-11-04-workdesk-validation.md) for actual browser, source/package and final-review checks and their distinct scopes. See [research-room decisions](reviews/research-room/DECISIONS.md), [roadmap](RESEARCHER-ROADMAP.md) and [release status](RELEASE-STATUS.md).
+Internal API/minimal-DOM checks and AI discussion are development evidence, not outside researcher interviews or measured time savings.
 
 Compatible local endpoint transport and explicit replay exist; Glimmer/local-model quality and hardware performance remain unvalidated. Literature retrieval, arbitrary notebook/paper reproduction, collaboration, container isolation and public execution are separate extensions. Deployment is optional for the captured submission requirements; this local service is not a hosted multi-user platform. See [security](SECURITY.md) and [deployment](DEPLOYMENT.md).

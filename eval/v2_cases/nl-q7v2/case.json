@@ -1,8 +1,0 @@
-{
-  "title": "Pump screening protocol",
-  "target": "event",
-  "intended_use": "Classify pump vibration records for an equipment inspection event using measurements available during that inspection. The evaluation population consists of independent equipment records drawn from the same synthetic population.",
-  "data_origin": "internal synthetic",
-  "metric": "accuracy",
-  "rows": 120
-}

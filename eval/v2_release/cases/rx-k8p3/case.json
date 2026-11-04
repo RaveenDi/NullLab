@@ -1,4 +1,0 @@
-{
-  "target": "event",
-  "intended_use": "Synthetic independent packaging records. Predict a quality event before final inspection from five already available sensor values. Independent-record random-row validation accuracy is the estimand; all selected measurements precede the decision. There is no forecast or entity-generalization claim. No numerical reference score is supplied."
-}

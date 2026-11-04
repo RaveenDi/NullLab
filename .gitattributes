@@ -12,14 +12,6 @@
 *.woff binary
 *.woff2 binary
 
-# Audit input identities bind exact bytes, including supplied line endings.
-eval/v2_cases/** -text whitespace=cr-at-eol
-eval/v2_followup_cases/** -text whitespace=cr-at-eol
-eval/v2_release/** -text whitespace=cr-at-eol
-eval/v2_confirmation/** -text whitespace=cr-at-eol
-examples/secom/** -text whitespace=cr-at-eol
-examples/secom_clean/** -text whitespace=cr-at-eol
-
 # Preserve the exact bytes of the tested recording UI and upload fixtures.
 # Their source/provenance identities must survive a fresh Git checkout.
 agent/engine.py -text whitespace=cr-at-eol
@@ -28,10 +20,3 @@ app/static/** -text whitespace=cr-at-eol
 test-materials/workdesk/** -text whitespace=cr-at-eol
 # Keep the upstream license texts verbatim, including their whitespace.
 app/static/fonts/*-OFL.txt -whitespace
-
-# Historical experiments are not part of the v2 source release.
-real/civilwar_*/** export-ignore
-runs*/** export-ignore
-report/** export-ignore
-docs/EVAL-[0-9]*.md export-ignore
-docs/reviews/** export-ignore

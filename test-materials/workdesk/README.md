@@ -1,10 +1,10 @@
 # Workdesk manual test materials
 
-Use [the complete manual guide](../../docs/TESTING-WORKDESK.md) in this order:
+Files to try in the Workdesk (see [usage](../../docs/USAGE.md)):
 
 - baseline.csv + notes.md: safe CSV-only generated baseline.
 - notes-revised.md: test revision/plan invalidation without changing old results.
-- supplied-pipeline/data.csv + train.py: exact copies of known synthetic confirmation case cn-b4m8, for testing uploaded-code execution and measured controls. Read the Python before acknowledging local execution.
+- supplied-pipeline/data.csv + train.py: a known synthetic case, for testing uploaded-code execution and measured controls. Read the Python before acknowledging local execution.
 - invalid-target.csv: deliberate yes/no labels, unsupported by the current 0/1 binary adapter.
 - unsupported.json: deliberate unsupported upload extension.
 

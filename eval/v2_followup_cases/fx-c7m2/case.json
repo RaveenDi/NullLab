@@ -1,8 +1,0 @@
-{
-  "title": "Cooling-fan acoustic screening",
-  "target": "event",
-  "intended_use": "Classify independent cooling-fan acoustic inspections for a screening event using measurements available during that inspection. The target population consists of unseen independent fan records from the same synthetic population.",
-  "data_origin": "internal synthetic",
-  "metric": "accuracy",
-  "rows": 120
-}
