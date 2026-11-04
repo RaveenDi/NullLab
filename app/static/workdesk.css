@@ -46,7 +46,7 @@
 
 .suggestion-details{margin-top:7px;border-top:1px solid #d4dfca}.suggestion-details>summary{font-size:11px;line-height:1.7;color:var(--green);min-height:44px;padding:10px 0}.suggestion-details .brief-suggestion:last-child{padding-bottom:0}
 
-/* Explicit task tabs get a readable work area; Research keeps its context column. */
+/* Each task has its own work area. */
 @media(min-width:1051px){
 .investigation-grid:not([data-view=research]){grid-template-columns:minmax(0,1fr)}
 .investigation-grid:not([data-view=research]) .research-column{display:none}
@@ -61,3 +61,80 @@
 }
 
 .inference-note{font-size:12px;line-height:1.8;padding:14px 16px;border-left:3px solid #aa8845;border-radius:0 5px 5px 0;background:#f8f0de;margin:14px 0;color:#675429}
+
+/* Focused Workdesk: one task, one reading column, history on demand. */
+.desk-shell{grid-template-columns:minmax(0,1fr)}
+.project-toggle{display:block;font-size:12px;min-height:44px;white-space:nowrap}
+.project-rail{display:none;position:fixed;left:0;top:var(--header);width:min(320px,88vw);height:calc(100svh - var(--header));min-height:0;z-index:40;padding:20px 18px;box-shadow:10px 0 40px #17362312}
+.project-rail[data-open=true]{display:flex}
+.rail-top>.eyebrow,.rail-bottom p{display:none}
+.rail-section-heading{margin-top:18px}
+.project-item{padding:12px;min-height:72px}
+.project-item strong{font-size:13px}
+.project-item span{font-size:11px}
+.desk-header{gap:20px}
+.desk-header>.brand{order:-1}
+.desk-header nav{margin-left:auto;margin-right:0}
+.local-badge{margin-left:12px}
+.investigation-header{position:relative;width:100%;padding:16px max(24px,calc((100% - 872px)/2)) 8px;gap:20px;border-bottom:0;align-items:flex-start}
+.investigation-heading{flex:1}
+.investigation-header h1{font-size:16px;line-height:1.5;margin:0;-webkit-line-clamp:2}
+.state-badge{font:11px/1.5 var(--sans);padding:5px 10px;margin-top:0}
+.question-details{font-size:12px}
+.question-details>summary{min-height:32px;padding:4px 0;color:var(--muted);font-size:11px;width:fit-content}
+.question-details>div{position:absolute;left:max(24px,calc((100% - 872px)/2));right:max(24px,calc((100% - 872px)/2));z-index:25;max-height:35svh;overflow:auto;background:var(--white);border:1px solid var(--line);border-radius:8px;padding:18px;box-shadow:0 10px 30px #203b3015;font-size:14px;line-height:1.75}
+.question-details .eyebrow{font-size:10px}
+.desk-tabs{padding-inline:max(16px,calc((100% - 888px)/2))}
+.desk-tabs button{font-size:13px;padding-inline:18px}
+.investigation-grid{grid-template-columns:minmax(0,1fr)}
+.investigation-grid[data-view=research] .context-column{display:none}
+.research-column{width:100%;max-width:872px;margin:0 auto}
+.thread-header{padding:16px 24px 8px}
+.thread-header>.eyebrow{font-family:var(--sans);font-size:12px;letter-spacing:0;text-transform:none;color:var(--ink)}
+.quiet-status{font-size:11px}
+.research-thread{padding:8px 24px 20px;scroll-behavior:auto;scrollbar-gutter:stable}
+.message{font-size:15px;line-height:1.8;margin:12px 0 28px}
+.message-header{font-size:11px;margin-bottom:8px}
+.message.user{margin-left:36px;padding:14px 18px}
+.message.system{font-size:13px}
+.message-references{gap:6px}
+.reference-chip{font-size:11px;background:transparent}
+.thread-actions{padding:8px 24px;gap:4px 20px;border-top:1px solid var(--line)}
+.thread-actions:empty{display:none}
+.thread-actions .text-button{font-size:12px;min-height:44px;padding:6px 0}
+.composer-wrap{padding:0 24px 12px;border-top:0;max-height:50%;overflow:auto}
+.composer-context:not([data-older=true]){display:none}
+.message-form{margin-top:0;padding:8px 12px;border-radius:10px}
+.message-form textarea{min-height:36px;font-size:15px;max-height:120px;padding:4px;resize:vertical}
+.composer-actions .button{min-height:44px}
+.assistant-settings{margin:4px 0 0}
+.assistant-settings summary{min-height:36px;font-size:11px}
+.assistant-settings summary>span{font-size:11px}
+.assistant-settings[open]{padding-bottom:8px}
+.request-progress{margin:0 24px 8px}
+.context-panel label{font-size:13px}
+.context-panel .panel-intro,.context-panel input[type=text],.context-panel select,.context-panel textarea{font-size:15px}
+.context-panel .field-note{font-size:12px}
+@media(max-width:760px){
+  .desk-header{gap:8px;padding-inline:14px}
+  .desk-header>.brand{font-size:18px}
+  .project-toggle{font-size:11px;min-width:0;padding:6px}
+  .local-badge{min-width:0;margin-left:0}
+  .investigation-header{padding:12px 18px 4px;gap:10px}
+  .investigation-header h1{font-size:15px;-webkit-line-clamp:2}
+  .state-badge{font-size:10px;max-width:80px;padding:4px 7px}
+  .question-details>summary{font-size:11px;min-height:36px}
+  .question-details>div{left:12px;right:12px}
+  .desk-tabs{padding-inline:8px}
+  .desk-tabs button{font-size:12px;padding-inline:3px;min-height:44px}
+  .thread-header{padding:12px 18px 4px}
+  .research-thread{padding:8px 18px 16px}
+  .message{font-size:14px;margin-bottom:24px}
+  .message.user{margin-left:10px;padding:12px 14px}
+  .thread-actions{padding:4px 18px}
+  .thread-actions .text-button{font-size:12px;min-height:44px}
+  .composer-wrap{padding:0 12px max(8px,env(safe-area-inset-bottom))}
+  .message-form textarea{font-size:16px;min-height:36px}
+  .assistant-settings summary{min-height:44px}
+  .request-progress{margin-inline:18px}
+}

@@ -117,6 +117,7 @@
 
   function setView(view, focus = false) {
     state.view = ["research", "brief", "results", "materials"].includes(view) ? view : "research";
+    $("questionDetails").open = false;
     $("investigationGrid").dataset.view = state.view;
     document.querySelectorAll(".desk-tabs button").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.view === state.view)));
     if (state.project) remember();
@@ -265,7 +266,13 @@
       if (message.ledger) article.append(node("p", `${message.ledger.calls || 0} provider attempts · $${Number(message.ledger.est_usd || 0).toFixed(3)} reserved estimate · unmeasured guidance`, "field-note"));
       container.append(article);
     });
-    container.scrollTop = container.scrollHeight;
+    // Controls below the thread can change its height during the same render.
+    // Position the latest reply only after that layout is complete.
+    const showLatest = () => {
+      if (state.threadKey === key) container.scrollTop = container.scrollHeight;
+    };
+    if (window.requestAnimationFrame) window.requestAnimationFrame(showLatest);
+    else showLatest();
   }
 
   function renderBriefSuggestions(project) {
@@ -523,10 +530,13 @@
     state.materialKey = materialKey;
     $("startView").hidden = true;
     $("investigationView").hidden = false;
-    const displayTitle = project.title && project.title !== String(project.question || "").slice(0, 90) ? project.title : project.question || project.title;
+    const question = project.question || project.title || "Investigation";
+    const displayTitle = project.title && project.title !== String(project.question || "").slice(0, 90) ? project.title : question.split(/(?<=\?)\s/)[0];
     text("investigationTitle", displayTitle);
-    $("investigationTitle").title = project.question || project.title || "";
-    text("revisionLabel", project.brief ? " · REV " + shortId(project.brief.id) : "");
+    $("investigationTitle").title = question;
+    text("fullQuestion", question);
+    if (previousId !== project.id) $("questionDetails").open = false;
+    text("revisionLabel", project.brief ? " · REV " + shortId(project.brief.id) : " · Not yet saved");
     renderThread(project); renderMaterials(project); renderRuns(project); renderThreadActions(project);
     if (fill || !state.briefDirty) fillBrief(project.brief || {});
     renderPlan(project); renderPending(); syncControls();
@@ -916,16 +926,19 @@
   $("downloadInvestigation").addEventListener("click", () => { if (state.project) downloadJson(state.project, `nulllab-investigation-${shortId(state.project.id)}.json`); });
   $("runJson").addEventListener("click", () => { if (state.job) downloadJson(state.job, `nulllab-audit-${shortId(state.job.id)}.json`); });
   document.addEventListener("keydown", event => {
+    if (event.key === "Escape" && $("questionDetails").open) {
+      $("questionDetails").open = false;
+      $("questionDetails").querySelector("summary").focus();
+    }
     if (!state.drawerOpen) return;
     if (event.key === "Escape") { event.preventDefault(); closeDrawer(); }
     if (event.key === "Tab") {
       const elements = [$("projectToggle"), ...$("projectRail").querySelectorAll('button:not([disabled]),a[href]')].filter(element => element.getClientRects().length);
       const index = elements.indexOf(document.activeElement);
-      if (event.shiftKey && index <= 0) { event.preventDefault(); elements.at(-1)?.focus(); }
-      else if (!event.shiftKey && (index === elements.length - 1 || index < 0)) { event.preventDefault(); elements[0]?.focus(); }
+      event.preventDefault();
+      elements[(index + (event.shiftKey ? -1 : 1) + elements.length) % elements.length]?.focus();
     }
   });
-  window.addEventListener("resize", () => { if (!window.matchMedia("(max-width: 760px)").matches && state.drawerOpen) closeDrawer(false); });
 
   async function initialize() {
     const params = new URLSearchParams(window.location.search);
@@ -933,6 +946,7 @@
       state.config = await api("/api/workdesk/config");
       text("metaIntakeHint", state.config.live_enabled ? "Optional Meta guidance is bounded to four attempts and $0.25 reserved per investigation. It does not execute an experiment." : "Meta guidance is not enabled on this server. The local study guide and manual brief remain available without a key.");
       await refreshProjects();
+      await document.fonts?.ready;
       if (params.get("project")) await openProject(params.get("project"), {run: params.get("run"), view: params.get("view")});
       else if (["secom", "secom_clean"].includes(params.get("example"))) {
         $("exampleCase").value = params.get("example"); $("exampleDialog").showModal();

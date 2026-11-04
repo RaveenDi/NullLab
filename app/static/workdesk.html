@@ -14,7 +14,7 @@
 <body>
   <a class="skip-link" href="#researchMain">Skip to your investigation</a>
   <header class="desk-header">
-    <button class="project-toggle plain-button" id="projectToggle" type="button" aria-controls="projectRail" aria-expanded="false">Projects</button>
+    <button class="project-toggle plain-button" id="projectToggle" type="button" aria-controls="projectRail" aria-expanded="false">Investigations</button>
     <a class="brand" href="/" aria-label="NullLab home"><svg viewBox="0 0 36 36" aria-hidden="true" fill="none"><circle cx="18" cy="18" r="11" stroke="currentColor" stroke-width="2.4"></circle><path d="M8 28 28 8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"></path></svg><span>NullLab</span></a>
     <nav aria-label="Main navigation"><a href="/workdesk" aria-current="page">Workdesk</a><a href="/evidence">Evidence Lab</a><a href="/architecture">Architecture</a></nav>
     <span class="local-badge"><span aria-hidden="true"></span>Local workspace</span>
@@ -45,16 +45,16 @@
         <div class="scope-note"><strong>Built for tabular ML evaluation.</strong> A CSV creates a clearly labelled baseline. Add a compatible training script to investigate your existing pipeline. Broad paper and notebook evaluation is outside the current instrument.</div>
       </section>
       <section id="investigationView" class="investigation-view" hidden aria-labelledby="investigationTitle">
-        <header class="investigation-header"><div><p class="eyebrow">YOUR INVESTIGATION <span id="revisionLabel"></span></p><h1 id="investigationTitle" tabindex="-1">Investigation</h1></div><span class="state-badge" id="investigationState">Draft</span></header>
+        <header class="investigation-header"><div class="investigation-heading"><h1 id="investigationTitle" tabindex="-1">Investigation</h1><details class="question-details" id="questionDetails"><summary>Full question &amp; revision</summary><div><p id="fullQuestion"></p><p class="eyebrow">Saved brief <span id="revisionLabel"></span></p></div></details></div><span class="state-badge" id="investigationState">Draft</span></header>
         <div class="desk-tabs" role="group" aria-label="Workdesk view"><button type="button" data-view="research" aria-pressed="true">Research</button><button type="button" data-view="brief" aria-pressed="false">Study brief</button><button type="button" data-view="results" aria-pressed="false">Results</button><button type="button" data-view="materials" aria-pressed="false">Materials</button></div>
         <div class="investigation-grid" id="investigationGrid" data-view="research">
           <section class="research-column" aria-label="Research conversation">
-            <div class="thread-header"><span class="eyebrow">RESEARCH THREAD</span><span class="quiet-status" id="threadStatus">Grounded in your materials</span></div>
+            <div class="thread-header"><span class="eyebrow">Conversation</span><span class="quiet-status" id="threadStatus">Grounded in your materials</span></div>
             <div class="research-thread" id="researchThread" role="log" aria-label="Research messages" aria-live="polite" aria-relevant="additions" tabindex="0"></div>
             <div class="thread-actions" id="threadActions"></div><p class="request-progress" id="requestProgress" role="status" aria-live="polite" hidden></p>
             <div class="composer-wrap">
               <p class="composer-context" id="composerContext" aria-live="polite">Follow-ups use your investigation’s question, materials and study brief.</p>
-              <form id="messageForm" class="message-form"><label class="sr-only" for="followupQuestion">Ask a question or add clarification</label><textarea id="followupQuestion" maxlength="4000" rows="2" placeholder="Ask a question, clarify an assumption, or propose the next step…"></textarea><div class="pending-files" id="threadPendingFiles"></div><div class="composer-actions"><button type="button" class="attach-button" id="threadAttach">Attach materials <span aria-hidden="true">+</span></button><button type="submit" class="button primary" id="sendMessage">Send <span aria-hidden="true">↗</span></button></div></form>
+              <form id="messageForm" class="message-form"><label class="sr-only" for="followupQuestion">Ask a question or add clarification</label><textarea id="followupQuestion" maxlength="4000" rows="1" placeholder="Ask a follow-up or add context…"></textarea><div class="pending-files" id="threadPendingFiles"></div><div class="composer-actions"><button type="button" class="attach-button" id="threadAttach">Attach materials <span aria-hidden="true">+</span></button><button type="submit" class="button primary" id="sendMessage">Send <span aria-hidden="true">↗</span></button></div></form>
               <details class="assistant-settings"><summary>Assistant settings <span id="assistantMode">Local study guide</span></summary><label class="check-row"><input type="checkbox" id="useMetaIntake"><span>Ask Meta to help frame this question</span></label><p id="metaIntakeHint">The local study guide works without a key. Meta assistance is optional and uses a bounded provider request.</p><label class="check-row" id="intakeConsentRow" hidden><input type="checkbox" id="intakeConsent"><span>I reviewed the question, code, notes, column names and aggregates that may leave this machine. Raw CSV rows are not sampled.</span></label></details>
             </div>
           </section>

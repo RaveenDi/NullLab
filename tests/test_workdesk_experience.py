@@ -112,13 +112,14 @@ for(const [view,target] of [['results','resultsTitle'],['materials','materialsTi
 assert(!calls.some(c=>c.method==='POST'));
 ''')
     css = (Path(__file__).resolve().parents[1] / "app/static/workdesk.css").read_text(encoding="utf-8")
-    # The desktop rule is deliberately scoped away from the default Research layout.
-    focused = css.split("/* Explicit task tabs", 1)[1]
+    # Every explicit task retains its own area; Research no longer duplicates the brief.
+    focused = css.split("/* Each task has its own work area.", 1)[1]
     assert "@media(min-width:1051px)" in focused
     assert ".investigation-grid:not([data-view=research]){grid-template-columns:minmax(0,1fr)}" in focused
     assert ".investigation-grid:not([data-view=research]) .research-column{display:none}" in focused
     assert ".investigation-grid:not([data-view=research]) .context-column{display:block;border-left:0;width:100%;min-width:0}" in focused
     assert "max-width:1000px" in focused
+    assert ".investigation-grid[data-view=research] .context-column{display:none}" in focused
 
 
 def test_unsupported_review_disagreement_does_not_become_a_tested_control():
@@ -167,12 +168,15 @@ setImmediate(()=>{assert(!el('inferenceNote').hidden);assert(el('inferenceNote')
     node(script, "evidence.js")
 
 
-def test_default_truncated_title_uses_complete_question_but_custom_title_is_respected():
+def test_compact_title_preserves_full_question_and_respects_custom_title():
     run_node(r'''
 const p=makeProject('p');p.question='Does random-row validation on repeated sensor readings estimate performance on entirely new rigs? I want to preserve the supplied model.';p.title=p.question.slice(0,90);projects.p=p;
 window.location.search='?project=p';load();await drain();
-assert.equal(el('investigationTitle').textContent,p.question);
+assert.equal(el('investigationTitle').textContent,p.question.split('?')[0]+'?');
+assert.equal(el('fullQuestion').textContent,p.question);
+assert.equal(el('investigationTitle').title,p.question);
 p.title='Rig protocol review';await open('p');assert.equal(el('investigationTitle').textContent,'Rig protocol review');
+assert.equal(el('fullQuestion').textContent,p.question);
 ''')
 
 
